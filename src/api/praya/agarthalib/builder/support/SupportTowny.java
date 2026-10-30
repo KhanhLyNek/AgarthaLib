@@ -4,15 +4,13 @@
 
 package api.praya.agarthalib.builder.support;
 
-import com.palmergames.bukkit.towny.TownyUniverse;
+import com.palmergames.bukkit.towny.TownyAPI;
 import org.bukkit.entity.Player;
 import org.bukkit.OfflinePlayer;
 import java.util.Iterator;
 import java.util.List;
 import com.palmergames.bukkit.towny.object.Town;
 import java.util.ArrayList;
-import org.bukkit.plugin.java.JavaPlugin;
-import com.palmergames.bukkit.towny.Towny;
 import java.util.Collection;
 import org.bukkit.plugin.Plugin;
 import com.praya.agarthalib.AgarthaLib;
@@ -27,9 +25,14 @@ public class SupportTowny extends Support implements SupportGroup
     
     @Override
     public Collection<String> getGroupIDs() {
-        final Towny         towny         = (Towny)JavaPlugin.getPlugin((Class)Towny.class);
-        final TownyUniverse townyUniverse = towny.getTownyUniverse();
-        return (Collection<String>)townyUniverse.getTownsMap().keySet();
+        // The former getTownsMap() was keyed by town names. New Towny
+        // exposes an ordered collection instead; retain the old name IDs
+        // rather than silently switching saved group IDs to UUIDs.
+        final Collection<String> names = new ArrayList<String>();
+        for (final Town town : this.getAllTown()) {
+            names.add(town.getName());
+        }
+        return names;
     }
     
     @Override
@@ -51,7 +54,7 @@ public class SupportTowny extends Support implements SupportGroup
     @Override
     public String getGroupIDByName(final String name) {
         final Town town = this.getTownByName(name);
-        return (town != null) ? town.getUuid().toString() : null;
+        return (town != null) ? town.getUUID().toString() : null;
     }
     
     @Override
@@ -96,7 +99,7 @@ public class SupportTowny extends Support implements SupportGroup
     @Override
     public String getPlayerGroupID(final OfflinePlayer player) {
         final Town town = this.getPlayerTown(player);
-        return (town != null) ? town.getUuid().toString() : null;
+        return (town != null) ? town.getUUID().toString() : null;
     }
     
     @Override
@@ -106,15 +109,13 @@ public class SupportTowny extends Support implements SupportGroup
     }
     
     public final Collection<Town> getAllTown() {
-        final Towny towny = (Towny)JavaPlugin.getPlugin((Class)Towny.class);
-        final TownyUniverse townUniverse = towny.getTownyUniverse();
-        return townUniverse.getTownsMap().values();
+        return TownyAPI.getInstance().getTowns();
     }
     
     public final Town getTownByID(final String id) {
         if (id != null) {
             for (final Town town : this.getAllTown()) {
-                final String townID = town.getUuid().toString();
+                final String townID = town.getUUID().toString();
                 if (townID.equalsIgnoreCase(id)) {
                     return town;
                 }
@@ -150,7 +151,7 @@ public class SupportTowny extends Support implements SupportGroup
     }
     
     public final Collection<Player> getOnlinePlayers(final Town town) {
-        return (town != null) ? com.palmergames.bukkit.towny.object.TownyUniverse.getOnlinePlayers(town) : new ArrayList<Player>();
+        return (town != null) ? TownyAPI.getInstance().getOnlinePlayersInTown(town) : new ArrayList<Player>();
     }
     
     public final Collection<OfflinePlayer> getPlayers(final Town town) {
