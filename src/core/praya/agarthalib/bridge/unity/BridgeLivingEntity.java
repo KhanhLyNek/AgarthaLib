@@ -6,12 +6,6 @@ package core.praya.agarthalib.bridge.unity;
 
 import core.praya.agarthalib.enums.main.VersionNMS;
 import com.praya.agarthalib.packet.livingentity.PacketLivingEntity_Paper26_3;
-import com.praya.agarthalib.packet.livingentity.PacketLivingEntity_1_12;
-import com.praya.agarthalib.packet.livingentity.PacketLivingEntity_1_11;
-import com.praya.agarthalib.packet.livingentity.PacketLivingEntity_1_10;
-import com.praya.agarthalib.packet.livingentity.PacketLivingEntity_1_9;
-import com.praya.agarthalib.packet.livingentity.PacketLivingEntity_1_8;
-import com.praya.agarthalib.packet.livingentity.PacketLivingEntity_1_7;
 import com.praya.agarthalib.utility.ServerUtil;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.entity.EntityType;
@@ -64,41 +58,10 @@ public class BridgeLivingEntity extends HandlerBridge
         
         static {
             final AgarthaLib plugin = (AgarthaLib)JavaPlugin.getPlugin((Class)AgarthaLib.class);
-            final VersionNMS version = ServerUtil.getVersionNMS();
-            HandlerPacket handler = null;
-            switch (version) {
+            final HandlerPacket handler;
+            switch (ServerUtil.getVersionNMS()) {
                 case V26_3: {
                     handler = new PacketLivingEntity_Paper26_3(plugin);
-                    break;
-                }
-                case V1_7_R4: {
-                    handler = new PacketLivingEntity_1_7(plugin);
-                    break;
-                }
-                case V1_8_R3: {
-                    handler = new PacketLivingEntity_1_8(plugin);
-                    break;
-                }
-                case V1_9_R2: {
-                    handler = new PacketLivingEntity_1_9(plugin);
-                    break;
-                }
-                case V1_10_R1: {
-                    handler = new PacketLivingEntity_1_10(plugin);
-                    break;
-                }
-                case V1_11_R1: {
-                    handler = new PacketLivingEntity_1_11(plugin);
-                    break;
-                }
-                case V1_12_R1: {
-                    handler = new PacketLivingEntity_1_12(plugin);
-                    break;
-                }
-                case V1_13_R2:
-                case V1_14_R1:
-                case V1_15_R1:{
-                    handler = new PacketLivingEntity_1_12(plugin);
                     break;
                 }
                 default: {
