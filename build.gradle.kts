@@ -33,6 +33,11 @@ dependencies {
     // Source-level dependencies found in the first GitHub Actions build log.
     // The historical JsonBuild and new hover payload parser both use this
     // library at runtime; Paper does not promise to provide it to plugins.
+    // Read old raw item tags through a bounded NBT parser; no NMS imports.
+    // Paper does not provide adventure-nbt on its plugin classpath.
+    implementation("net.kyori:adventure-nbt:5.2.0") {
+        isTransitive = false
+    }
     implementation("com.googlecode.json-simple:json-simple:1.1.1") {
         isTransitive = false
     }
@@ -93,7 +98,7 @@ sourceSets {
 tasks.named<Jar>("jar") {
     from({
         configurations.runtimeClasspath.get()
-            .filter { it.name.startsWith("json-simple-") }
+            .filter { (it.name.startsWith("json-simple-") || it.name.startsWith("adventure-nbt-")) }
             .map { zipTree(it) }
     })
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -976,6 +981,28 @@ tasks.register<JavaCompile>("compilePaper26HoverPipelineSelfTest") {
     options.encoding = "UTF-8"
     options.release.set(25)
 }
+tasks.register<JavaCompile>("compilePaper26LegacyNbtSelfTest") {
+    description = "Compile real read-only raw NBT compatibility fixtures"
+    group = "verification"
+    dependsOn("classes")
+    source = fileTree("ci/paper26-legacy-nbt-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + sourceSets.main.get().output
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-legacy-nbt-tests"))
+    javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26LegacyNbt") {
+    description = "Verify historical string, compound-stat and typed primitive tag readers"
+    group = "verification"
+    dependsOn("compilePaper26LegacyNbtSelfTest")
+    classpath = configurations["compileClasspath"] + sourceSets.main.get().output +
+            files(layout.buildDirectory.dir("paper26-legacy-nbt-tests"))
+    mainClass.set("com.praya.agarthalib.modern.Paper26LegacyItemTagsSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+}
+
 tasks.register<JavaExec>("testPaper26HoverPipeline") {
     description = "Test old DSL and modern show_item.contents with unchanged click/text behavior"
     group = "verification"
@@ -1015,7 +1042,7 @@ tasks.register<JavaExec>("testPaper26HoverItemPayload") {
 tasks.register<JavaExec>("testPaper26PapiOptional") {
     description = "Verify disabled/missing PlaceholderAPI retains exact placeholder and formatting"
     group = "verification"
-    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager", "testPaper26LivingEntityKind", "testPaper26JsonChat", "testPaper26MythicLibOptional", "testPaper26ModernProviders", "testPaper26ItemSnapshots", "testPaper26ServerTPS", "testPaper26HoverItemPayload", "testPaper26HoverPipeline")
+    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager", "testPaper26LivingEntityKind", "testPaper26JsonChat", "testPaper26MythicLibOptional", "testPaper26ModernProviders", "testPaper26ItemSnapshots", "testPaper26ServerTPS", "testPaper26HoverItemPayload", "testPaper26HoverPipeline", "testPaper26LegacyNbt")
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-papi-optional-tests"),
         layout.buildDirectory.dir("paper26-placeholder-api-check"),

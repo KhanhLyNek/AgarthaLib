@@ -3,6 +3,7 @@ package com.praya.agarthalib.packet.item;
 import com.praya.agarthalib.AgarthaLib;
 import com.praya.agarthalib.handler.HandlerPacket;
 import com.praya.agarthalib.modern.Paper26ItemData;
+import com.praya.agarthalib.modern.Paper26LegacyItemTags;
 import com.praya.agarthalib.modern.Paper26ItemMeta;
 import com.praya.agarthalib.modern.Paper26StringListCodec;
 import core.praya.agarthalib.builder.bridge.TagsNBTBooks;
@@ -92,37 +93,54 @@ public final class PacketItem_Paper26_3 extends HandlerPacket
 
     @Override
     public String getString(final String key, final String parent, final ItemStack item) {
-        return get(key, parent, item, PersistentDataType.STRING);
+        final String modern = get(key, parent, item, PersistentDataType.STRING);
+        return modern != null ? modern : Paper26LegacyItemTags.string(
+                Paper26LegacyItemTags.customData(item), key, parent);
     }
 
     @Override
     public int getInt(final String key, final String parent, final ItemStack item) {
         final Integer value = get(key, parent, item, PersistentDataType.INTEGER);
-        return value == null ? 0 : value;
+        if (value != null) return value;
+        final Integer old = Paper26LegacyItemTags.integer(
+                Paper26LegacyItemTags.customData(item), key, parent);
+        return old == null ? 0 : old;
     }
 
     @Override
     public double getDouble(final String key, final String parent, final ItemStack item) {
         final Double value = get(key, parent, item, PersistentDataType.DOUBLE);
-        return value == null ? 0 : value;
+        if (value != null) return value;
+        final Double old = Paper26LegacyItemTags.decimal(
+                Paper26LegacyItemTags.customData(item), key, parent);
+        return old == null ? 0 : old;
     }
 
     @Override
     public long getLong(final String key, final String parent, final ItemStack item) {
         final Long value = get(key, parent, item, PersistentDataType.LONG);
-        return value == null ? 0 : value;
+        if (value != null) return value;
+        final Long old = Paper26LegacyItemTags.longNumber(
+                Paper26LegacyItemTags.customData(item), key, parent);
+        return old == null ? 0 : old;
     }
 
     @Override
     public boolean getBoolean(final String key, final String parent, final ItemStack item) {
         final Byte value = get(key, parent, item, PersistentDataType.BYTE);
-        return value != null && value != 0;
+        if (value != null) return value != 0;
+        final Boolean old = Paper26LegacyItemTags.booleanValue(
+                Paper26LegacyItemTags.customData(item), key, parent);
+        return old != null && old;
     }
 
     @Override
     public List<String> getListString(final String key, final String parent, final ItemStack item) {
         final byte[] raw = get(key, parent, item, PersistentDataType.BYTE_ARRAY);
-        return Paper26StringListCodec.decode(raw);
+        if (raw != null) return Paper26StringListCodec.decode(raw);
+        final List<String> old = Paper26LegacyItemTags.strings(
+                Paper26LegacyItemTags.customData(item), key, parent);
+        return old == null ? List.of() : old;
     }
 
     @Override
