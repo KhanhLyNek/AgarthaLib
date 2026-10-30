@@ -11,14 +11,6 @@ import com.praya.agarthalib.listener.custom.ListenerMenuCreate;
 import com.praya.agarthalib.listener.custom.ListenerPlayerHealthChange;
 import com.praya.agarthalib.listener.custom.ListenerPlayerHealthMaxChange;
 import com.praya.agarthalib.listener.main.*;
-import com.praya.agarthalib.listener.support.battlelevels.ListenerBattleLevelsPlayerLevelUp;
-import com.praya.agarthalib.listener.support.heroes.ListenerHeroesAttributeAllocationPointsChange;
-import com.praya.agarthalib.listener.support.heroes.ListenerHeroesAttributeChange;
-import com.praya.agarthalib.listener.support.heroes.ListenerHeroesHeroChangeClass;
-import com.praya.agarthalib.listener.support.heroes.ListenerHeroesHeroChangeLevel;
-import com.praya.agarthalib.listener.support.skillapi.ListenerSkillAPIAccountChange;
-import com.praya.agarthalib.listener.support.skillapi.ListenerSkillAPIClassChange;
-import com.praya.agarthalib.listener.support.skillapi.ListenerSkillAPILevelUp;
 import com.praya.agarthalib.manager.core.CoreManager;
 import com.praya.agarthalib.manager.game.GameManager;
 import com.praya.agarthalib.manager.player.PlayerManager;
@@ -198,27 +190,15 @@ public class AgarthaLib extends JavaPlugin implements Agartha
             ServerEventUtil.registerEvent((Plugin)this, listenerCoreBossBarPlayerRespawn);
             ServerEventUtil.registerEvent((Plugin)this, listenerCoreBossBarPlayerTeleport);
         }
-        if (PluginUtil.isPluginInstalled("SkillAPI")) {
-            final Listener listenerSkillAPIAccountChange = (Listener)new ListenerSkillAPIAccountChange(this);
-            final Listener listenerSkillAPIClassChange = (Listener)new ListenerSkillAPIClassChange(this);
-            final Listener listenerSkillAPILevelUp = (Listener)new ListenerSkillAPILevelUp(this);
-            ServerEventUtil.registerEvent((Plugin)this, listenerSkillAPIAccountChange);
-            ServerEventUtil.registerEvent((Plugin)this, listenerSkillAPIClassChange);
-            ServerEventUtil.registerEvent((Plugin)this, listenerSkillAPILevelUp);
-        }
-        if (PluginUtil.isPluginInstalled("BattleLevels")) {
-            final Listener listenerBattleLevelsPlayerLevelUp = (Listener)new ListenerBattleLevelsPlayerLevelUp(this);
-            ServerEventUtil.registerEvent((Plugin)this, listenerBattleLevelsPlayerLevelUp);
-        }
-        if (PluginUtil.isPluginInstalled("Heroes")) {
-            final Listener listenerHeroesAttributeAllocationPointsChange = (Listener)new ListenerHeroesAttributeAllocationPointsChange(this);
-            final Listener listenerHeroesAttributeChange = (Listener)new ListenerHeroesAttributeChange(this);
-            final Listener listenerHeroesHeroChangeClass = (Listener)new ListenerHeroesHeroChangeClass(this);
-            final Listener listenerHeroesHeroChangeLevel = (Listener)new ListenerHeroesHeroChangeLevel(this);
-            ServerEventUtil.registerEvent((Plugin)this, listenerHeroesAttributeAllocationPointsChange);
-            ServerEventUtil.registerEvent((Plugin)this, listenerHeroesAttributeChange);
-            ServerEventUtil.registerEvent((Plugin)this, listenerHeroesHeroChangeClass);
-            ServerEventUtil.registerEvent((Plugin)this, listenerHeroesHeroChangeLevel);
+        // Removed: 1.7-1.15 provider events cannot be subscribed to through
+        // obsolete third-party API classes on Paper 26.3.
+        // Do not silently map their XP/health callbacks onto MMOCore/AuraSkills.
+        for (final String obsolete : new String[] {"SkillAPI", "BattleLevels", "Heroes"}) {
+            if (PluginUtil.isPluginInstalled(obsolete)) {
+                this.getLogger().warning("Legacy provider " + obsolete
+                        + " detected. Its old event bridge is disabled on Paper 26.3;"
+                        + " use the new separate provider API contracts.");
+            }
         }
     }
     
