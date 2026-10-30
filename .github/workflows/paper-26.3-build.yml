@@ -30,11 +30,11 @@ jobs:
         run: |
           java -version
           gradle --version
-      - name: Verify modern PDC API independently
+      - name: Verify modern PDC and legacy-compatible item adapter
         shell: bash
         run: |
           set -o pipefail
-          gradle compilePaper26ItemData --no-daemon --console=plain 2>&1 | tee paper26-item-api-check.log
+          gradle compilePaper26ItemBridge --no-daemon --console=plain 2>&1 | tee paper26-item-api-check.log
       - name: Build with compiler diagnostics
         if: always()
         shell: bash
