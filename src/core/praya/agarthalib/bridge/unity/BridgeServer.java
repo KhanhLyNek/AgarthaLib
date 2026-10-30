@@ -12,6 +12,7 @@ import com.praya.agarthalib.utility.ServerUtil;
 import core.praya.agarthalib.builder.bridge.ServerTools;
 import core.praya.agarthalib.enums.main.VersionNMS;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.Bukkit;
 
 public class BridgeServer extends HandlerBridge
 {
@@ -43,6 +44,10 @@ public class BridgeServer extends HandlerBridge
     }
     
     public final double getTPS() {
+        if (ServerUtil.getVersionNMS() == VersionNMS.V26_3) {
+            final double[] tps = Bukkit.getTPS();
+            return tps.length > 0 ? tps[0] : 20.0;
+        }
         return this.isImplementServerTools() ? this.getServerTools().getTPS() : 20.0;
     }
     
