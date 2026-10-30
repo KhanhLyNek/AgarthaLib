@@ -126,3 +126,26 @@ tasks.register<JavaExec>("testPaper26StringListCodec") {
 tasks.named("compilePaper26ItemBridge") {
     dependsOn("testPaper26StringListCodec")
 }
+
+// Type-check the real Paper player adapter against the original public
+// player packet contracts; the old NMS implementations remain untouched.
+tasks.register<JavaCompile>("compilePaper26PlayerBridge") {
+    description = "Compile the real Paper 26.3 player bridge using its legacy interfaces"
+    group = "verification"
+    dependsOn("compilePaper26ItemBridge")
+    source = fileTree(".") {
+        include("src/com/praya/agarthalib/packet/player/PacketPlayer_Paper26_3.java")
+        include("src/com/praya/agarthalib/packet/player/PacketPlayerProperties.java")
+        include("src/com/praya/agarthalib/packet/player/PacketPlayerVisibility.java")
+        include("src/com/praya/agarthalib/packet/player/PacketPlayerAbsorption.java")
+        include("src/com/praya/agarthalib/packet/player/PacketPlayerCombat.java")
+    }
+    classpath = configurations["compileClasspath"] +
+        files(layout.buildDirectory.dir("paper26-bridge-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-player-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
