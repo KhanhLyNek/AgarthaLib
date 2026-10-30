@@ -59,3 +59,11 @@ References: https://docs.papermc.io/paper/dev/project-setup/ and https://jd.pape
 5. Add an explicit backup and migration command; never auto-rewrite live inventories on the first plugin startup.
 
 Reference: https://docs.papermc.io/paper/dev/pdc/ (item stack PDC support), https://docs.papermc.io/paper/dev/data-component-api/.
+
+## 2026-10-30 additional regression checks
+
+- Original combat/metadata code and all source-controlled YAML are protected by a Git-blob baseline and a CI comparison. An intentional edit needs a review and baseline update.
+- The real Paper26StringListCodec now supports UTF-8 strings longer than 64 KiB and reads the first experimental PDC codec format. A Java 25 executable test covers Unicode, long strings, preview input and corrupt payloads.
+- The new Paper26SoundRegistry resolves sound IDs through the Minecraft namespaced registry. Missing historical sounds must still be validated; the bridge does not silently use different audio.
+- GitHub Actions scans every Java file for historic NMS, CraftBukkit, reflection and external integrations. The scan is diagnostic only.
+- Full build and runtime gameplay verification remain unresolved; old raw item NBT migration requires backups and representative item fixtures.
