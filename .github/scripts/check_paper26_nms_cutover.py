@@ -45,5 +45,24 @@ assert "implements EquipmentTools" in equipment
 assert "PacketEquipment_1_9" not in equipment
 arrow = (root / "src/com/praya/agarthalib/packet/arrow/PacketArrow_Paper26_3.java").read_text("utf-8")
 assert "HIDE_ADDITIONAL_TOOLTIP" in arrow and "PotionMeta" in arrow
+# No provider implementation whose public Java signature links an absent
+# dependency may accidentally re-enter the Paper runtime artifact.
+retired = ("JobsReborn", "HolographicDisplays", "Heroes", "SkillsPro",
+           "CombatStamina", "LifeEssence", "Kingdoms", "McMMO",
+           "BattleLevels", "Citizens", "MyItems", "SkillAPI",
+           "Gangs", "SimpleClans")
+manager = (root / "src/api/praya/agarthalib/manager/plugin/SupportManagerAPI.java").read_text("utf-8")
+for name in retired:
+    assert f'java.exclude("**/builder/support/Support{name}.java")' in gradle, name
+    assert "Support" + name + " getSupport" + name + "(" not in manager, name
+    assert "isSupport" + name + "()" in manager, name
+for folder in ("heroes", "skillapi", "battlelevels"):
+    assert f'java.exclude("**/listener/support/{folder}/**")' in gradle
+boot = (root / "src/com/praya/agarthalib/AgarthaLib.java").read_text("utf-8")
+for old_listener in ("new ListenerHeroes", "new ListenerSkillAPI",
+                     "new ListenerBattleLevels"):
+    assert old_listener not in boot, "Old listener boot route reintroduced"
+assert "createTransientDecentHologram" in manager and "getMMOCoreLevel" in manager
+
 print(f"PASS: {len(packets)} old packet sources excluded from Paper-only build; "
       "12 bridges reviewed and 9 current packet adapters wired")
