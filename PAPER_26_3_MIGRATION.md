@@ -258,9 +258,12 @@ unsupported provider APIs. Counts are not interchangeable with `javac` error
 messages, and new adapters are not proof of full in-game compatibility.
 
 **Scope formula: 82 version-suffixed historic packet Java source files +
-3 legacy Jobs/Heroes/HolographicDisplays source integrations +
+8 Java files importing Jobs/Heroes/HolographicDisplays (1+6+1) +
 2 separate legacy item migration gaps (arbitrary old NBT and SNBT hover item) +
-4 modern provider contract targets = 91 defined source tasks.**
+4 modern provider contract targets = 96 defined scoped file/feature work items.
+Of 82 versioned packet files, 62 directly reference old NMS/CraftBukkit.
+The other legacy providers (e.g. SkillAPI and mcMMO) are reported separately
+and are **not included** in this 96-item scope.**
 
 New `Paper26OptionalProviders` exposes four separately guarded contracts:
 - AuraSkills: online player's default-skill level, using documented
