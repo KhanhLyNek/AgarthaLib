@@ -30,6 +30,8 @@ jobs:
         run: python3 .github/scripts/check_legacy_logic.py
       - name: Guard Paper 26.3 living target and legacy particle routes
         run: python3 .github/scripts/check_paper26_bridge_routes.py
+      - name: Guard optional MythicLib and removed Factions runtime hooks
+        run: python3 .github/scripts/check_paper26_provider_routes.py
       - name: Java and Gradle versions
         run: |
           java -version
