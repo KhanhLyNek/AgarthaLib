@@ -55,7 +55,8 @@ manager = (root / "src/api/praya/agarthalib/manager/plugin/SupportManagerAPI.jav
 for name in retired:
     assert f'java.exclude("**/builder/support/Support{name}.java")' in gradle, name
     assert "Support" + name + " getSupport" + name + "(" not in manager, name
-    assert "isSupport" + name + "()" in manager, name
+    flag_name = "HolographicDisplay" if name == "HolographicDisplays" else name
+    assert "isSupport" + flag_name + "()" in manager, name
 for folder in ("heroes", "skillapi", "battlelevels"):
     assert f'java.exclude("**/listener/support/{folder}/**")' in gradle
 boot = (root / "src/com/praya/agarthalib/AgarthaLib.java").read_text("utf-8")
