@@ -3,6 +3,7 @@ package com.praya.agarthalib.packet.item;
 import com.google.common.collect.ImmutableMultimap;
 import com.praya.agarthalib.AgarthaLib;
 import com.praya.agarthalib.handler.HandlerPacket;
+import com.praya.agarthalib.modern.Paper26ItemData;
 import core.praya.agarthalib.builder.bridge.TagsNBTBooks;
 import core.praya.agarthalib.builder.bridge.TagsNBTCustom;
 import core.praya.agarthalib.builder.bridge.TagsNBTItem;
@@ -18,7 +19,6 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.io.ByteArrayInputStream;
@@ -26,7 +26,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -45,56 +44,22 @@ import java.util.Locale;
 public final class PacketItem_Paper26_3 extends HandlerPacket
         implements TagsNBTItem, TagsNBTBooks, TagsNBTCustom {
 
-    private static final String NAMESPACE = "agarthalib";
-
     public PacketItem_Paper26_3(final AgarthaLib plugin) {
         super(plugin);
     }
 
-    /**
-     * NamespacedKeys allow a restricted alphabet. UTF-8 hexadecimal encoding
-     * preserves the original, case-sensitive key and parent without collisions.
-     * The prefixes distinguish a null parent from an explicitly empty parent.
-     */
-    private static NamespacedKey dataKey(final String key, final String parent) {
-        if (key == null) {
-            return null;
-        }
-        final String path = (parent == null ? "n_" : "p_" + hex(parent) + "_") + hex(key);
-        return new NamespacedKey(NAMESPACE, "legacy_" + path);
-    }
-
-    private static String hex(final String value) {
-        final byte[] utf8 = value.getBytes(StandardCharsets.UTF_8);
-        final char[] chars = new char[utf8.length * 2];
-        final char[] digits = "0123456789abcdef".toCharArray();
-        for (int i = 0; i < utf8.length; i++) {
-            chars[i * 2] = digits[(utf8[i] & 0xff) >>> 4];
-            chars[i * 2 + 1] = digits[utf8[i] & 0x0f];
-        }
-        return new String(chars);
-    }
-
-    private static boolean valid(final ItemStack item) {
-        return item != null && !item.getType().isAir();
-    }
-
     private static <T, Z> void set(final String key, final String parent, final ItemStack item,
                                    final PersistentDataType<T, Z> type, final Z value) {
-        final NamespacedKey tag = dataKey(key, parent);
-        if (tag == null || !valid(item) || value == null) {
-            return;
-        }
-        item.editPersistentDataContainer(pdc -> pdc.set(tag, type, value));
+        Paper26ItemData.set(key, parent, item, type, value);
     }
 
     private static <T, Z> Z get(final String key, final String parent, final ItemStack item,
                                 final PersistentDataType<T, Z> type) {
-        final NamespacedKey tag = dataKey(key, parent);
-        if (tag == null || !valid(item)) {
-            return null;
-        }
-        return item.getPersistentDataContainer().get(tag, type);
+        return Paper26ItemData.get(key, parent, item, type);
+    }
+
+    private static boolean valid(final ItemStack item) {
+        return item != null && !item.getType().isAir();
     }
 
     @Override
@@ -198,10 +163,7 @@ public final class PacketItem_Paper26_3 extends HandlerPacket
 
     @Override
     public void remove(final String key, final String parent, final ItemStack item) {
-        final NamespacedKey tag = dataKey(key, parent);
-        if (tag != null && valid(item)) {
-            item.editPersistentDataContainer(pdc -> pdc.remove(tag));
-        }
+        Paper26ItemData.remove(key, parent, item);
     }
 
     private static Attribute resolveAttribute(final TagsAttribute tag) {
