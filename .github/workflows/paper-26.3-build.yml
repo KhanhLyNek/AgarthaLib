@@ -26,6 +26,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.2.1'
+      - name: Guard original YAML and gameplay logic
+        run: python3 .github/scripts/check_legacy_logic.py
       - name: Java and Gradle versions
         run: |
           java -version
