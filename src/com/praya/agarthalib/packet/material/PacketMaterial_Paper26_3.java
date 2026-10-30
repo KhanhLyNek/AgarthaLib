@@ -12,6 +12,6 @@ public final class PacketMaterial_Paper26_3 extends HandlerPacket implements Mat
         return material != null && material.isSolid();
     }
     @Override public boolean isFluid(final Material material) {
-        return material != null && material.isLiquid();
+        return material == Material.WATER || material == Material.LAVA;
     }
 }
