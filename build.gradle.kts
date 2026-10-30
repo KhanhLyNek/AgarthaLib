@@ -12,6 +12,9 @@ repositories {
     maven("https://maven.enginehub.org/repo/")
     maven("https://repo.extendedclip.com/releases/")
     maven("https://repo.helpch.at/releases/")
+    // Official EssentialsX release API and VaultAPI as documented by MilkBowl.
+    maven("https://repo.essentialsx.net/releases/")
+    maven("https://jitpack.io")
     // TownyAdvanced documents this repository for its public Java API.
     maven("https://repo.glaremasters.me/repository/towny/")
 }
@@ -31,6 +34,10 @@ dependencies {
     compileOnly("javax.annotation:javax.annotation-api:1.3.2")
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.20")
     compileOnly("me.clip:placeholderapi:2.12.3")
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
+    compileOnly("net.essentialsx:EssentialsX:2.22.0") {
+        isTransitive = false
+    }
     compileOnly("com.palmergames.bukkit.towny:towny:0.103.2.0")
 
     // Remaining integrations must be ported or supplied with compatible APIs:
@@ -65,7 +72,7 @@ publishing {
 tasks.register<JavaCompile>("compilePaper26ItemData") {
     description = "Type-check the Paper 26.3 item storage and metadata services without legacy NMS"
     group = "verification"
-    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java", "Paper26PotionAliases.java", "Paper26MVdWRegistration.java") }
+    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java", "Paper26PotionAliases.java", "Paper26MVdWRegistration.java", "Paper26PlaceholderValues.java") }
     classpath = configurations["compileClasspath"]
     destinationDirectory.set(layout.buildDirectory.dir("paper26-api-check"))
     javaCompiler.set(javaToolchains.compilerFor {
@@ -543,4 +550,74 @@ tasks.register<JavaExec>("testPaper26MVdWRegistration") {
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
+}
+
+// Compile the actual replacement for removed PlaceholderHook against the
+// modern PlaceholderAPI 2.12.3 public expansion API. Internal stubs are
+// compile-only, and never enter sourceSets.main or published JARs.
+tasks.register<JavaCompile>("compilePaper26PapiExpansion") {
+    description = "Type-check preserved placeholder prefix with PlaceholderExpansion 2.12.3"
+    group = "verification"
+    dependsOn("testPaper26MVdWRegistration")
+    source = fileTree(".") {
+        include("src/com/praya/agarthalib/placeholder/replacer/ReplacerPlaceholderAPI.java")
+    }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-papi-expansion-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaCompile>("compilePaper26PlaceholderValuesSelfTest") {
+    description = "Compile legacy YAML placeholder lookup regression tests"
+    group = "verification"
+    dependsOn("compilePaper26ItemData")
+    source = fileTree("ci/paper26-placeholder-values-test") { include("**/*.java") }
+    classpath = files(layout.buildDirectory.dir("paper26-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-placeholder-values-tests"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26PlaceholderValues") {
+    description = "Protect configured placeholder names, colors and original values"
+    group = "verification"
+    dependsOn("compilePaper26PlaceholderValuesSelfTest", "compilePaper26PapiExpansion")
+    classpath = files(
+        layout.buildDirectory.dir("paper26-placeholder-values-tests"),
+        layout.buildDirectory.dir("paper26-api-check")
+    )
+    mainClass.set("com.praya.agarthalib.modern.Paper26PlaceholderValuesSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+}
+
+// Preserve Vault Economy's public type: the same service contract is provided
+// by original Vault and VaultUnlocked. No economy data migrations or rounding.
+tasks.register<JavaCompile>("compilePaper26VaultBridge") {
+    description = "Compile original Vault economy adapter against official VaultAPI 1.7"
+    group = "verification"
+    dependsOn("testPaper26PlaceholderValues")
+    source = fileTree(".") {
+        include("src/api/praya/agarthalib/builder/support/SupportVault.java")
+    }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-vault-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
 }
