@@ -14,7 +14,9 @@ repositories {
     maven("https://repo.helpch.at/releases/")
     // Official EssentialsX release API and VaultAPI as documented by MilkBowl.
     maven("https://repo.essentialsx.net/releases/")
-    maven("https://jitpack.io")
+    maven("https://jitpack.io") {
+        content { includeGroup("com.github.MilkBowl") }
+    }
     // TownyAdvanced documents this repository for its public Java API.
     maven("https://repo.glaremasters.me/repository/towny/")
 }
@@ -34,10 +36,11 @@ dependencies {
     compileOnly("javax.annotation:javax.annotation-api:1.3.2")
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.20")
     compileOnly("me.clip:placeholderapi:2.12.3")
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
-    compileOnly("net.essentialsx:EssentialsX:2.22.0") {
+    // API-only: reject VaultAPI's stale Bukkit 1.13 transitive dependency.
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7") {
         isTransitive = false
     }
+    // EssentialsX 2.22.0 is an optional runtime integration: its real warp\n    // API is resolved by SupportEssentials without linking its unstable JAR.
     compileOnly("com.palmergames.bukkit.towny:towny:0.103.2.0")
 
     // Remaining integrations must be ported or supplied with compatible APIs:
