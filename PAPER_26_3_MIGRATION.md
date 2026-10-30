@@ -155,3 +155,16 @@ Verified against:
 Source references: https://modrinth.com/plugin/placeholderapi ; https://wiki.placeholderapi.com/users/placeholder-list/minecraft/ ; https://essentialsx.net/ ; https://www.spigotmc.org/resources/vault.34315/ .
 
 **CI correction:** Do not add `net.essentialsx:EssentialsX:2.22.0` to the mandatory compile classpath until the artifact actually resolves in GitHub Actions. EssentialsX continues as an optional installed server plugin, and existing warp-forwarding tests remain in CI.
+
+## 2026-10-30: Strict UTF-8 item-list reads (proposed)
+
+The Paper 26.3 `Paper26StringListCodec` now rejects malformed UTF-8 bytes,
+unexpected continuation bytes and overlong sequences instead of silently
+replacing them with U+FFFD. Valid encoded lists and the existing preview-format
+modified UTF-8 reader keep their previous behavior. The existing Java codec
+self-test now includes corruption regressions and runs in the isolated Paper 26.3
+verification gate.
+
+This is a *data-integrity guard*, not historical raw-NBT recovery. It does not
+convert old MyItems item tags, compile the full legacy NMS code, or certify
+production support.

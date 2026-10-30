@@ -58,6 +58,19 @@ public final class Paper26StringListCodecSelfTest {
         final byte[] trailing = Arrays.copyOf(valid, valid.length + 1);
         expectInvalid(trailing);
 
+        // A valid length prefix can still contain invalid UTF-8. Never
+        // silently convert saved item data into Unicode replacement chars.
+        final byte[] malformedLead = Paper26StringListCodec.encode(List.of("x"));
+        malformedLead[malformedLead.length - 1] = (byte) 0xC3;
+        expectInvalid(malformedLead);
+        final byte[] unexpectedContinuation = Paper26StringListCodec.encode(List.of("x"));
+        unexpectedContinuation[unexpectedContinuation.length - 1] = (byte) 0x80;
+        expectInvalid(unexpectedContinuation);
+        final byte[] overlongEncoding = Paper26StringListCodec.encode(List.of("xx"));
+        overlongEncoding[overlongEncoding.length - 2] = (byte) 0xC0;
+        overlongEncoding[overlongEncoding.length - 1] = (byte) 0xAF;
+        expectInvalid(overlongEncoding);
+
         if (!Paper26StringListCodec.decode(null).isEmpty()) {
             throw new AssertionError("Null custom list should read as empty");
         }
