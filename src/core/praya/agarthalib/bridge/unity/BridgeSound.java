@@ -16,6 +16,8 @@ import core.praya.agarthalib.builder.bridge.SoundTools;
 import core.praya.agarthalib.enums.branch.SoundEnum;
 import core.praya.agarthalib.enums.main.VersionNMS;
 import org.bukkit.Location;
+import org.bukkit.Registry;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -64,6 +66,26 @@ public class BridgeSound extends HandlerBridge
     }
     
     public final void playSound(final Collection<Player> players, final Location loc, final SoundEnum sound, final float volume, final float pitch) {
+        if (ServerUtil.getVersionNMS() == VersionNMS.V26_3) {
+            if (players == null || loc == null || loc.getWorld() == null || sound == null) {
+                return;
+            }
+            Sound resolved = null;
+            for (final Sound entry : Registry.SOUND_EVENT) {
+                if (entry.name().equalsIgnoreCase(sound.name())) {
+                    resolved = entry;
+                    break;
+                }
+            }
+            if (resolved != null) {
+                for (final Player player : players) {
+                    if (player != null && player.isOnline() && player.getWorld().equals(loc.getWorld())) {
+                        player.playSound(loc, resolved, volume, pitch);
+                    }
+                }
+            }
+            return;
+        }
         final SoundTools soundTools = this.getSoundTools();
         if (soundTools != null) {
             soundTools.playSoundEffect(players, loc, sound, volume, pitch);
@@ -77,7 +99,10 @@ public class BridgeSound extends HandlerBridge
         static {
             final AgarthaLib plugin = (AgarthaLib)JavaPlugin.getPlugin((Class)AgarthaLib.class);
             HandlerPacket handler;
-            if (ServerUtil.isCompatible(VersionNMS.V1_10_R1)) {
+            if (ServerUtil.getVersionNMS() == VersionNMS.V26_3) {
+                handler = null;
+            }
+            else if (ServerUtil.isCompatible(VersionNMS.V1_10_R1)) {
                 handler = new PacketSounds_1_10(plugin);
             }
             else if (ServerUtil.isCompatible(VersionNMS.V1_9_R2)) {
