@@ -50,11 +50,11 @@ dependencies {
     compileOnly("com.github.MilkBowl:VaultAPI:1.7") {
         isTransitive = false
     }
-    // EssentialsX 2.22.0 artifact is not resolvable by GitHub CI. Keep
-    // its optional runtime warp adapter via verified reflection, not a
-    // mandatory compile classpath dependency that prevents all builds.
-    // EssentialsX 2.22.0 is an optional runtime integration: its real warp
-    // API is resolved by SupportEssentials without linking its unstable JAR.
+    // Latest EssentialsX stable: 2.22.0 (net.essentialsx:EssentialsX).
+    // Prefer its documented net.ess3.api.IWarps interface via provider-owned
+    // classloader, without depending on the unstable transitive build graph.
+    // Optional: no EssentialsX class is shipped in AgarthaLib's final JAR.
+    // Actual server support for Paper 26.3 is NOT established by EssentialsX.
     compileOnly("com.palmergames.bukkit.towny:towny:0.103.2.0")
 
     // Remaining integrations must be ported or supplied with compatible APIs:

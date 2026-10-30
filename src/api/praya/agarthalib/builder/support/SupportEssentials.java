@@ -23,6 +23,10 @@ public class SupportEssentials extends Support {
     private volatile Method warpsGetter;
     private volatile Method warpNamesGetter;
     private volatile Method warpGetter;
+    // net.ess3.api.IWarps is the public API in EssentialsX 2.22.0.
+    // Keep a reflective reference to avoid linking the optional provider JAR
+    // into AgarthaLib or triggering classloader errors without EssentialsX.
+    private volatile Class<?> warpContract;
     private volatile boolean unavailable;
 
     public SupportEssentials(final AgarthaLib plugin, final Plugin source) {
@@ -35,10 +39,17 @@ public class SupportEssentials extends Support {
             return Collections.emptyList();
         }
         try {
-            final Method method = namesMethod(warps.getClass());
+            final Method method = namesMethod(warps);
             final Object names = method.invoke(warps);
-            if (!(names instanceof Collection<?>)) {
+            if (!(names instanceof Collection<?> result)) {
                 return Collections.emptyList();
+            }
+            // Fail closed on malformed third-party providers; never return
+            // a Collection containing non-String keys to public callers.
+            for (final Object name : result) {
+                if (!(name instanceof String)) {
+                    return Collections.emptyList();
+                }
             }
             // The original Essentials adapter returned the API's collection
             // directly, so do not copy or filter it behind callers' backs.
@@ -65,12 +76,15 @@ public class SupportEssentials extends Support {
     }
 
     public final Location getWarp(final String name) {
+        if (name == null || name.isBlank()) {
+            return null;
+        }
         final Object warps = warps();
         if (warps == null) {
             return null;
         }
         try {
-            final Method method = warpMethod(warps.getClass());
+            final Method method = warpMethod(warps);
             final Object location = method.invoke(warps, name);
             return location instanceof Location ? (Location) location : null;
         } catch (final InvocationTargetException ex) {
@@ -134,13 +148,45 @@ public class SupportEssentials extends Support {
         }
     }
 
-    private Method namesMethod(final Class<?> warpsType) throws NoSuchMethodException {
+    /**
+     * Resolve the provider-owned *public* EssentialsX interface rather than
+     * binding to com.earth2me.essentials.Warps (an implementation detail).
+     *
+     * Existing Essentials 2.x without net.ess3.api.IWarps remains supported
+     * via the old object's public methods; the modern interface is never
+     * downgraded silently if an incompatible provider claims to implement it.
+     */
+    private Class<?> contract(final Object warps) throws NoSuchMethodException {
+        Class<?> type = warpContract;
+        if (type == null) {
+            synchronized (this) {
+                type = warpContract;
+                if (type == null) {
+                    try {
+                        type = Class.forName("net.ess3.api.IWarps", false,
+                                source.getClass().getClassLoader());
+                    } catch (final ClassNotFoundException ignored) {
+                        // Essentials 2.x predating the modern public interface.
+                        type = warps.getClass();
+                    }
+                    warpContract = type;
+                }
+            }
+        }
+        if (!type.isInstance(warps)) {
+            throw new NoSuchMethodException("Essentials warp provider does not implement " + type.getName());
+        }
+        return type;
+    }
+
+    private Method namesMethod(final Object warps) throws NoSuchMethodException {
+        final Class<?> api = contract(warps);
         Method method = warpNamesGetter;
-        if (method == null || method.getDeclaringClass() != warpsType) {
+        if (method == null) {
             synchronized (this) {
                 method = warpNamesGetter;
-                if (method == null || method.getDeclaringClass() != warpsType) {
-                    method = warpsType.getMethod("getList");
+                if (method == null) {
+                    method = api.getMethod("getList");
                     warpNamesGetter = method;
                 }
             }
@@ -148,13 +194,14 @@ public class SupportEssentials extends Support {
         return method;
     }
 
-    private Method warpMethod(final Class<?> warpsType) throws NoSuchMethodException {
+    private Method warpMethod(final Object warps) throws NoSuchMethodException {
+        final Class<?> api = contract(warps);
         Method method = warpGetter;
-        if (method == null || method.getDeclaringClass() != warpsType) {
+        if (method == null) {
             synchronized (this) {
                 method = warpGetter;
-                if (method == null || method.getDeclaringClass() != warpsType) {
-                    method = warpsType.getMethod("getWarp", String.class);
+                if (method == null) {
+                    method = api.getMethod("getWarp", String.class);
                     warpGetter = method;
                 }
             }

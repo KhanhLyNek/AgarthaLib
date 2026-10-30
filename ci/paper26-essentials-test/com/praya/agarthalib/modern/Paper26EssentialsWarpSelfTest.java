@@ -23,7 +23,7 @@ public final class Paper26EssentialsWarpSelfTest {
     public static final class WarpNotFoundException extends Exception {}
     public static final class InvalidWorldException extends Exception {}
 
-    public static final class FakeWarps {
+    public static final class FakeWarps implements net.ess3.api.IWarps {
         private final World first;
         private final World second;
         private final List<String> names = List.of("spawn", "market", "missing", "badworld");
@@ -93,13 +93,48 @@ public final class Paper26EssentialsWarpSelfTest {
                 });
 
         final SupportEssentials bridge = new SupportEssentials(null, source);
+        try {
+            final var contractField = SupportEssentials.class.getDeclaredField("warpContract");
+            contractField.setAccessible(true);
+            check(contractField.get(bridge) == null, "API contract resolves lazily");
+        } catch (ReflectiveOperationException ex) {
+            throw new AssertionError("Unable to inspect actual adapter ABI", ex);
+        }
         check(bridge.getWarpNames() == warpApi.getList(), "Warp collection identity preserved");
+        try {
+            final var contractField = SupportEssentials.class.getDeclaredField("warpContract");
+            contractField.setAccessible(true);
+            check(contractField.get(bridge) == net.ess3.api.IWarps.class,
+                    "Latest EssentialsX public net.ess3.api.IWarps resolved");
+            final var namesField = SupportEssentials.class.getDeclaredField("warpNamesGetter");
+            namesField.setAccessible(true);
+            final var cachedName = (java.lang.reflect.Method) namesField.get(bridge);
+            check(cachedName.getDeclaringClass().isAssignableFrom(net.ess3.api.IWarps.class),
+                    "Public interface method resolved, not concrete Warps method");
+            bridge.getWarpNames();
+            check(namesField.get(bridge) == cachedName, "Warp Method cache reused");
+        } catch (ReflectiveOperationException ex) {
+            throw new AssertionError("Modern EssentialsX contract not retained", ex);
+        }
+        check(bridge.getWarp(null) == null, "Null warp name fails closed");
+        check(bridge.getWarp(" ") == null, "Empty warp name fails closed");
         check(bridge.getWarpNames().size() == 4, "All source names retained");
         check(bridge.getWarpNames(worldA).equals(List.of("spawn")), "Names filtered by first world");
         check(bridge.getWarpNames(worldB).equals(List.of("market")), "Names filtered by second world");
         check(bridge.getWarpNames((World) null).isEmpty(), "Null world yields no names");
         check(bridge.getWarp("spawn").getWorld() == worldA, "Warp coordinates/source world preserved");
         check(bridge.getWarp("market").getBlockX() == 8, "Second warp coordinates preserved");
+        try {
+            final var warpField = SupportEssentials.class.getDeclaredField("warpGetter");
+            warpField.setAccessible(true);
+            final var method = (java.lang.reflect.Method) warpField.get(bridge);
+            check(method.getDeclaringClass().isAssignableFrom(net.ess3.api.IWarps.class),
+                    "getWarp resolved through published IWarps API");
+            bridge.getWarp("market");
+            check(warpField.get(bridge) == method, "getWarp Method cache reused");
+        } catch (ReflectiveOperationException ex) {
+            throw new AssertionError("Warp lookup API cache broken", ex);
+        }
         check(bridge.getWarp("missing") == null, "Missing warp exception swallowed");
         check(bridge.getWarp("badworld") == null, "Invalid world exception swallowed");
         check(bridge.getWarps().size() == 2, "Invalid warps excluded from locations");

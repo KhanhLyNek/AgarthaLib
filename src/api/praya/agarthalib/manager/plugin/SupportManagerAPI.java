@@ -137,18 +137,18 @@ public class SupportManagerAPI extends HandlerManager
         return this.supportWorldGuard;
     }
     
+    /** Resolve the active Essentials provider on every access.
+     * A plugin reload can replace the Plugin instance without callers noticing.
+     * Never retain the previous classloader's warp API/Method handles.
+     */
     public final SupportEssentials getSupportEssentials() {
-        if (this.supportEssentials == null) {
-            final Plugin source = PluginUtil.getPlugin("Essentials");
-            if (source != null && source.isEnabled()) {
-                this.supportEssentials = new SupportEssentials(this.plugin, source);
-            }
+        final Plugin source = PluginUtil.getPlugin("Essentials");
+        if (source == null || !source.isEnabled()) {
+            this.supportEssentials = null;
+            return null;
         }
-        else {
-            final Plugin source = this.supportEssentials.getSource();
-            if (!source.isEnabled()) {
-                this.supportEssentials = null;
-            }
+        if (this.supportEssentials == null || this.supportEssentials.getSource() != source) {
+            this.supportEssentials = new SupportEssentials(this.plugin, source);
         }
         return this.supportEssentials;
     }
