@@ -132,6 +132,10 @@ public class BridgeBlock extends HandlerBridge
             final VersionNMS version = ServerUtil.getVersionNMS();
             HandlerPacket handler = null;
             switch (version) {
+                case V26_3: {
+                    handler = new PacketBlock_Paper26_3(plugin);
+                    break;
+                }
                 case V1_7_R4: {
                     handler = new PacketBlock_1_7_R4(plugin);
                     break;
