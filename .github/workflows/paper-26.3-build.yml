@@ -49,6 +49,11 @@ jobs:
         run: |
           python3 .github/scripts/compile_report.py build-26.3.log > compiler-report.md
           cat compiler-report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Scan all Java source files for migration risks
+        if: always()
+        run: |
+          python3 .github/scripts/audit_source_api.py > source-audit.md
+          cat source-audit.md >> "$GITHUB_STEP_SUMMARY"
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
@@ -57,6 +62,7 @@ jobs:
           path: |
             build-26.3.log
             compiler-report.md
+            source-audit.md
             paper26-item-api-check.log
           if-no-files-found: ignore
           retention-days: 14
