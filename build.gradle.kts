@@ -9,6 +9,8 @@ version = "2.17.2-paper26.3-SNAPSHOT"
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://maven.enginehub.org/repo/")
+    maven("https://repo.extendedclip.com/releases/")
 }
 
 java {
@@ -20,8 +22,16 @@ dependencies {
     // Build-time API only: Paper provides these classes at runtime.
     compileOnly("io.papermc.paper:paper-api:26.3.build.230-stable")
 
-    // TODO: add the supported versions of optional external plugin APIs.
-    // TODO: migrate the old NMS/CraftBukkit handlers before compileJava can pass.
+    // Source-level dependencies found in the first GitHub Actions build log.
+    compileOnly("com.googlecode.json-simple:json-simple:1.1.1")
+    compileOnly("commons-lang:commons-lang:2.6")
+    compileOnly("javax.annotation:javax.annotation-api:1.3.2")
+    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.20")
+    compileOnly("me.clip:placeholderapi:2.11.6")
+
+    // Remaining integrations must be ported or supplied with compatible APIs:
+    // Factions variants, Jobs, Heroes, Towny, HolographicDisplays and others.
+    // Historical NMS/CraftBukkit packet handlers still block compilation.
 }
 
 sourceSets {
@@ -34,6 +44,8 @@ sourceSets {
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
     options.release.set(25)
+    // Show more than javac's default 100 errors so one CI run exposes the next API blockers.
+    options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000", "-Xmaxwarns", "200"))
 }
 
 publishing {
