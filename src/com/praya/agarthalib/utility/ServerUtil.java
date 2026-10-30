@@ -32,12 +32,12 @@ public class ServerUtil
     }
     
     public static final String getTextVersionNMS() {
-        try {
-            return Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+        // CraftBukkit versioned package names disappeared on modern Paper.
+        if ("26.3".equals(Bukkit.getMinecraftVersion())) {
+            return VersionNMS.V26_3.getText();
         }
-        catch (ArrayIndexOutOfBoundsException e) {
-            return null;
-        }
+        final String[] packageParts = Bukkit.getServer().getClass().getPackage().getName().split("\\.");
+        return (packageParts.length > 3) ? packageParts[3] : null;
     }
     
     public static final String getName() {
@@ -78,9 +78,7 @@ public class ServerUtil
     }
     
     public static final String getServerFullVersion() {
-        final String[] baseVersion = Bukkit.getVersion().split(" ");
-        final String fullVersion = baseVersion[baseVersion.length - 1].replace(")", "");
-        return fullVersion;
+        return Bukkit.getMinecraftVersion();
     }
     
     public static final String getServerVersion() {
@@ -91,13 +89,17 @@ public class ServerUtil
     }
     
     public static final boolean isCompatible(final VersionNMS minReq) {
-        return isCompatible(minReq, VersionNMS.V1_15_R1);
+        return isCompatible(minReq, VersionNMS.V26_3);
     }
     
     public static final boolean isCompatible(final VersionNMS minReq, final VersionNMS maxReq) {
         final int ordinalMin = (minReq != null) ? minReq.ordinal() : 0;
         final int ordinalMax = (maxReq != null) ? maxReq.ordinal() : 0;
-        final int ordinalValue = getVersionNMS().ordinal();
+        final VersionNMS version = getVersionNMS();
+        if (version == null) {
+            return false;
+        }
+        final int ordinalValue = version.ordinal();
         return ordinalValue >= ordinalMin && ordinalValue <= ordinalMax;
     }
     
