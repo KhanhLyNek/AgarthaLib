@@ -70,3 +70,26 @@ tasks.register<JavaCompile>("compilePaper26ItemData") {
     options.encoding = "UTF-8"
     options.release.set(25)
 }
+
+// Compile the real 26.3 packet bridge and its original public NBT interfaces
+// with only CI-scope stand-ins for legacy AgarthaLib implementation classes.
+// These stubs NEVER enter the plugin's runtime source set or published jar.
+tasks.register<JavaCompile>("compilePaper26ItemBridge") {
+    description = "Type-check the real Paper 26.3 item adapter against preserved NBT interfaces"
+    group = "verification"
+    dependsOn("compilePaper26ItemData")
+    source = fileTree(".") {
+        include("src/com/praya/agarthalib/packet/item/PacketItem_Paper26_3.java")
+        include("src/core/praya/agarthalib/builder/bridge/TagsNBTItem.java")
+        include("src/core/praya/agarthalib/builder/bridge/TagsNBTBooks.java")
+        include("src/core/praya/agarthalib/builder/bridge/TagsNBTCustom.java")
+        include("ci/paper26-bridge-stubs/**/*.java")
+    }
+    classpath = configurations["compileClasspath"] + files(layout.buildDirectory.dir("paper26-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-bridge-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
