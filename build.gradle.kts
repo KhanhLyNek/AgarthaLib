@@ -821,7 +821,7 @@ tasks.register<JavaCompile>("compilePaper26LivingEntitySelfTest") {
     options.release.set(25)
 }
 
-tasks.register<JavaExec>("testPaper26LivingEntityKind", "testPaper26JsonChat", "testPaper26MythicLibOptional") {
+tasks.register<JavaExec>("testPaper26LivingEntityKind") {
     description = "Test real Paper entity metadata and legacy combat target exclusions"
     group = "verification"
     dependsOn("compilePaper26LivingEntitySelfTest")
@@ -838,7 +838,7 @@ tasks.register<JavaExec>("testPaper26LivingEntityKind", "testPaper26JsonChat", "
 tasks.register<JavaExec>("testPaper26PapiOptional") {
     description = "Verify disabled/missing PlaceholderAPI retains exact placeholder and formatting"
     group = "verification"
-    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager", "testPaper26LivingEntityKind")
+    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager", "testPaper26LivingEntityKind", "testPaper26JsonChat", "testPaper26MythicLibOptional")
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-papi-optional-tests"),
         layout.buildDirectory.dir("paper26-placeholder-api-check"),
