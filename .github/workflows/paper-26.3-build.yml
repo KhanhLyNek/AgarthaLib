@@ -30,7 +30,13 @@ jobs:
         run: |
           java -version
           gradle --version
+      - name: Verify modern PDC API independently
+        shell: bash
+        run: |
+          set -o pipefail
+          gradle compilePaper26ItemData --no-daemon --console=plain 2>&1 | tee paper26-item-api-check.log
       - name: Build with compiler diagnostics
+        if: always()
         shell: bash
         run: |
           set -o pipefail
@@ -49,6 +55,7 @@ jobs:
           path: |
             build-26.3.log
             compiler-report.md
+            paper26-item-api-check.log
           if-no-files-found: ignore
           retention-days: 14
       - name: Upload test jars (not a verified release)
