@@ -412,3 +412,58 @@ tasks.register<JavaExec>("testPaper26EssentialsWarps") {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
 }
+
+// LangUtils is another optional legacy integration. Compile the ORIGINAL
+// 24 public method overloads without requiring its obsolete external JAR.
+tasks.register<JavaCompile>("compilePaper26LangUtilsBridge") {
+    description = "Compile real legacy LangUtils adapter with Paper API and no external JAR"
+    group = "verification"
+    dependsOn("testPaper26EssentialsWarps")
+    source = fileTree(".") {
+        include("src/api/praya/agarthalib/builder/support/SupportLangUtils.java")
+    }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-langutils-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaCompile>("compilePaper26LangUtilsSelfTest") {
+    description = "Compile tests for optional LangUtils overloads with isolated fake API"
+    group = "verification"
+    dependsOn("compilePaper26LangUtilsBridge")
+    source = fileTree("ci/paper26-langutils-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-langutils-api-check"),
+        layout.buildDirectory.dir("paper26-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-langutils-tests"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26LangUtils") {
+    description = "Check LangUtils translation calls, typed overloads and missing-plugin behavior"
+    group = "verification"
+    dependsOn("compilePaper26LangUtilsSelfTest")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-langutils-tests"),
+        layout.buildDirectory.dir("paper26-langutils-api-check"),
+        layout.buildDirectory.dir("paper26-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    mainClass.set("com.praya.agarthalib.modern.Paper26LangUtilsSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+}
