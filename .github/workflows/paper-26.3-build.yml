@@ -32,11 +32,11 @@ jobs:
         run: |
           java -version
           gradle --version
-      - name: Verify modern bridges and original potion utility against Java 25
+      - name: Verify modern bridges, potion utility and optional MVdW API isolation
         shell: bash
         run: |
           set -o pipefail
-          gradle compilePaper26PotionUtility --no-daemon --console=plain 2>&1 | tee paper26-item-api-check.log
+          gradle compilePaper26MVdWBridge --no-daemon --console=plain 2>&1 | tee paper26-item-api-check.log
       - name: Build with compiler diagnostics
         if: always()
         shell: bash
