@@ -4,6 +4,7 @@ import com.praya.agarthalib.AgarthaLib;
 import com.praya.agarthalib.handler.HandlerPacket;
 import com.praya.agarthalib.modern.Paper26ItemData;
 import com.praya.agarthalib.modern.Paper26ItemMeta;
+import com.praya.agarthalib.modern.Paper26StringListCodec;
 import core.praya.agarthalib.builder.bridge.TagsNBTBooks;
 import core.praya.agarthalib.builder.bridge.TagsNBTCustom;
 import core.praya.agarthalib.builder.bridge.TagsNBTItem;
@@ -17,12 +18,6 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -92,18 +87,7 @@ public final class PacketItem_Paper26_3 extends HandlerPacket
         if (list == null) {
             return;
         }
-        try {
-            final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            try (DataOutputStream out = new DataOutputStream(bytes)) {
-                out.writeInt(list.size());
-                for (final String line : list) {
-                    out.writeUTF(line == null ? "" : line);
-                }
-            }
-            set(key, parent, item, PersistentDataType.BYTE_ARRAY, bytes.toByteArray());
-        } catch (final IOException ex) {
-            throw new IllegalArgumentException("Cannot encode custom item list '" + key + "'", ex);
-        }
+        set(key, parent, item, PersistentDataType.BYTE_ARRAY, Paper26StringListCodec.encode(list));
     }
 
     @Override
@@ -138,22 +122,7 @@ public final class PacketItem_Paper26_3 extends HandlerPacket
     @Override
     public List<String> getListString(final String key, final String parent, final ItemStack item) {
         final byte[] raw = get(key, parent, item, PersistentDataType.BYTE_ARRAY);
-        final List<String> result = new ArrayList<>();
-        if (raw == null) {
-            return result;
-        }
-        try (DataInputStream in = new DataInputStream(new ByteArrayInputStream(raw))) {
-            final int count = in.readInt();
-            if (count < 0 || count > 10_000) {
-                throw new IOException("Invalid string-list count");
-            }
-            for (int i = 0; i < count; i++) {
-                result.add(in.readUTF());
-            }
-            return result;
-        } catch (final IOException ex) {
-            throw new IllegalStateException("Corrupted custom item list '" + key + "'", ex);
-        }
+        return Paper26StringListCodec.decode(raw);
     }
 
     @Override
