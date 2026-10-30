@@ -54,6 +54,19 @@ public final class Paper26LegacyItemTagsSelfTest {
             ListBinaryTag.builder(BinaryTagTypes.COMPOUND)
                 .add(CompoundBinaryTag.builder().putInt("stat", 1).build()).build()).build();
         check(Paper26LegacyItemTags.strings(bad, "Bad", null) == null, "malformed list rejected");
+        // Removal keys are separate from original values and encode the
+        // legacy parent/key exactly. This protects old metadata from being
+        // resurrected after a newer PDC key is deleted.
+        var normalKey = Paper26ItemData.key("skill", "MyItems");
+        var deletedKey = Paper26ItemData.removalKey("skill", "MyItems");
+        check(!normalKey.equals(deletedKey), "tombstone cannot shadow PDC data key");
+        check(!deletedKey.equals(Paper26ItemData.removalKey("skill", "Other")),
+                "parent-scoped deletion masks");
+        check(!deletedKey.equals(Paper26ItemData.removalKey("Skill", "MyItems")),
+                "case-sensitive legacy keys");
+        check(deletedKey.equals(Paper26ItemData.removalKey("skill", "MyItems")),
+                "deterministic deletion marker");
+
         check(Paper26LegacyItemTags.locate(null) == null, "null root");
         check(Paper26LegacyItemTags.strings(raw, null, null) == null, "null key");
         check(Paper26LegacyItemTags.string(null, "Name", null) == null, "null data");

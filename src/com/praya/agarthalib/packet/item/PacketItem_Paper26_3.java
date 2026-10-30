@@ -94,7 +94,7 @@ public final class PacketItem_Paper26_3 extends HandlerPacket
     @Override
     public String getString(final String key, final String parent, final ItemStack item) {
         final String modern = get(key, parent, item, PersistentDataType.STRING);
-        return modern != null ? modern : Paper26LegacyItemTags.string(
+        return modern != null ? modern : Paper26ItemData.isRemoved(key, parent, item) ? null : Paper26LegacyItemTags.string(
                 Paper26LegacyItemTags.customData(item), key, parent);
     }
 
@@ -102,6 +102,7 @@ public final class PacketItem_Paper26_3 extends HandlerPacket
     public int getInt(final String key, final String parent, final ItemStack item) {
         final Integer value = get(key, parent, item, PersistentDataType.INTEGER);
         if (value != null) return value;
+        if (Paper26ItemData.isRemoved(key, parent, item)) return 0;
         final Integer old = Paper26LegacyItemTags.integer(
                 Paper26LegacyItemTags.customData(item), key, parent);
         return old == null ? 0 : old;
@@ -111,6 +112,7 @@ public final class PacketItem_Paper26_3 extends HandlerPacket
     public double getDouble(final String key, final String parent, final ItemStack item) {
         final Double value = get(key, parent, item, PersistentDataType.DOUBLE);
         if (value != null) return value;
+        if (Paper26ItemData.isRemoved(key, parent, item)) return 0.0;
         final Double old = Paper26LegacyItemTags.decimal(
                 Paper26LegacyItemTags.customData(item), key, parent);
         return old == null ? 0 : old;
@@ -120,6 +122,7 @@ public final class PacketItem_Paper26_3 extends HandlerPacket
     public long getLong(final String key, final String parent, final ItemStack item) {
         final Long value = get(key, parent, item, PersistentDataType.LONG);
         if (value != null) return value;
+        if (Paper26ItemData.isRemoved(key, parent, item)) return 0L;
         final Long old = Paper26LegacyItemTags.longNumber(
                 Paper26LegacyItemTags.customData(item), key, parent);
         return old == null ? 0 : old;
@@ -129,6 +132,7 @@ public final class PacketItem_Paper26_3 extends HandlerPacket
     public boolean getBoolean(final String key, final String parent, final ItemStack item) {
         final Byte value = get(key, parent, item, PersistentDataType.BYTE);
         if (value != null) return value != 0;
+        if (Paper26ItemData.isRemoved(key, parent, item)) return false;
         final Boolean old = Paper26LegacyItemTags.booleanValue(
                 Paper26LegacyItemTags.customData(item), key, parent);
         return old != null && old;
@@ -138,6 +142,7 @@ public final class PacketItem_Paper26_3 extends HandlerPacket
     public List<String> getListString(final String key, final String parent, final ItemStack item) {
         final byte[] raw = get(key, parent, item, PersistentDataType.BYTE_ARRAY);
         if (raw != null) return Paper26StringListCodec.decode(raw);
+        if (Paper26ItemData.isRemoved(key, parent, item)) return List.of();
         final List<String> old = Paper26LegacyItemTags.strings(
                 Paper26LegacyItemTags.customData(item), key, parent);
         return old == null ? List.of() : old;

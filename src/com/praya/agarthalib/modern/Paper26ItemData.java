@@ -29,6 +29,25 @@ public final class Paper26ItemData {
         return new NamespacedKey(NAMESPACE, "legacy_" + encoded);
     }
 
+    /**
+     * Removing a PDC key must also hide the historical raw NBT value:
+     * otherwise /nbtclear resurrects old weapon skill or stat metadata.
+     * This writes only a plugin-owned tombstone; raw legacy NBT is preserved
+     * so the user can still recover the original item from a backup.
+     */
+    public static NamespacedKey removalKey(final String legacyKey, final String parent) {
+        final NamespacedKey original = key(legacyKey, parent);
+        return new NamespacedKey(NAMESPACE, "deleted_" + original.getKey());
+    }
+
+    public static boolean isRemoved(final String legacyKey, final String parent,
+                                    final ItemStack item) {
+        if (legacyKey == null || !valid(item)) return false;
+        final Byte marker = item.getPersistentDataContainer().get(
+                removalKey(legacyKey, parent), PersistentDataType.BYTE);
+        return marker != null && marker == 1;
+    }
+
     private static String hex(final String text) {
         final byte[] utf8 = text.getBytes(StandardCharsets.UTF_8);
         final char[] output = new char[utf8.length * 2];
@@ -50,7 +69,11 @@ public final class Paper26ItemData {
             return;
         }
         final NamespacedKey namespacedKey = key(legacyKey, parent);
-        item.editPersistentDataContainer(pdc -> pdc.set(namespacedKey, type, value));
+        final NamespacedKey tombstone = removalKey(legacyKey, parent);
+        item.editPersistentDataContainer(pdc -> {
+            pdc.set(namespacedKey, type, value);
+            pdc.remove(tombstone);
+        });
     }
 
     public static <T, Z> Z get(final String legacyKey, final String parent,
@@ -66,6 +89,10 @@ public final class Paper26ItemData {
             return;
         }
         final NamespacedKey namespacedKey = key(legacyKey, parent);
-        item.editPersistentDataContainer(pdc -> pdc.remove(namespacedKey));
+        final NamespacedKey tombstone = removalKey(legacyKey, parent);
+        item.editPersistentDataContainer(pdc -> {
+            pdc.remove(namespacedKey);
+            pdc.set(tombstone, PersistentDataType.BYTE, (byte) 1);
+        });
     }
 }
