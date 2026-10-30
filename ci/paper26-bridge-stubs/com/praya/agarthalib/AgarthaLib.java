@@ -1,3 +1,10 @@
 package com.praya.agarthalib;
-/** CI-only type placeholder; not packaged or used at runtime. */
-public class AgarthaLib {}
+
+import org.bukkit.plugin.java.JavaPlugin;
+
+/**
+ * CI-only class hierarchy matching the actual AgarthaLib plugin.
+ * Never included in the plugin's main source set or release JAR.
+ */
+public class AgarthaLib extends JavaPlugin {
+}
