@@ -36,10 +36,12 @@ public abstract class PlaceholderManager extends HandlerManager
     
     public final void registerAll() {
         final String placeholder = this.plugin.getPluginPlaceholder();
-        if (PluginUtil.isPluginInstalled("PlaceholderAPI")) {
+        final org.bukkit.plugin.Plugin papi = PluginUtil.getPlugin("PlaceholderAPI");
+        if (papi != null && papi.isEnabled()) {
             new ReplacerPlaceholderAPI(this.plugin, placeholder).hook();
         }
-        if (PluginUtil.isPluginInstalled("MVdWPlaceholderAPI")) {
+        final org.bukkit.plugin.Plugin mvdw = PluginUtil.getPlugin("MVdWPlaceholderAPI");
+        if (mvdw != null && mvdw.isEnabled()) {
             new ReplacerMVDWPlaceholderAPI(this.plugin, placeholder).register();
         }
     }
@@ -56,6 +58,9 @@ public abstract class PlaceholderManager extends HandlerManager
     }
     
     public final String getReplacement(final Player player, final String identifier) {
-        return null;
+        // The original decompiled body unconditionally returned null, making
+        // both PAPI and MVdW expansions inert. Configured values are returned
+        // byte-for-byte: no new color, recursion or player-dependent behavior.
+        return this.getPlaceholder(identifier);
     }
 }
