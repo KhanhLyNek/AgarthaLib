@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          gradle testPaper26OriginalPlaceholderManager --no-daemon --console=plain 2>&1 | tee paper26-item-api-check.log
+          gradle testPaper26PapiOptional --no-daemon --console=plain 2>&1 | tee paper26-item-api-check.log
       - name: Build with compiler diagnostics
         if: always()
         shell: bash
