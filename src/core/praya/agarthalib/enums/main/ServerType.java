@@ -13,7 +13,7 @@ public enum ServerType
 {
     BUKKIT(Arrays.asList("Bukkit", "CraftBukkit")), 
     SPIGOT(Arrays.asList("Spigot")), 
-    PAPER_SPIGOT(Arrays.asList("PaperSpigot", "PaperClip")), 
+    PAPER_SPIGOT(Arrays.asList("Paper", "PaperSpigot", "PaperClip")), 
     FORGE(Arrays.asList("Mod", "Forge")), 
     UNKNOWN(Arrays.asList("Unknown"));
     
@@ -28,10 +28,14 @@ public enum ServerType
     }
     
     public static final ServerType getServerType() {
-        final String version = Bukkit.getServer().getVersion();
-        final String[] parts = version.split("-");
-        final int length = parts.length;
-        return (length > 1) ? getServerType(parts[1]) : ServerType.FORGE;
+        // Modern Paper no longer exposes an implementation marker at a fixed
+        // position in the server version string.
+        final ServerType byName = getServerType(Bukkit.getName());
+        if (byName != ServerType.FORGE) {
+            return byName;
+        }
+        final String[] parts = Bukkit.getVersion().split("-");
+        return parts.length > 1 ? getServerType(parts[1]) : ServerType.FORGE;
     }
     
     public static final ServerType getServerType(final String serverType) {
