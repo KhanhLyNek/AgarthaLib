@@ -24,16 +24,19 @@ public class BiomeUtil
     }
     
     public static final Biome getBiomeByOriginalName(final String biome) {
-        if (biome != null) {
-            Biome[] values;
-            for (int length = (values = Biome.values()).length, i = 0; i < length; ++i) {
-                final Biome key = values[i];
-                if (key.toString().equalsIgnoreCase(biome)) {
-                    return key;
-                }
-            }
+        if (biome == null || biome.isBlank()) return null;
+        // Biome.values() is marked for removal: biomes are a dynamic registry
+        // on Paper 26.3 and may be supplied by datapacks. The historical
+        // names ("PLAINS") still resolve as minecraft:plains.
+        final String canonical = biome.trim().toLowerCase(java.util.Locale.ROOT);
+        final org.bukkit.NamespacedKey key;
+        try {
+            key = org.bukkit.NamespacedKey.fromString(canonical);
+        } catch (IllegalArgumentException ex) {
+            return null;
         }
-        return null;
+        return key == null ? null : io.papermc.paper.registry.RegistryAccess.registryAccess()
+                .getRegistry(io.papermc.paper.registry.RegistryKey.BIOME).get(key);
     }
     
     public static final boolean isBiomeExists(final String biome) {
