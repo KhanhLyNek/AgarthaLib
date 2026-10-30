@@ -57,6 +57,9 @@ public class BridgePlayer extends HandlerBridge
     public final String getLocale(final Player player) {
         final PacketPlayerProperties packetPlayerProperties = this.getPacketPlayerProperties();
         final AgarthaLibConfig mainConfig = this.plugin.getMainConfig();
+        if (player == null) {
+            return mainConfig.getGeneralLocale();
+        }
         return (packetPlayerProperties != null) ? packetPlayerProperties.getLocale(player) : mainConfig.getGeneralLocale();
     }
     
@@ -112,6 +115,12 @@ public class BridgePlayer extends HandlerBridge
     }
     
     public final void playSwingOffHand(final Player player) {
+        if (ServerUtil.getVersionNMS() == VersionNMS.V26_3) {
+            if (player != null) {
+                player.swingOffHand();
+            }
+            return;
+        }
         final PacketPlayerCombat packetPlayerCombat = this.getPacketPlayerCombat();
         if (packetPlayerCombat != null && packetPlayerCombat instanceof PacketPlayerCombatPresent) {
             final PacketPlayerCombatPresent packetPlayerCombatPresent = (PacketPlayerCombatPresent)packetPlayerCombat;
@@ -128,6 +137,10 @@ public class BridgePlayer extends HandlerBridge
             final VersionNMS version = ServerUtil.getVersionNMS();
             HandlerPacket handler = null;
             switch (version) {
+                case V26_3: {
+                    handler = new PacketPlayer_Paper26_3(plugin);
+                    break;
+                }
                 case V1_7_R4: {
                     handler = new PacketPlayer_1_7_R4(plugin);
                     break;
