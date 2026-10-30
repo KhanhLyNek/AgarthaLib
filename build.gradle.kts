@@ -713,10 +713,61 @@ tasks.register<JavaCompile>("compilePaper26PapiOptionalSelfTest") {
     options.release.set(25)
 }
 
+// Compile the actual Paper 26.3 combat target classifier, old public bridge
+// interface and new packet adapter without any ancient NMS implementations.
+tasks.register<JavaCompile>("compilePaper26LivingEntityBridge") {
+    description = "Type-check the Paper 26.3 LivingEntityTools adapter and classifier"
+    group = "verification"
+    dependsOn("compilePaper26ItemBridge")
+    source = fileTree(".") {
+        include("src/com/praya/agarthalib/modern/Paper26LivingEntityKind.java")
+        include("src/com/praya/agarthalib/packet/livingentity/PacketLivingEntity_Paper26_3.java")
+        include("src/core/praya/agarthalib/builder/bridge/LivingEntityTools.java")
+    }
+    classpath = configurations["compileClasspath"] +
+        files(layout.buildDirectory.dir("paper26-bridge-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-livingentity-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaCompile>("compilePaper26LivingEntitySelfTest") {
+    description = "Compile entity, armor-stand, projectile and display-entity regression tests"
+    group = "verification"
+    dependsOn("compilePaper26LivingEntityBridge")
+    source = fileTree("ci/paper26-livingentity-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-livingentity-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-livingentity-tests"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26LivingEntityKind") {
+    description = "Test real Paper entity metadata and legacy combat target exclusions"
+    group = "verification"
+    dependsOn("compilePaper26LivingEntitySelfTest")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-livingentity-tests"),
+        layout.buildDirectory.dir("paper26-livingentity-api-check")
+    )
+    mainClass.set("com.praya.agarthalib.modern.Paper26LivingEntityKindSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+}
+
 tasks.register<JavaExec>("testPaper26PapiOptional") {
     description = "Verify disabled/missing PlaceholderAPI retains exact placeholder and formatting"
     group = "verification"
-    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager")
+    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager", "testPaper26LivingEntityKind")
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-papi-optional-tests"),
         layout.buildDirectory.dir("paper26-placeholder-api-check"),
