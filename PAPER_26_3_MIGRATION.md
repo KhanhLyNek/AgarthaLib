@@ -1,6 +1,6 @@
 # Paper 26.3 migration tracker — AgarthaLib
 
-**Status: in progress; NOT a verified Paper 26.3 build.** The default branch of this repository is `master`, not `main`. Changes are made directly to the existing default branch as requested.
+**Status: full Paper 26.3 Java 25 build passed in CI; NOT runtime verified.** The default branch of this repository is `master`, not `main`. Changes are made directly to the existing default branch as requested.
 
 ## Compatibility constraints
 
@@ -328,3 +328,39 @@ verification gate.
 This is a *data-integrity guard*, not historical raw-NBT recovery. It does not
 convert old MyItems item tags, compile the full legacy NMS code, or certify
 production support.
+
+## 2026-10-30: master-only Paper 26.3 production-source cutover
+
+GitHub Actions AgarthaLib run [41083338412](https://github.com/KhanhLyNek/AgarthaLib/actions/runs/41083338412)
+completed `Build with compiler diagnostics` and uploaded a test JAR.
+**This proves a Java 25/Paper 26.3 GitHub CI build, not startup or gameplay
+runtime compatibility.** The original 82 Packet*_1_* sources remain in git
+but are not compiled/published by `sourceSets.main.java.exclude`.
+All 12 original Bridge* family selectors are Paper-only; 9 have Paper
+adapter classes and particle/sound/server use their existing direct API path.
+The replacement arrow/material/equipment classes are typechecked under Java25.
+
+The following 14 obsolete, third-party typed adapters are excluded from the
+Paper artifact, not deleted from git:
+JobsReborn, HolographicDisplays, Heroes, SkillsPro, CombatStamina,
+LifeEssence, Kingdoms, McMMO, BattleLevels, Citizens, MyItems (reverse
+bridge), SkillAPI, Gangs, SimpleClans. The obsolete battlelevels, heroes and
+skillapi listeners are also excluded, with former registration calls removed
+from plugin initialization. Their legacy boolean support flags return false.
+`SupportManagerAPI` offers explicit separate read-only AuraSkills/MMOCore/
+Lands and transient DecentHolograms methods. This intentionally changes the
+old external *typed API* and does **not** migrate jobs salary, heroes scaling,
+SkillAPI classes, factions claims or HolographicDisplays objects.
+
+The original PlayerHealthMaxChangeEvent remains available to other listeners,
+but the deprecated Heroes/SkillAPI/BattleLevels bonus-health equations are
+not applied because they cannot safely be treated as MMOCore statistics.
+**Do not deploy to a world that depends on those old bonuses without explicit
+per-provider migration and backup verification.**
+
+The `PAPER26_LEGACY_API_CALLERS` CI report records callers so restored
+providers cannot be silently linked into the production JAR.
+Original YAML/item/ability source values were not modified by this cutover.
+Outstanding: startup smoke test, Paper runtime inventory item snapshot parity,
+raw custom legacy NBT migration, historic hover_item SNBT conversion,
+functional Jobs/EcoJobs and Heroes/MMOCore equivalence mapping.
