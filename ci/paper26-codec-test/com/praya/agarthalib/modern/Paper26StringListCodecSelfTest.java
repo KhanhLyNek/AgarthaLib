@@ -58,6 +58,13 @@ public final class Paper26StringListCodecSelfTest {
         final byte[] trailing = Arrays.copyOf(valid, valid.length + 1);
         expectInvalid(trailing);
 
+        // Malformed byte sequences must fail rather than being replaced with U+FFFD.
+        for (final byte bad : new byte[] {(byte) 0x80, (byte) 0xc0, (byte) 0xff}) {
+            final byte[] corrupted = Paper26StringListCodec.encode(List.of("x"));
+            corrupted[corrupted.length - 1] = bad;
+            expectInvalid(corrupted);
+        }
+
         if (!Paper26StringListCodec.decode(null).isEmpty()) {
             throw new AssertionError("Null custom list should read as empty");
         }

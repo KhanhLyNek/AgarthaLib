@@ -32,6 +32,8 @@ jobs:
         run: python3 .github/scripts/check_paper26_bridge_routes.py
       - name: Guard optional MythicLib and removed Factions runtime hooks
         run: python3 .github/scripts/check_paper26_provider_routes.py
+      - name: Audit exact remaining NMS and provider source debt
+        run: python3 .github/scripts/audit_paper26_remaining.py
       - name: Java and Gradle versions
         run: |
           java -version
@@ -58,6 +60,13 @@ jobs:
         run: |
           python3 .github/scripts/audit_source_api.py > source-audit.md
           cat source-audit.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload migration source audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper26-source-audit
+          path: build/reports/paper26-remaining.json
+          if-no-files-found: warn
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4

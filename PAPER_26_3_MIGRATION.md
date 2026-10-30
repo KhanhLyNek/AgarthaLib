@@ -248,3 +248,70 @@ existing plugin.yml baseline was explicitly updated only for the new
 MythicLib soft-dependency; original skill/item/command YAML is unchanged.
 
 Reference: https://docs.phoenixdevt.fr/mythiclib/api/maven
+
+## 2026-10-30: measured remaining-debt audit and four optional provider contracts (stacked PR)
+
+Run `python3 .github/scripts/audit_paper26_remaining.py`. The JSON artifact
+`build/reports/paper26-remaining.json` counts exact source files, with a
+reproducible snapshot of all version-specific packet paths and files importing
+unsupported provider APIs. Counts are not interchangeable with `javac` error
+messages, and new adapters are not proof of full in-game compatibility.
+
+**Scope formula: 82 version-suffixed historic packet Java source files +
+8 Java files importing Jobs/Heroes/HolographicDisplays (1+6+1) +
+2 separate legacy item migration gaps (arbitrary old NBT and SNBT hover item) +
+4 modern provider contract targets = 96 defined scoped file/feature work items.
+Of 82 versioned packet files, 62 directly reference old NMS/CraftBukkit.
+The other legacy providers (e.g. SkillAPI and mcMMO) are reported separately
+and are **not included** in this 96-item scope.**
+
+New `Paper26OptionalProviders` exposes four separately guarded contracts:
+- AuraSkills: online player's default-skill level, using documented
+  `AuraSkillsApi.get() -> getUser(UUID) -> getSkillLevel(Skill)`, read-only.
+- MMOCore: online player's character level and class ID via documented
+  `PlayerData.get(UUID)`, `getLevel()`, `getProfess().getId()`.
+- Lands: claimed-area presence via `LandsIntegration.of(owner).getArea(location)`.
+  This never grants block-break rights, never treats missing provider as wilderness,
+  and intentionally does NOT use removed `getLand` methods.
+- DecentHolograms: temporary, explicitly nonpersistent hologram creation using
+  `DHAPI.getHologram(id)` and
+  `createHologram(id, location, false, lines)` with collision and input checks.
+  It does not impersonate legacy `Hologram` objects or migrate saved holograms.
+
+These adapters are protected by per-provider JVM fixtures and Java 25 isolated
+typechecks. Neither MyItems skills nor AgarthaLib's old Jobs, Heroes or
+HolographicDisplays public classes have been dynamically rewritten or enabled
+to emulate those other APIs. No claim of production equivalence.
+
+**Item safety:** `Paper26ItemSnapshots.snapshot/restore` backs up an item
+already decoded by Paper through `ItemStack.serializeAsBytes` and
+`deserializeBytes`, preserving DataVersion-based Minecraft conversion.
+No world, inventory, player record, command or original saved YAML is changed.
+`Paper26HoverItems` sends modern native `show_item` data components via
+`ItemStack.asHoverEvent` instead of inventing SNBT. **The existing legacy
+`packetGetJsonItem` remains null** and arbitrary raw custom NBT from older
+servers still needs actual binary fixtures and an explicit migration process.
+Snapshot roundtrip and item metadata parity require a real Paper runtime test.
+Corrupt UTF-8 in new list PDC data now fails decoding instead of silently
+replacing characters; the older separate PR #1 implemented the same safety
+fix, but was not yet merged into the stacked branch.
+
+The additive four provider `softdepend` declarations are reviewed by the
+protected `plugin.yml` blob SHA guard; all original command, permission and
+ability YAML content remains unchanged.
+
+Sources:
+- https://wiki.aurelium.dev/auraskills/api
+- https://gitlab.com/phoenix-dvpmt/mmocore/-/blob/master/MMOCore-API/src/main/java/net/Indyuce/mmocore/api/player/PlayerData.java
+- https://wiki.incredibleplugins.com/lands/developers/api
+- https://wiki.decentholograms.eu/api/dhapi/
+- https://docs.papermc.io/paper/dev/pdc/
+- https://jd.papermc.io/paper/26.3/org/bukkit/inventory/ItemStack.html
+
+### Server TPS packet parity
+The public `BridgeServer.getTPS()` Paper 26.3 branch now calls
+`Paper26ServerTPS.current()` using Bukkit's first-minute TPS but preserving
+the historic 2-decimal rounding and 0..20 limit. Seven isolated tests cover
+fractional TPS, negative values and nonfinite values. This corrects a Paper
+route's *semantics*; old NMS server packet source files remain in the archive
+and are still counted among the 82 versioned packet files.

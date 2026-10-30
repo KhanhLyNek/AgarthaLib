@@ -8,6 +8,10 @@ softdepend:
 - PlaceholderAPI
 - MVdWPlaceholderAPI
 - MythicLib
+- AuraSkills
+- MMOCore
+- Lands
+- DecentHolograms
 
 commands:
   agarthalib:
