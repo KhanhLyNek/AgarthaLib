@@ -271,12 +271,32 @@ tasks.register<JavaCompile>("compilePaper26InventoryEquipmentBridges") {
     source = fileTree(".") {
         include("src/com/praya/agarthalib/packet/inventory/PacketInventory_Paper26_3.java")
         include("src/com/praya/agarthalib/packet/equipment/PacketEquipment_Paper26_3.java")
-        include("src/com/praya/agarthalib/packet/equipment/PacketEquipment_1_9.java")
         include("src/core/praya/agarthalib/builder/bridge/WindowTools.java")
         include("src/core/praya/agarthalib/builder/bridge/EquipmentTools.java")
     }
     classpath = configurations["compileClasspath"] + files(layout.buildDirectory.dir("paper26-bridge-api-check"))
     destinationDirectory.set(layout.buildDirectory.dir("paper26-inventory-equipment-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+// Verify the actual 26.3 arrow and material replacements using original
+// public handler interfaces and only test-scoped AgarthaLib base stubs.
+tasks.register<JavaCompile>("compilePaper26ArrowMaterial") {
+    description = "Compile current-only Bukkit arrow and material packet replacements"
+    group = "verification"
+    dependsOn("compilePaper26ItemBridge")
+    source = fileTree(".") {
+        include("src/com/praya/agarthalib/packet/arrow/PacketArrow_Paper26_3.java")
+        include("src/com/praya/agarthalib/packet/arrow/PacketArrowNormal.java")
+        include("src/com/praya/agarthalib/packet/arrow/PacketArrowModification.java")
+        include("src/com/praya/agarthalib/packet/material/PacketMaterial_Paper26_3.java")
+        include("src/core/praya/agarthalib/builder/bridge/MaterialTools.java")
+    }
+    classpath = configurations["compileClasspath"] +
+        files(layout.buildDirectory.dir("paper26-bridge-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-arrow-material-api-check"))
     javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
     options.encoding = "UTF-8"
     options.release.set(25)
@@ -330,7 +350,7 @@ tasks.register<JavaExec>("testPaper26MythicLibOptional") {
     javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
 }
 
-tasks.named("compilePaper26MessageBridge") { dependsOn("compilePaper26InventoryEquipmentBridges") }
+tasks.named("compilePaper26MessageBridge") { dependsOn("compilePaper26InventoryEquipmentBridges", "compilePaper26ArrowMaterial") }
 
 // Verify the real block animation adapter and its unchanged packet interface.
 // CI-only AgarthaLib class stubs were already compiled by the item-bridge task.
