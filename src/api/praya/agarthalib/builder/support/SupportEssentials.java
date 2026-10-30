@@ -40,13 +40,11 @@ public class SupportEssentials extends Support {
             if (!(names instanceof Collection<?>)) {
                 return Collections.emptyList();
             }
-            final Collection<String> result = new ArrayList<>();
-            for (final Object name : (Collection<?>) names) {
-                if (name instanceof String) {
-                    result.add((String) name);
-                }
-            }
-            return result;
+            // The original Essentials adapter returned the API's collection
+            // directly, so do not copy or filter it behind callers' backs.
+            @SuppressWarnings("unchecked")
+            final Collection<String> original = (Collection<String>) names;
+            return original;
         } catch (final ReflectiveOperationException | LinkageError ex) {
             failure("getList", ex);
             return Collections.emptyList();
