@@ -22,9 +22,14 @@ public class SupportVault extends Support
     }
     
     public final Economy getEconomy() {
-        if (this.economy == null) {
-            this.registerService();
+        // A cached economy provider can become stale after an economy plugin
+        // reload. Re-resolve the active Vault service without changing any
+        // transaction values or creating fake player accounts.
+        if (this.source == null || !this.source.isEnabled()) {
+            this.economy = null;
+            return null;
         }
+        this.registerService();
         return this.economy;
     }
     
@@ -86,9 +91,12 @@ public class SupportVault extends Support
     
     private final void registerService() {
         final ServicesManager servicesManager = Bukkit.getServicesManager();
-        final RegisteredServiceProvider<Economy> economyProvider = (RegisteredServiceProvider<Economy>)servicesManager.getRegistration((Class)Economy.class);
-        if (economyProvider != null) {
-            this.economy = (Economy)economyProvider.getProvider();
-        }
+        final RegisteredServiceProvider<Economy> economyProvider =
+                servicesManager.getRegistration(Economy.class);
+        // Clear the previous provider if the current service is gone or its
+        // owner has been disabled. Original Vault and VaultUnlocked both
+        // register the same net.milkbowl.vault.economy.Economy contract.
+        this.economy = economyProvider != null && economyProvider.getPlugin().isEnabled()
+                ? economyProvider.getProvider() : null;
     }
 }
