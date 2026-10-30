@@ -67,3 +67,15 @@ Reference: https://docs.papermc.io/paper/dev/pdc/ (item stack PDC support), http
 - The new Paper26SoundRegistry resolves sound IDs through the Minecraft namespaced registry. Missing historical sounds must still be validated; the bridge does not silently use different audio.
 - GitHub Actions scans every Java file for historic NMS, CraftBukkit, reflection and external integrations. The scan is diagnostic only.
 - Full build and runtime gameplay verification remain unresolved; old raw item NBT migration requires backups and representative item fixtures.
+
+## Modern player and message bridges (incremental)
+
+- `PacketPlayer_Paper26_3` now implements the original player locale, entity visibility, absorption and main-hand animation interfaces with public Paper APIs; `BridgePlayer` chooses it for `V26_3`. The off-hand animation goes through `Player.swingOffHand()`. Original skill and command sources are untouched.
+- **Behavior review needed:** `Player.hideEntity(plugin, entity)` is plugin-scoped and can persist until `showEntity`; the old implementation sent a one-off entity-destroy packet. Check lifecycle and reveal conditions before production. `Player.swingMainHand()` broadcasts via Paper's tracking system, not the old `effectRange`-limited manual packet loop.
+- **Intentionally not guessed:** Old NMS `getSwingDuration` and `getSwingProgress` calculations have no confirmed 26.3 equivalents; they are not implemented in the new `PacketPlayerCombatPresent` interface. Callers must be audited and any required semantics reconstructed with tests before release.
+- `Paper26AudienceService` and `PacketMessage_Paper26_3` replace legacy action-bar, title and subtitle NMS packets using Adventure. Section-sign formatting and the numeric tick timing parameters retain their public contract; titles/subtitles update only the requested part instead of clearing the other.
+- **JSON gap:** The legacy `MessageJson` contract uses a custom `||` DSL plus serialized item NBT in hover events. JSON chat, click/hover and `getJsonItem` are **not migrated** by this adapter. Do not claim they work on Paper 26.3 until a lossless hover-item conversion is implemented.
+- **Inventory gap:** Paper 26.3 deprecates `InventoryView.setTitle` because it has broken or unsupported behavior. Do not substitute it blindly for NMS window-title packets, which could cause inventory event or item behavior changes. Investigate a safe menu recreation flow with explicit viewer/state tests.
+- GitHub Actions now independently compiles these new adapters, their original interfaces and the prior codec tests. The full `compileJava` and all gameplay/runtime tests **still must pass** before publishing.
+
+Paper 26.3 references: https://jd.papermc.io/paper/26.3/org/bukkit/entity/Player.html and https://jd.papermc.io/paper/26.3/org/bukkit/inventory/InventoryView.html .
