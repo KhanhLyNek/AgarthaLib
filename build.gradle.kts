@@ -277,3 +277,24 @@ tasks.register<JavaExec>("testPaper26PotionAliases") {
 tasks.named("compilePaper26PotionUtility") {
     dependsOn("testPaper26PotionAliases")
 }
+
+// MVdWPlaceholderAPI is an optional legacy plugin. The real adapter and its
+// public SupportPlaceholder contract must compile without the external JAR.
+tasks.register<JavaCompile>("compilePaper26MVdWBridge") {
+    description = "Type-check optional MVdW placeholder hook without its old external API"
+    group = "verification"
+    dependsOn("compilePaper26PotionUtility")
+    source = fileTree(".") {
+        include("src/api/praya/agarthalib/builder/support/SupportMVdWPlaceholderAPI.java")
+        include("src/api/praya/agarthalib/builder/support/main/Support.java")
+        include("src/api/praya/agarthalib/builder/support/main/SupportPlaceholder.java")
+    }
+    classpath = configurations["compileClasspath"] +
+        files(layout.buildDirectory.dir("paper26-bridge-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-placeholder-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
