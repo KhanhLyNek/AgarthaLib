@@ -1,24 +1,20 @@
 package com.praya.agarthalib.packet.item;
 
-import com.google.common.collect.ImmutableMultimap;
 import com.praya.agarthalib.AgarthaLib;
 import com.praya.agarthalib.handler.HandlerPacket;
 import com.praya.agarthalib.modern.Paper26ItemData;
+import com.praya.agarthalib.modern.Paper26ItemMeta;
 import core.praya.agarthalib.builder.bridge.TagsNBTBooks;
 import core.praya.agarthalib.builder.bridge.TagsNBTCustom;
 import core.praya.agarthalib.builder.bridge.TagsNBTItem;
 import core.praya.agarthalib.enums.main.Slot;
 import core.praya.agarthalib.enums.main.TagsAttribute;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.io.ByteArrayInputStream;
@@ -27,7 +23,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -208,82 +203,39 @@ public final class PacketItem_Paper26_3 extends HandlerPacket
         }
         final Slot resolvedSlot = slot == null ? Slot.MAINHAND : slot;
         final NamespacedKey modifierKey = new NamespacedKey(
-                NAMESPACE,
+                "agarthalib",
                 "attribute_" + tags.name().toLowerCase(Locale.ROOT)
                         + "_" + resolvedSlot.name().toLowerCase(Locale.ROOT));
         value = Math.max(tags.getMinValue(), Math.min(tags.getMaxValue(), value));
         if (!"Double".equalsIgnoreCase(tags.getValueType())) {
             value = (int) value;
         }
-        final AttributeModifier replacement = new AttributeModifier(
-                modifierKey, value, AttributeModifier.Operation.ADD_NUMBER, slotGroup(resolvedSlot));
-        final ItemMeta meta = item.getItemMeta();
-        if (meta == null) {
-            return;
-        }
-        final Collection<AttributeModifier> existing = meta.getAttributeModifiers(attribute);
-        if (existing != null) {
-            for (final AttributeModifier old : new ArrayList<>(existing)) {
-                if (modifierKey.equals(old.getKey())) {
-                    meta.removeAttributeModifier(attribute, old);
-                }
-            }
-        }
-        meta.addAttributeModifier(attribute, replacement);
-        item.setItemMeta(meta);
+        Paper26ItemMeta.addAttribute(item, attribute, modifierKey, value, slotGroup(resolvedSlot));
     }
 
     @Override
     public void clearNBT(final ItemStack item) {
-        if (valid(item)) {
-            final ItemMeta meta = item.getItemMeta();
-            if (meta != null) {
-                // Empty overrides match the old explicit AttributeModifiers: [].
-                meta.setAttributeModifiers(ImmutableMultimap.of());
-                item.setItemMeta(meta);
-            }
-        }
+        Paper26ItemMeta.clearAttributes(item);
     }
 
     @Override
     public void setUnbreakable(final ItemStack item, final boolean unbreakable) {
-        if (valid(item)) {
-            final ItemMeta meta = item.getItemMeta();
-            if (meta != null) {
-                meta.setUnbreakable(unbreakable);
-                item.setItemMeta(meta);
-            }
-        }
+        Paper26ItemMeta.setUnbreakable(item, unbreakable);
     }
 
     @Override
     public boolean isUnbreakable(final ItemStack item) {
-        return valid(item) && item.hasItemMeta() && item.getItemMeta().isUnbreakable();
+        return Paper26ItemMeta.isUnbreakable(item);
     }
 
     @Override
     public ItemStack createBook(final String name, final int amount, final String title,
                                 final String author, final String... pages) {
-        final ItemStack book = new ItemStack(Material.WRITTEN_BOOK, Math.max(1, amount));
-        final BookMeta meta = (BookMeta) book.getItemMeta();
-        if (meta != null) {
-            if (name != null) {
-                meta.setDisplayName(name);
-            }
-            meta.setTitle(title == null ? "" : title);
-            meta.setAuthor(author == null ? "" : author);
-            if (pages != null) {
-                meta.setPages(pages);
-            }
-            book.setItemMeta(meta);
-        }
-        return book;
+        return Paper26ItemMeta.createBook(name, amount, title, author, pages);
     }
 
     @Override
     public void openBook(final ItemStack book, final Player player) {
-        if (valid(book) && player != null) {
-            player.openBook(book);
-        }
+        Paper26ItemMeta.openBook(book, player);
     }
 }
