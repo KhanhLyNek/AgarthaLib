@@ -307,3 +307,11 @@ Sources:
 - https://wiki.decentholograms.eu/api/dhapi/
 - https://docs.papermc.io/paper/dev/pdc/
 - https://jd.papermc.io/paper/26.3/org/bukkit/inventory/ItemStack.html
+
+### Server TPS packet parity
+The public `BridgeServer.getTPS()` Paper 26.3 branch now calls
+`Paper26ServerTPS.current()` using Bukkit's first-minute TPS but preserving
+the historic 2-decimal rounding and 0..20 limit. Seven isolated tests cover
+fractional TPS, negative values and nonfinite values. This corrects a Paper
+route's *semantics*; old NMS server packet source files remain in the archive
+and are still counted among the 82 versioned packet files.
