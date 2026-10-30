@@ -6,6 +6,7 @@ package core.praya.agarthalib.bridge.unity;
 
 import com.praya.agarthalib.packet.equipment.PacketEquipment_1_7;
 import com.praya.agarthalib.packet.equipment.PacketEquipment_1_9;
+import com.praya.agarthalib.packet.equipment.PacketEquipment_Paper26_3;
 import com.praya.agarthalib.utility.ServerUtil;
 import core.praya.agarthalib.enums.main.VersionNMS;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -121,7 +122,10 @@ public class BridgeEquipment extends HandlerBridge
         static {
             final AgarthaLib plugin = (AgarthaLib)JavaPlugin.getPlugin((Class)AgarthaLib.class);
             HandlerPacket handler;
-            if (ServerUtil.isCompatible(VersionNMS.V1_9_R2)) {
+            if (ServerUtil.getVersionNMS() == VersionNMS.V26_3) {
+                handler = new PacketEquipment_Paper26_3(plugin);
+            }
+            else if (ServerUtil.isCompatible(VersionNMS.V1_9_R2)) {
                 handler = new PacketEquipment_1_9(plugin);
             }
             else if (ServerUtil.isCompatible(VersionNMS.V1_7_R4)) {
