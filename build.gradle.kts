@@ -36,6 +36,7 @@ dependencies {
     compileOnly("javax.annotation:javax.annotation-api:1.3.2")
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.20")
     compileOnly("me.clip:placeholderapi:2.12.3")
+    compileOnly("org.jetbrains:annotations:26.0.2")
     // API-only: reject VaultAPI's stale Bukkit 1.13 transitive dependency.
     compileOnly("com.github.MilkBowl:VaultAPI:1.7") {
         isTransitive = false
