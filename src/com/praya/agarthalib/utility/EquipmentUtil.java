@@ -603,7 +603,7 @@ public class EquipmentUtil
         if (item != null) {
             final ItemMeta meta = item.getItemMeta();
             if (meta != null && !meta.hasEnchants()) {
-                addEnchantment(item, Enchantment.DURABILITY, 7);
+                addEnchantment(item, Enchantment.UNBREAKING, 7);
                 if (ServerUtil.isCompatible(VersionNMS.V1_8_R3)) {
                     ItemFlagUtil.addFlag(item, "HIDE_ENCHANTS");
                 }
