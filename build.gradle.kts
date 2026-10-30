@@ -59,9 +59,9 @@ publishing {
 // Compile the modern item storage independently while the decompiled v1_* NMS
 // classes are migrated. This task never treats a failed full build as success.
 tasks.register<JavaCompile>("compilePaper26ItemData") {
-    description = "Type-check the Paper 26.3 PDC service without legacy NMS sources"
+    description = "Type-check the Paper 26.3 item storage and metadata services without legacy NMS"
     group = "verification"
-    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java") }
+    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java") }
     classpath = configurations["compileClasspath"]
     destinationDirectory.set(layout.buildDirectory.dir("paper26-api-check"))
     javaCompiler.set(javaToolchains.compilerFor {
