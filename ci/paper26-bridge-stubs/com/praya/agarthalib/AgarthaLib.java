@@ -8,6 +8,10 @@ import org.bukkit.plugin.java.JavaPlugin;
  * Never part of a packaged production plugin.
  */
 public class AgarthaLib extends JavaPlugin {
+    public String getPluginPlaceholder() {
+        return "agarthalib";
+    }
+
     public PluginManager getPluginManager() {
         return null;
     }
