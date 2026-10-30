@@ -156,6 +156,166 @@ Source references: https://modrinth.com/plugin/placeholderapi ; https://wiki.pla
 
 **CI correction:** Do not add `net.essentialsx:EssentialsX:2.22.0` to the mandatory compile classpath until the artifact actually resolves in GitHub Actions. EssentialsX continues as an optional installed server plugin, and existing warp-forwarding tests remain in CI.
 
+## 2026-10-30: modern LivingEntity combat-target bridge (proposed PR)
+
+- Added `PacketLivingEntity_Paper26_3`, implementing the original `LivingEntityTools`
+  overloads while using `EntityType.getEntityClass()` and
+  `LivingEntity.class.isAssignableFrom(...)`; no CraftBukkit/NMS imports.
+- `BridgeLivingEntity` routes `V26_3` to this adapter without deleting
+  historical version implementations or changing gameplay ability sources.
+- **Important semantic preservation:** Bukkit armor stands implement
+  `LivingEntity`, but original AgarthaLib deliberately excluded them;
+  the new adapter still excludes `ARMOR_STAND`. Arrow, dropped items and
+  modern text/item holograms are not valid living combat targets.
+- New Java 25 isolated compiler gate compiles the *actual* adapter with the
+  original `LivingEntityTools` interface; an executable regression test checks
+  Paper's registry class metadata, null inputs and combat target exceptions.
+- This is an isolated component migration, **not** a full Paper 26.3 build or
+  verified in-game combat target behavior. Entity selection must be tested on
+  real Paper 26.3 fixtures before production deployment.
+
+### Optional plugin replacements: compatibility policy
+
+The existing direct Java imports for Jobs Reborn, Heroes, FactionsUUID/Massive
+and HolographicDisplays are still **full-build blockers**. Do not silently
+delete these public adapter classes or pretend that an incompatible replacement
+provides the same types or persistent data.
+
+- Jobs Reborn: EcoJobs (economy jobs) or AuraSkills (skill progression).
+  A job salary is not equivalent to skill XP; disable old adapters only after
+  explicit feature mapping.
+- Heroes: evaluate MMOCore with its required runtime components; class names,
+  health scaling and player level are not guaranteed to match old Heroes APIs.
+- FactionsUUID/Massive: evaluate Lands or KingdomsX; claim/role semantics
+  and offline ownership require provider-specific adapters.
+- HolographicDisplays: prefer DecentHolograms, optionally FancyHolograms, via
+  separate provider-specific hologram adapters. Legacy `Hologram` return types
+  cannot be substituted with an unrelated API without breaking consumers.
+
+Every new provider needs an explicitly optional adapter, provider-installed
+runtime checks, read-only migration verification and relevant regression tests;
+no automatic player data conversion, config rewrite or provider JAR bundling.
+
+### Legacy particle overload on Paper 26.3
+
+The deprecated `BridgeParticle.playParticle(..., int id, float data)` overload
+previously attempted the absent 26.3 NMS handler and became a no-op. The Paper
+26.3 route now forwards to the existing `spawnParticle` path, treating the
+last float as the original particle speed/extra parameter; as in the old 1.15
+implementation the integer id was ignored. The original particle names, YAML
+and modern typed particle path are unchanged. A new source-level CI guard
+prevents this specific routing regression. It is *not* a visual particle
+test; effects requiring typed particle data still need real-game fixtures.
+
+## 2026-10-30: Remove Factions API hooks; optional MythicLib and Paper bridges (stacked)
+
+The obsolete direct FactionsLegacy, FactionsUUID, and FactionsMassive integration
+classes have been deleted, and registration/getter entry points removed from
+`SupportManagerAPI`. The old framework-level `SupportFactions`/group enums
+are retained **only as source compatibility types**, not providers; old
+claim/territory services are not replaced automatically. Review any other
+downstream plugins compiled against the removed adapter classes.
+
+MythicLib is now an optional `softdepend` (no bundled MythicLib jar or mandatory
+build dependency). `SupportMythicLib` and `Paper26MythicLibStats` offer a
+**read-only** API, using the documented `MMOPlayerData.get(UUID)`,
+`getStatMap()`, `getStat(String)` contract via guarded reflection. Missing
+providers, offline players, missing stats, or incompatible APIs return null;
+these must not be interpreted as a numeric zero. NO MyItems damage/health
+formulas, class data, XP, or player balances are modified.
+
+The Paper 26.3 equipment path now selects `PacketEquipment_Paper26_3`, using
+the existing public Bukkit slot access methods with null-equipment guards.
+The inventory path selects `PacketInventory_Paper26_3`. Because
+`InventoryView.setTitle` is deprecated and broken in Paper, attempting to
+rename an already-open inventory now warns once rather than impersonating
+an invalid NMS window, reopening a copied inventory, or replacing holders.
+Use `Paper26InventoryFactory.createChest(...)` to create new titled menus.
+
+`PacketMessage_Paper26_3` now implements the old `MessageJson` entry point
+and forwards the unchanged original `JsonUtil` DSL to Adventure JSON
+serialization for supported click/hover-text messages. Malformed JSON is
+ignored instead of becoming plain text with an altered click action.
+**Hover-item serialization via historical SNBT is not ported**: the API
+returns null rather than falsely serializing modern data components. This
+is a known behavioral gap and requires real item fixtures plus a lossless
+migration design.
+
+Independent Java/Paper 26.3 checks compile the actual new adapter classes,
+execute rich JSON and MythicLib read-only fixtures, and guard route registration.
+The existing full build still fails for other NMS and optional APIs. The
+existing plugin.yml baseline was explicitly updated only for the new
+MythicLib soft-dependency; original skill/item/command YAML is unchanged.
+
+Reference: https://docs.phoenixdevt.fr/mythiclib/api/maven
+
+## 2026-10-30: measured remaining-debt audit and four optional provider contracts (stacked PR)
+
+Run `python3 .github/scripts/audit_paper26_remaining.py`. The JSON artifact
+`build/reports/paper26-remaining.json` counts exact source files, with a
+reproducible snapshot of all version-specific packet paths and files importing
+unsupported provider APIs. Counts are not interchangeable with `javac` error
+messages, and new adapters are not proof of full in-game compatibility.
+
+**Scope formula: 82 version-suffixed historic packet Java source files +
+8 Java files importing Jobs/Heroes/HolographicDisplays (1+6+1) +
+2 separate legacy item migration gaps (arbitrary old NBT and SNBT hover item) +
+4 modern provider contract targets = 96 defined scoped file/feature work items.
+Of 82 versioned packet files, 62 directly reference old NMS/CraftBukkit.
+The other legacy providers (e.g. SkillAPI and mcMMO) are reported separately
+and are **not included** in this 96-item scope.**
+
+New `Paper26OptionalProviders` exposes four separately guarded contracts:
+- AuraSkills: online player's default-skill level, using documented
+  `AuraSkillsApi.get() -> getUser(UUID) -> getSkillLevel(Skill)`, read-only.
+- MMOCore: online player's character level and class ID via documented
+  `PlayerData.get(UUID)`, `getLevel()`, `getProfess().getId()`.
+- Lands: claimed-area presence via `LandsIntegration.of(owner).getArea(location)`.
+  This never grants block-break rights, never treats missing provider as wilderness,
+  and intentionally does NOT use removed `getLand` methods.
+- DecentHolograms: temporary, explicitly nonpersistent hologram creation using
+  `DHAPI.getHologram(id)` and
+  `createHologram(id, location, false, lines)` with collision and input checks.
+  It does not impersonate legacy `Hologram` objects or migrate saved holograms.
+
+These adapters are protected by per-provider JVM fixtures and Java 25 isolated
+typechecks. Neither MyItems skills nor AgarthaLib's old Jobs, Heroes or
+HolographicDisplays public classes have been dynamically rewritten or enabled
+to emulate those other APIs. No claim of production equivalence.
+
+**Item safety:** `Paper26ItemSnapshots.snapshot/restore` backs up an item
+already decoded by Paper through `ItemStack.serializeAsBytes` and
+`deserializeBytes`, preserving DataVersion-based Minecraft conversion.
+No world, inventory, player record, command or original saved YAML is changed.
+`Paper26HoverItems` sends modern native `show_item` data components via
+`ItemStack.asHoverEvent` instead of inventing SNBT. **The existing legacy
+`packetGetJsonItem` remains null** and arbitrary raw custom NBT from older
+servers still needs actual binary fixtures and an explicit migration process.
+Snapshot roundtrip and item metadata parity require a real Paper runtime test.
+Corrupt UTF-8 in new list PDC data now fails decoding instead of silently
+replacing characters; the older separate PR #1 implemented the same safety
+fix, but was not yet merged into the stacked branch.
+
+The additive four provider `softdepend` declarations are reviewed by the
+protected `plugin.yml` blob SHA guard; all original command, permission and
+ability YAML content remains unchanged.
+
+Sources:
+- https://wiki.aurelium.dev/auraskills/api
+- https://gitlab.com/phoenix-dvpmt/mmocore/-/blob/master/MMOCore-API/src/main/java/net/Indyuce/mmocore/api/player/PlayerData.java
+- https://wiki.incredibleplugins.com/lands/developers/api
+- https://wiki.decentholograms.eu/api/dhapi/
+- https://docs.papermc.io/paper/dev/pdc/
+- https://jd.papermc.io/paper/26.3/org/bukkit/inventory/ItemStack.html
+
+### Server TPS packet parity
+The public `BridgeServer.getTPS()` Paper 26.3 branch now calls
+`Paper26ServerTPS.current()` using Bukkit's first-minute TPS but preserving
+the historic 2-decimal rounding and 0..20 limit. Seven isolated tests cover
+fractional TPS, negative values and nonfinite values. This corrects a Paper
+route's *semantics*; old NMS server packet source files remain in the archive
+and are still counted among the 82 versioned packet files.
+
 ## 2026-10-30: Strict UTF-8 item-list reads (proposed)
 
 The Paper 26.3 `Paper26StringListCodec` now rejects malformed UTF-8 bytes,

@@ -45,8 +45,7 @@ public class BridgeServer extends HandlerBridge
     
     public final double getTPS() {
         if (ServerUtil.getVersionNMS() == VersionNMS.V26_3) {
-            final double[] tps = Bukkit.getTPS();
-            return tps.length > 0 ? tps[0] : 20.0;
+            return com.praya.agarthalib.modern.Paper26ServerTPS.current();
         }
         return this.isImplementServerTools() ? this.getServerTools().getTPS() : 20.0;
     }

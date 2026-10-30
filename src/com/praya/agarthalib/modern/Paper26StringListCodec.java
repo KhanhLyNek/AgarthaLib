@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -69,12 +70,14 @@ public final class Paper26StringListCodec {
                     }
                     final byte[] data = new byte[length];
                     input.readFully(data);
-                    // Reject malformed/overlong UTF-8 instead of silently replacing
-                    // broken bytes with U+FFFD and corrupting stored item lore.
-                    result.add(StandardCharsets.UTF_8.newDecoder()
-                            .onMalformedInput(CodingErrorAction.REPORT)
-                            .onUnmappableCharacter(CodingErrorAction.REPORT)
-                            .decode(ByteBuffer.wrap(data)).toString());
+                    try {
+                        result.add(StandardCharsets.UTF_8.newDecoder()
+                                .onMalformedInput(CodingErrorAction.REPORT)
+                                .onUnmappableCharacter(CodingErrorAction.REPORT)
+                                .decode(ByteBuffer.wrap(data)).toString());
+                    } catch (final CharacterCodingException malformed) {
+                        throw new IOException("Invalid UTF-8 in custom lore", malformed);
+                    }
                 } else {
                     // Preview builds used Java modified UTF-8, not standard UTF-8.
                     result.add(input.readUTF());

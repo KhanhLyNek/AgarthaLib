@@ -80,7 +80,7 @@ publishing {
 tasks.register<JavaCompile>("compilePaper26ItemData") {
     description = "Type-check the Paper 26.3 item storage and metadata services without legacy NMS"
     group = "verification"
-    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java", "Paper26PotionAliases.java", "Paper26MVdWRegistration.java", "Paper26PlaceholderValues.java") }
+    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java", "Paper26PotionAliases.java", "Paper26MVdWRegistration.java", "Paper26PlaceholderValues.java", "Paper26MythicLibStats.java", "Paper26InventoryFactory.java", "Paper26JsonChat.java", "Paper26AuraSkillsProgress.java", "Paper26MMOCoreProgress.java", "Paper26LandsClaims.java", "Paper26DecentHolograms.java", "Paper26OptionalProviders.java", "Paper26ItemSnapshots.java", "Paper26HoverItems.java", "Paper26ServerTPS.java") }
     classpath = configurations["compileClasspath"]
     destinationDirectory.set(layout.buildDirectory.dir("paper26-api-check"))
     javaCompiler.set(javaToolchains.compilerFor {
@@ -179,6 +179,8 @@ tasks.register<JavaCompile>("compilePaper26MessageBridge") {
         include("src/com/praya/agarthalib/packet/message/PacketMessage_Paper26_3.java")
         include("src/core/praya/agarthalib/builder/bridge/MessageActionbar.java")
         include("src/core/praya/agarthalib/builder/bridge/MessageTitle.java")
+        include("src/core/praya/agarthalib/builder/bridge/MessageJson.java")
+        include("ci/paper26-json-stubs/com/praya/agarthalib/utility/JsonUtil.java")
     }
     classpath = configurations["compileClasspath"] +
         files(layout.buildDirectory.dir("paper26-bridge-api-check")) +
@@ -190,6 +192,141 @@ tasks.register<JavaCompile>("compilePaper26MessageBridge") {
     options.encoding = "UTF-8"
     options.release.set(25)
 }
+
+tasks.register<JavaCompile>("compilePaper26ServerTPSSelfTest") {
+    description = "Compile legacy TPS rounding/clamping regression checks"
+    group = "verification"
+    dependsOn("compilePaper26ItemData")
+    source = fileTree("ci/paper26-tps-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + files(layout.buildDirectory.dir("paper26-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-tps-tests"))
+    javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+tasks.register<JavaExec>("testPaper26ServerTPS") {
+    description = "Check original first-minute TPS formatting on Paper"
+    group = "verification"
+    dependsOn("compilePaper26ServerTPSSelfTest")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-tps-tests"),
+        layout.buildDirectory.dir("paper26-api-check"))
+    mainClass.set("com.praya.agarthalib.modern.Paper26ServerTPSSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+}
+
+// Source-isolated provider fixtures are not shipped with the plugin.
+tasks.register<JavaCompile>("compilePaper26ModernProvidersSelfTest") {
+    description = "Compile optional AuraSkills, MMOCore, Lands and DecentHolograms JVM contracts"
+    group = "verification"
+    dependsOn("compilePaper26ItemData")
+    source = fileTree("ci/paper26-modern-provider-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + files(layout.buildDirectory.dir("paper26-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-modern-provider-tests"))
+    javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+tasks.register<JavaExec>("testPaper26ModernProviders") {
+    description = "Verify read-only provider compatibility and absent API fallback"
+    group = "verification"
+    dependsOn("compilePaper26ModernProvidersSelfTest")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-modern-provider-tests"),
+        layout.buildDirectory.dir("paper26-api-check"))
+    mainClass.set("com.praya.agarthalib.modern.Paper26ModernProvidersSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+}
+tasks.register<JavaCompile>("compilePaper26ItemSnapshotSelfTest") {
+    description = "Compile item snapshot rejection/hover null checks"
+    group = "verification"
+    dependsOn("compilePaper26ItemData")
+    source = fileTree("ci/paper26-item-snapshot-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + files(layout.buildDirectory.dir("paper26-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-item-snapshot-tests"))
+    javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+tasks.register<JavaExec>("testPaper26ItemSnapshots") {
+    description = "Reject unsafe item backup data without editing any inventory"
+    group = "verification"
+    dependsOn("compilePaper26ItemSnapshotSelfTest")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-item-snapshot-tests"),
+        layout.buildDirectory.dir("paper26-api-check"))
+    mainClass.set("com.praya.agarthalib.modern.Paper26ItemSnapshotsSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+}
+
+// Verify modern inventory and equipment adapters against preserved public contracts.
+tasks.register<JavaCompile>("compilePaper26InventoryEquipmentBridges") {
+    description = "Compile Paper 26.3 inventory and equipment bridge sources"
+    group = "verification"
+    dependsOn("compilePaper26ItemBridge")
+    source = fileTree(".") {
+        include("src/com/praya/agarthalib/packet/inventory/PacketInventory_Paper26_3.java")
+        include("src/com/praya/agarthalib/packet/equipment/PacketEquipment_Paper26_3.java")
+        include("src/com/praya/agarthalib/packet/equipment/PacketEquipment_1_9.java")
+        include("src/core/praya/agarthalib/builder/bridge/WindowTools.java")
+        include("src/core/praya/agarthalib/builder/bridge/EquipmentTools.java")
+    }
+    classpath = configurations["compileClasspath"] + files(layout.buildDirectory.dir("paper26-bridge-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-inventory-equipment-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+// Production JsonUtil remains the original DSL implementation. Only the
+// JSON serializing transport is independently validated here.
+tasks.register<JavaCompile>("compilePaper26JsonSelfTest") {
+    description = "Compile rich Adventure JSON message self-tests"
+    group = "verification"
+    dependsOn("compilePaper26MessageBridge")
+    source = fileTree("ci/paper26-json-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + files(layout.buildDirectory.dir("paper26-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-json-tests"))
+    javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26JsonChat") {
+    description = "Check click, hover, Unicode, and malformed component handling"
+    group = "verification"
+    dependsOn("compilePaper26JsonSelfTest")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-json-tests"),
+        layout.buildDirectory.dir("paper26-api-check"))
+    mainClass.set("com.praya.agarthalib.modern.Paper26JsonChatSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+}
+
+tasks.register<JavaCompile>("compilePaper26MythicLibSelfTest") {
+    description = "Compile MythicLib isolated stat API compatibility fixtures"
+    group = "verification"
+    dependsOn("compilePaper26ItemData")
+    source = fileTree("ci/paper26-mythiclib-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + files(layout.buildDirectory.dir("paper26-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-mythiclib-tests"))
+    javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26MythicLibOptional") {
+    description = "Read-only MythicLib values and safe disabled-provider fallback"
+    group = "verification"
+    dependsOn("compilePaper26MythicLibSelfTest")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-mythiclib-tests"),
+        layout.buildDirectory.dir("paper26-api-check"))
+    mainClass.set("com.praya.agarthalib.modern.Paper26MythicLibStatsSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+}
+
+tasks.named("compilePaper26MessageBridge") { dependsOn("compilePaper26InventoryEquipmentBridges") }
 
 // Verify the real block animation adapter and its unchanged packet interface.
 // CI-only AgarthaLib class stubs were already compiled by the item-bridge task.
@@ -713,10 +850,61 @@ tasks.register<JavaCompile>("compilePaper26PapiOptionalSelfTest") {
     options.release.set(25)
 }
 
+// Compile the actual Paper 26.3 combat target classifier, old public bridge
+// interface and new packet adapter without any ancient NMS implementations.
+tasks.register<JavaCompile>("compilePaper26LivingEntityBridge") {
+    description = "Type-check the Paper 26.3 LivingEntityTools adapter and classifier"
+    group = "verification"
+    dependsOn("compilePaper26ItemBridge")
+    source = fileTree(".") {
+        include("src/com/praya/agarthalib/modern/Paper26LivingEntityKind.java")
+        include("src/com/praya/agarthalib/packet/livingentity/PacketLivingEntity_Paper26_3.java")
+        include("src/core/praya/agarthalib/builder/bridge/LivingEntityTools.java")
+    }
+    classpath = configurations["compileClasspath"] +
+        files(layout.buildDirectory.dir("paper26-bridge-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-livingentity-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaCompile>("compilePaper26LivingEntitySelfTest") {
+    description = "Compile entity, armor-stand, projectile and display-entity regression tests"
+    group = "verification"
+    dependsOn("compilePaper26LivingEntityBridge")
+    source = fileTree("ci/paper26-livingentity-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-livingentity-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-livingentity-tests"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26LivingEntityKind") {
+    description = "Test real Paper entity metadata and legacy combat target exclusions"
+    group = "verification"
+    dependsOn("compilePaper26LivingEntitySelfTest")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-livingentity-tests"),
+        layout.buildDirectory.dir("paper26-livingentity-api-check")
+    )
+    mainClass.set("com.praya.agarthalib.modern.Paper26LivingEntityKindSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+}
+
 tasks.register<JavaExec>("testPaper26PapiOptional") {
     description = "Verify disabled/missing PlaceholderAPI retains exact placeholder and formatting"
     group = "verification"
-    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager")
+    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager", "testPaper26LivingEntityKind", "testPaper26JsonChat", "testPaper26MythicLibOptional", "testPaper26ModernProviders", "testPaper26ItemSnapshots", "testPaper26ServerTPS")
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-papi-optional-tests"),
         layout.buildDirectory.dir("paper26-placeholder-api-check"),

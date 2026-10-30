@@ -5,6 +5,7 @@
 package core.praya.agarthalib.bridge.unity;
 
 import core.praya.agarthalib.enums.main.VersionNMS;
+import com.praya.agarthalib.packet.livingentity.PacketLivingEntity_Paper26_3;
 import com.praya.agarthalib.packet.livingentity.PacketLivingEntity_1_12;
 import com.praya.agarthalib.packet.livingentity.PacketLivingEntity_1_11;
 import com.praya.agarthalib.packet.livingentity.PacketLivingEntity_1_10;
@@ -66,6 +67,10 @@ public class BridgeLivingEntity extends HandlerBridge
             final VersionNMS version = ServerUtil.getVersionNMS();
             HandlerPacket handler = null;
             switch (version) {
+                case V26_3: {
+                    handler = new PacketLivingEntity_Paper26_3(plugin);
+                    break;
+                }
                 case V1_7_R4: {
                     handler = new PacketLivingEntity_1_7(plugin);
                     break;
