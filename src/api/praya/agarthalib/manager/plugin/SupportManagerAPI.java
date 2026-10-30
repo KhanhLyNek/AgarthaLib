@@ -20,6 +20,7 @@ import api.praya.agarthalib.builder.support.SupportBattleLevels;
 import api.praya.agarthalib.builder.support.SupportLifeEssence;
 import api.praya.agarthalib.builder.support.SupportCombatStamina;
 import api.praya.agarthalib.builder.support.SupportMyItems;
+import api.praya.agarthalib.builder.support.SupportMythicLib;
 import api.praya.agarthalib.builder.support.SupportJobsReborn;
 import api.praya.agarthalib.builder.support.SupportMcMMO;
 import api.praya.agarthalib.builder.support.SupportMythicMobs;
@@ -53,6 +54,7 @@ public class SupportManagerAPI extends HandlerManager
     private SupportMcMMO supportMcMMO;
     private SupportJobsReborn supportJobsReborn;
     private SupportMyItems supportMyItems;
+    private SupportMythicLib supportMythicLib;
     private SupportCombatStamina supportCombatStamina;
     private SupportLifeEssence supportLifeEssence;
     private SupportBattleLevels supportBattleLevels;
@@ -66,6 +68,19 @@ public class SupportManagerAPI extends HandlerManager
         super(plugin);
     }
     
+    /** Optional provider; never caches a disabled plugin instance. */
+    public final SupportMythicLib getSupportMythicLib() {
+        final Plugin provider = PluginUtil.getPlugin("MythicLib");
+        if (provider == null || !provider.isEnabled()) {
+            this.supportMythicLib = null;
+            return null;
+        }
+        if (this.supportMythicLib == null || this.supportMythicLib.getSource() != provider) {
+            this.supportMythicLib = new SupportMythicLib(this.plugin, provider);
+        }
+        return this.supportMythicLib;
+    }
+
     public final SupportVault getSupportVault() {
         if (this.supportVault == null) {
             final Plugin source = PluginUtil.getPlugin("Vault");
