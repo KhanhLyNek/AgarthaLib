@@ -11,6 +11,7 @@ repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://maven.enginehub.org/repo/")
     maven("https://repo.extendedclip.com/releases/")
+    maven("https://repo.helpch.at/releases/")
 }
 
 java {
@@ -27,7 +28,7 @@ dependencies {
     compileOnly("commons-lang:commons-lang:2.6")
     compileOnly("javax.annotation:javax.annotation-api:1.3.2")
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.20")
-    compileOnly("me.clip:placeholderapi:2.11.6")
+    compileOnly("me.clip:placeholderapi:2.12.3")
 
     // Remaining integrations must be ported or supplied with compatible APIs:
     // Factions variants, Jobs, Heroes, Towny, HolographicDisplays and others.
