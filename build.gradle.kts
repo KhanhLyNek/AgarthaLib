@@ -61,7 +61,7 @@ publishing {
 tasks.register<JavaCompile>("compilePaper26ItemData") {
     description = "Type-check the Paper 26.3 item storage and metadata services without legacy NMS"
     group = "verification"
-    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java") }
+    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java") }
     classpath = configurations["compileClasspath"]
     destinationDirectory.set(layout.buildDirectory.dir("paper26-api-check"))
     javaCompiler.set(javaToolchains.compilerFor {
@@ -92,4 +92,37 @@ tasks.register<JavaCompile>("compilePaper26ItemBridge") {
     })
     options.encoding = "UTF-8"
     options.release.set(25)
+}
+
+// Exercise the actual Java codec (not a re-implementation in Python).
+tasks.register<JavaCompile>("compilePaper26CodecSelfTest") {
+    description = "Compile byte-exact item string-list serialization tests"
+    group = "verification"
+    dependsOn("compilePaper26ItemData")
+    source = fileTree("ci/paper26-codec-test") { include("**/*.java") }
+    classpath = files(layout.buildDirectory.dir("paper26-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-codec-tests"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26StringListCodec") {
+    description = "Test UTF-8 lists, >64 KiB strings, preview format, and corrupt data"
+    group = "verification"
+    dependsOn("compilePaper26CodecSelfTest")
+    classpath = files(
+        layout.buildDirectory.dir("paper26-codec-tests"),
+        layout.buildDirectory.dir("paper26-api-check")
+    )
+    mainClass.set("com.praya.agarthalib.modern.Paper26StringListCodecSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+}
+
+tasks.named("compilePaper26ItemBridge") {
+    dependsOn("testPaper26StringListCodec")
 }
