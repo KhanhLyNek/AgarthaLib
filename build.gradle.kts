@@ -41,7 +41,8 @@ dependencies {
     compileOnly("com.github.MilkBowl:VaultAPI:1.7") {
         isTransitive = false
     }
-    // EssentialsX 2.22.0 is an optional runtime integration: its real warp\n    // API is resolved by SupportEssentials without linking its unstable JAR.
+    // EssentialsX 2.22.0 is an optional runtime integration: its real warp
+    // API is resolved by SupportEssentials without linking its unstable JAR.
     compileOnly("com.palmergames.bukkit.towny:towny:0.103.2.0")
 
     // Remaining integrations must be ported or supplied with compatible APIs:
@@ -685,6 +686,40 @@ tasks.register<JavaExec>("testPaper26OriginalPlaceholderManager") {
         layout.buildDirectory.dir("paper26-mvdw-replacer-api-check")
     )
     mainClass.set("com.praya.agarthalib.modern.Paper26OriginalPlaceholderManagerSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+}
+
+// Verify the original optional PlaceholderAPI adapter does not call a disabled
+// provider or mutate placeholder expressions, including Vault expansions.
+tasks.register<JavaCompile>("compilePaper26PapiOptionalSelfTest") {
+    description = "Compile original optional PAPI adapter fallback checks"
+    group = "verification"
+    dependsOn("compilePaper26PlaceholderBridges")
+    source = fileTree("ci/paper26-papi-optional-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-papi-optional-tests"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26PapiOptional") {
+    description = "Verify disabled/missing PlaceholderAPI retains exact placeholder and formatting"
+    group = "verification"
+    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-papi-optional-tests"),
+        layout.buildDirectory.dir("paper26-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    mainClass.set("com.praya.agarthalib.modern.Paper26PapiOptionalSelfTest")
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
