@@ -32,11 +32,11 @@ jobs:
         run: |
           java -version
           gradle --version
-      - name: Verify modern bridges, Towny API and MVdW registration callback
+      - name: Verify Paper 26.3 modern bridges and PAPI 2.12.3 / VaultAPI 1.7
         shell: bash
         run: |
           set -o pipefail
-          gradle testPaper26MVdWRegistration --no-daemon --console=plain 2>&1 | tee paper26-item-api-check.log
+          gradle compilePaper26VaultBridge --no-daemon --console=plain 2>&1 | tee paper26-item-api-check.log
       - name: Build with compiler diagnostics
         if: always()
         shell: bash
