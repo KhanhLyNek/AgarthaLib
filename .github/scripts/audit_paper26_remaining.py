@@ -57,7 +57,8 @@ data = {
     "direct_external_api_paths": ext,
     "modern_provider_adapters_present": existing,
     "scoped_remaining_work_items": remaining,
-    "scope_item_total": 82 + 3 + 1 + 1 + 4,
+    "scope_item_total": len(versioned) + sum(
+        len(ext[name]) for name in ("JobsReborn", "Heroes", "HolographicDisplays")) + 2 + 4,
     "scoped_implemented_provider_sources": len(existing),
     "meaning": "Counts represent selected source-level work items, NOT independent defects or validated runtime functionality"
 }
