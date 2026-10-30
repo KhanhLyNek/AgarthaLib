@@ -6,7 +6,6 @@ package com.praya.agarthalib.utility;
 
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
-import net.kyori.adventure.key.Key;
 import core.praya.agarthalib.enums.branch.EnchantmentEnum;
 import org.bukkit.enchantments.Enchantment;
 
@@ -25,16 +24,18 @@ public class EnchantmentUtil
         if (enchantment == null || enchantment.isBlank()) {
             return null;
         }
-        // Paper 26.3 no longer uses the old Enchantment enum/name model.
-        // Only the unqualified vanilla key matched on the earlier modern
-        // path. Preserve that grammar, while resolving through the registry.
-        final String name = enchantment.toLowerCase(java.util.Locale.ROOT);
-        try {
-            return RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT)
-                    .get(RegistryKey.ENCHANTMENT.typedKey(Key.key("minecraft:" + name)));
-        } catch (IllegalArgumentException ex) {
-            return null;
+        // The modern Paper registry contains vanilla and plugin-defined
+        // enchantments. Preserve the original case-insensitive *unqualified*
+        // lookup across all namespaces; fully-qualified keys also work.
+        for (final Enchantment value : RegistryAccess.registryAccess()
+                .getRegistry(RegistryKey.ENCHANTMENT)) {
+            final org.bukkit.NamespacedKey key = value.getKey();
+            if (key.getKey().equalsIgnoreCase(enchantment)
+                    || key.toString().equalsIgnoreCase(enchantment)) {
+                return value;
+            }
         }
+        return null;
     }
     
     public static final boolean isEnchantmentExists(final String enchantment) {
