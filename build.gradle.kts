@@ -300,3 +300,60 @@ tasks.register<JavaCompile>("compilePaper26PlaceholderBridges") {
     options.encoding = "UTF-8"
     options.release.set(25)
 }
+
+// FeatherBoard is optional. Type-check the REAL hook without shipping a
+// FeatherBoard API JAR or fake classes in the plugin's production source set.
+tasks.register<JavaCompile>("compilePaper26FeatherBoardBridge") {
+    description = "Compile the preserved FeatherBoard integration against Paper without its old API JAR"
+    group = "verification"
+    dependsOn("compilePaper26PlaceholderBridges")
+    source = fileTree(".") {
+        include("src/api/praya/agarthalib/builder/support/SupportFeatherBoard.java")
+    }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-featherboard-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+// The fake external API lives in ci/ and never enters the production jar.
+// This tests boolean state, toggle-if-needed behavior, silent flag and names.
+tasks.register<JavaCompile>("compilePaper26FeatherBoardSelfTest") {
+    description = "Compile real-adapter tests against a CI-only fake FeatherBoard API"
+    group = "verification"
+    dependsOn("compilePaper26FeatherBoardBridge")
+    source = fileTree("ci/paper26-featherboard-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-featherboard-api-check"),
+        layout.buildDirectory.dir("paper26-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-featherboard-tests"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26FeatherBoard") {
+    description = "Test optional FeatherBoard API forwarding and original scoreboard toggling"
+    group = "verification"
+    dependsOn("compilePaper26FeatherBoardSelfTest")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-featherboard-tests"),
+        layout.buildDirectory.dir("paper26-featherboard-api-check"),
+        layout.buildDirectory.dir("paper26-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    mainClass.set("com.praya.agarthalib.modern.Paper26FeatherBoardSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+}
