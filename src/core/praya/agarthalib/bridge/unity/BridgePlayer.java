@@ -77,6 +77,25 @@ public class BridgePlayer extends HandlerBridge
         }
     }
     
+    /**
+     * Explicitly reveal an entity hidden by AgarthaLib on Paper 26.3.
+     * This is additive; existing hideEntity call sites remain unchanged.
+     * The original NMS protocols do not expose a matching operation here.
+     */
+    public final void showEntity(final Player viewer, final Entity entity) {
+        if (ServerUtil.getVersionNMS() == VersionNMS.V26_3 && viewer != null && entity != null) {
+            viewer.showEntity(this.plugin, entity);
+        }
+    }
+
+    public final void showEntity(final Collection<Player> viewers, final Entity entity) {
+        if (viewers != null && entity != null) {
+            for (final Player viewer : viewers) {
+                this.showEntity(viewer, entity);
+            }
+        }
+    }
+
     public final float getAbsorptionHearts(final Player player) {
         final PacketPlayerAbsorption packetPlayerAbsorption = this.getPacketPlayerAbsorption();
         return (packetPlayerAbsorption != null) ? packetPlayerAbsorption.getAbsorptionHearts(player) : 0.0f;
