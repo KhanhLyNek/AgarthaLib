@@ -291,6 +291,10 @@ public class BridgeMessage extends Handler
             final VersionNMS version = ServerUtil.getVersionNMS();
             HandlerPacket handler = null;
             switch (version) {
+                case V26_3: {
+                    handler = new PacketMessage_Paper26_3(plugin);
+                    break;
+                }
                 case V1_7_R4: {
                     handler = new PacketMessage_1_7_R4(plugin);
                     break;
