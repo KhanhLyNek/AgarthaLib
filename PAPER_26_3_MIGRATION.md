@@ -195,3 +195,14 @@ provides the same types or persistent data.
 Every new provider needs an explicitly optional adapter, provider-installed
 runtime checks, read-only migration verification and relevant regression tests;
 no automatic player data conversion, config rewrite or provider JAR bundling.
+
+### Legacy particle overload on Paper 26.3
+
+The deprecated `BridgeParticle.playParticle(..., int id, float data)` overload
+previously attempted the absent 26.3 NMS handler and became a no-op. The Paper
+26.3 route now forwards to the existing `spawnParticle` path, treating the
+last float as the original particle speed/extra parameter; as in the old 1.15
+implementation the integer id was ignored. The original particle names, YAML
+and modern typed particle path are unchanged. A new source-level CI guard
+prevents this specific routing regression. It is *not* a visual particle
+test; effects requiring typed particle data still need real-game fixtures.
