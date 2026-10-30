@@ -944,10 +944,36 @@ tasks.register<JavaExec>("testPaper26LivingEntityKind") {
     })
 }
 
+// Verify the actual encoded hover payload and strict item-stack counts using
+// the same JSON-simple parser shipped in the historical AgarthaLib sources.
+tasks.register<JavaCompile>("compilePaper26HoverItemPayloadSelfTest") {
+    description = "Compile real versioned hover item payload against JSON-simple"
+    group = "verification"
+    source = fileTree(".") {
+        include("src/com/praya/agarthalib/modern/Paper26HoverItemPayload.java")
+        include("ci/paper26-hover-item-test/**/*.java")
+    }
+    classpath = configurations["compileClasspath"]
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-hover-item-tests"))
+    javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26HoverItemPayload") {
+    description = "Reject oversized or nonintegral item counts and preserve UTF-8 hover items"
+    group = "verification"
+    dependsOn("compilePaper26HoverItemPayloadSelfTest")
+    classpath = configurations["compileClasspath"] +
+            files(layout.buildDirectory.dir("paper26-hover-item-tests"))
+    mainClass.set("com.praya.agarthalib.modern.Paper26HoverItemPayloadSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+}
+
 tasks.register<JavaExec>("testPaper26PapiOptional") {
     description = "Verify disabled/missing PlaceholderAPI retains exact placeholder and formatting"
     group = "verification"
-    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager", "testPaper26LivingEntityKind", "testPaper26JsonChat", "testPaper26MythicLibOptional", "testPaper26ModernProviders", "testPaper26ItemSnapshots", "testPaper26ServerTPS")
+    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager", "testPaper26LivingEntityKind", "testPaper26JsonChat", "testPaper26MythicLibOptional", "testPaper26ModernProviders", "testPaper26ItemSnapshots", "testPaper26ServerTPS", "testPaper26HoverItemPayload")
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-papi-optional-tests"),
         layout.buildDirectory.dir("paper26-placeholder-api-check"),

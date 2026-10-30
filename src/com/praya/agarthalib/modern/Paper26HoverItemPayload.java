@@ -53,7 +53,11 @@ public final class Paper26HoverItemPayload {
             if (!(id instanceof String name) || name.isBlank() || name.length() > 256) return null;
             if (data.containsKey("count")) {
                 final Object amount = data.get("count");
-                if (!(amount instanceof Number n) || n.intValue() <= 0) return null;
+                // JSON-simple represents integral JSON numbers as Long. Do not
+                // truncate a floating-point count or a very large integer:
+                // intValue() can silently turn invalid data into a valid stack.
+                // Match the 1..99 bound used by Paper26HoverItems.
+                if (!(amount instanceof Long n) || n < 1L || n > 99L) return null;
             }
             return contents;
         } catch (RuntimeException | org.json.simple.parser.ParseException ex) {
