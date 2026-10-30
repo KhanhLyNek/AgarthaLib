@@ -78,6 +78,33 @@ public final class Paper26FeatherBoardSelfTest {
         check(FeatherBoardAPI.showCalls == 1 && FeatherBoardAPI.removeCalls == 1,
                 "Null scoreboard and player ignored");
 
+        // Simulate an enabled optional plugin whose class loader cannot see
+        // the old FeatherBoard API. There must be no blind scoreboard toggle.
+        final ClassLoader missingApiLoader = new ClassLoader(Plugin.class.getClassLoader()) {
+            @Override
+            protected Class<?> loadClass(final String name, final boolean resolve)
+                    throws ClassNotFoundException {
+                if ("be.maximvdw.featherboard.api.FeatherBoardAPI".equals(name)) {
+                    throw new ClassNotFoundException(name);
+                }
+                return super.loadClass(name, resolve);
+            }
+        };
+        final Plugin incompatibleSource = (Plugin) Proxy.newProxyInstance(
+                missingApiLoader, new Class<?>[]{Plugin.class},
+                (p, m, a) -> {
+                    if ("isEnabled".equals(m.getName())) {
+                        return true;
+                    }
+                    throw new AssertionError("Unexpected missing-API source method: " + m.getName());
+                });
+        final SupportFeatherBoard missing = new SupportFeatherBoard(null, incompatibleSource);
+        check(!missing.getPlayerScoreboardToggle(player), "Missing API cannot report enabled");
+        missing.setPlayerScoreboardToggle(player, true);
+        missing.resetDefaultScoreboard(player);
+        check(FeatherBoardAPI.toggleCalls == 2 && FeatherBoardAPI.resetCalls == 1,
+                "Missing external API must not mutate the scoreboard");
+
         System.out.println("PASS: " + assertions + " FeatherBoard public API behavior assertions");
     }
 }
