@@ -7,6 +7,7 @@ package core.praya.agarthalib.bridge.unity;
 import com.praya.agarthalib.AgarthaLib;
 import com.praya.agarthalib.handler.HandlerBridge;
 import com.praya.agarthalib.handler.HandlerPacket;
+import com.praya.agarthalib.modern.Paper26SoundRegistry;
 import com.praya.agarthalib.packet.sounds.PacketSounds_1_10;
 import com.praya.agarthalib.packet.sounds.PacketSounds_1_7;
 import com.praya.agarthalib.packet.sounds.PacketSounds_1_9;
@@ -16,19 +17,15 @@ import core.praya.agarthalib.builder.bridge.SoundTools;
 import core.praya.agarthalib.enums.branch.SoundEnum;
 import core.praya.agarthalib.enums.main.VersionNMS;
 import org.bukkit.Location;
-import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.EnumMap;
 
 public class BridgeSound extends HandlerBridge
 {
     final HandlerPacket handler;
-    private static final Map<SoundEnum, Sound> MODERN_SOUND_CACHE = new EnumMap<>(SoundEnum.class);
     
     protected BridgeSound(final AgarthaLib plugin, final HandlerPacket handler) {
         super(plugin);
@@ -73,16 +70,7 @@ public class BridgeSound extends HandlerBridge
             if (players == null || loc == null || loc.getWorld() == null || sound == null) {
                 return;
             }
-            Sound resolved = MODERN_SOUND_CACHE.get(sound);
-            if (!MODERN_SOUND_CACHE.containsKey(sound)) {
-                for (final Sound entry : Registry.SOUND_EVENT) {
-                    if (entry.name().equalsIgnoreCase(sound.name())) {
-                        resolved = entry;
-                        break;
-                    }
-                }
-                MODERN_SOUND_CACHE.put(sound, resolved);
-            }
+            final Sound resolved = Paper26SoundRegistry.resolve(sound.name());
             if (resolved != null) {
                 for (final Player player : players) {
                     if (player != null && player.isOnline() && player.getWorld().equals(loc.getWorld())) {
