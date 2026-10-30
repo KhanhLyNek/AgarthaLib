@@ -45,12 +45,10 @@ public class PlaceholderMemory extends PlaceholderManager
     
     @Override
     public final String getPlaceholder(final String id) {
-        for (final String key : this.getPlaceholderIds()) {
-            if (key.equalsIgnoreCase(id)) {
-                return this.getPlaceholderConfig().mapPlaceholder.get(id);
-            }
-        }
-        return null;
+        // Preserve the original case-insensitive search, but retrieve using
+        // the actual YAML key. map.get(id) fails for mixed-case requests.
+        return com.praya.agarthalib.modern.Paper26PlaceholderValues.get(
+                this.getPlaceholderConfig().mapPlaceholder, id);
     }
     
     private static class PlaceholderMemorySingleton
