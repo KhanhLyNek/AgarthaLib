@@ -87,3 +87,15 @@ Paper 26.3 references: https://jd.papermc.io/paper/26.3/org/bukkit/entity/Player
 - The API accepts a world through `Location`; the legacy packet had no world field. The modern adapter uses each receiving viewer's world, matching the old per-viewer packet scope.
 - The isolated CI task `compilePaper26BlockBridge` checks the actual adapter and the unchanged original interface. `testPaper26BlockDamage` tests all 14 boundary cases, including clearing.
 - **Gameplay caution:** The 10-level screen crack overlay and stage clearing must be compared on a live Paper 26.3 client. Successful source/compile checks do not prove pixel-perfect animation or lifecycle parity. No MyItems skill code was changed.
+
+## Potion effect IDs, aliases and optional legacy placeholders (2026-10-30)
+
+- `PotionUtil.getPotionEffectType(String)` continues to query `Registry.MOB_EFFECT` and keeps the exact original public signature. The name and historical integer-ID normalization now live in `Paper26PotionAliases`, with legacy IDs 1–32 unchanged.
+- `PotionUtil.getPotionTypeByOriginalName` preserves existing aliases such as `INSTANT_HEAL → HEALING`, `INSTANT_DAMAGE → HARMING`, `REGEN → REGENERATION`, `JUMP → LEAPING`, and `SPEED → SWIFTNESS`.
+- `PotionUtil.createPotion` remains unchanged: duration is still interpreted as ticks, amplifier is still `grade - 1`, and ambient/particle flags are passed through unchanged. The existing poison/wither victim-selection switch is untouched.
+- Isolated Java 25 compilation includes the **actual** `PotionUtil` and `PotionTypeEnum` sources against Paper 26.3, not replacement stubs. `Paper26PotionAliasesSelfTest` verifies all 32 historical IDs and legacy config aliases. Those files and alias mapping now have CI source hashes to block silent later changes.
+- `SupportMVdWPlaceholderAPI` retains its original class, public constructor and `setPlaceholders(OfflinePlayer, String)` contract, but discovers the optional legacy MVdW API lazily through its plugin class loader. It no longer requires a discontinued `be.maximvdw.placeholderapi` dependency at compile time. Existing `{...}` formatting is NOT silently converted to `%...`.
+- The independent `compilePaper26MVdWBridge` task compiles the real optional adapter and original support interfaces **without** the MVdW JAR. Live behavior remains contingent on the external plugin being installed, compatible and enabled.
+- No claim is made for removed `PotionType.UNCRAFTABLE` or other historic potion variants without a supported Paper equivalent; it must be handled explicitly when relevant fixtures are available.
+
+**Still blocked:** The full AgarthaLib build requires migration or replacement of additional optional integrations, remaining versioned NMS classes and runtime tests. MyItems cannot yet be installed safely.
