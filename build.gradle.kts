@@ -60,6 +60,25 @@ sourceSets {
         // source files for audit/history, but never ship incompatible NMS.
         // All public Bridge* entry points now select modern Paper handlers.
         java.exclude("**/packet/**/Packet*_1_*.java")
+        // Obsolete compile-only external plugin APIs are not part of the
+        // Paper build; historic implementations stay in Git for reference.
+        java.exclude("**/builder/support/SupportJobsReborn.java")
+        java.exclude("**/builder/support/SupportHolographicDisplays.java")
+        java.exclude("**/builder/support/SupportHeroes.java")
+        java.exclude("**/builder/support/SupportSkillsPro.java")
+        java.exclude("**/builder/support/SupportCombatStamina.java")
+        java.exclude("**/builder/support/SupportLifeEssence.java")
+        java.exclude("**/builder/support/SupportKingdoms.java")
+        java.exclude("**/builder/support/SupportMcMMO.java")
+        java.exclude("**/builder/support/SupportBattleLevels.java")
+        java.exclude("**/builder/support/SupportCitizens.java")
+        java.exclude("**/builder/support/SupportMyItems.java")
+        java.exclude("**/builder/support/SupportSkillAPI.java")
+        java.exclude("**/builder/support/SupportGangs.java")
+        java.exclude("**/builder/support/SupportSimpleClans.java")
+        java.exclude("**/listener/support/heroes/**")
+        java.exclude("**/listener/support/skillapi/**")
+        java.exclude("**/listener/support/battlelevels/**")
         resources.setSrcDirs(listOf("resources"))
     }
 }

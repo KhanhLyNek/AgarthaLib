@@ -11,25 +11,11 @@ import api.praya.agarthalib.builder.support.main.SupportGroup;
 import org.bukkit.plugin.Plugin;
 import com.praya.agarthalib.utility.PluginUtil;
 import com.praya.agarthalib.AgarthaLib;
-import api.praya.agarthalib.builder.support.SupportSimpleClans;
 import api.praya.agarthalib.builder.support.SupportTowny;
-import api.praya.agarthalib.builder.support.SupportGangs;
-import api.praya.agarthalib.builder.support.SupportKingdoms;
 import api.praya.agarthalib.builder.support.SupportLangUtils;
-import api.praya.agarthalib.builder.support.SupportBattleLevels;
-import api.praya.agarthalib.builder.support.SupportLifeEssence;
-import api.praya.agarthalib.builder.support.SupportCombatStamina;
-import api.praya.agarthalib.builder.support.SupportMyItems;
 import api.praya.agarthalib.builder.support.SupportMythicLib;
-import api.praya.agarthalib.builder.support.SupportJobsReborn;
-import api.praya.agarthalib.builder.support.SupportMcMMO;
 import api.praya.agarthalib.builder.support.SupportMythicMobs;
-import api.praya.agarthalib.builder.support.SupportHeroes;
-import api.praya.agarthalib.builder.support.SupportSkillsPro;
-import api.praya.agarthalib.builder.support.SupportSkillAPI;
 import api.praya.agarthalib.builder.support.SupportFeatherBoard;
-import api.praya.agarthalib.builder.support.SupportHolographicDisplays;
-import api.praya.agarthalib.builder.support.SupportCitizens;
 import api.praya.agarthalib.builder.support.SupportEssentials;
 import api.praya.agarthalib.builder.support.SupportWorldGuard;
 import api.praya.agarthalib.builder.support.SupportMVdWPlaceholderAPI;
@@ -37,6 +23,7 @@ import api.praya.agarthalib.builder.support.SupportPlaceholderAPI;
 import api.praya.agarthalib.builder.support.SupportVault;
 import com.praya.agarthalib.handler.HandlerManager;
 
+/** Paper-only manager: obsolete typed plugin provider handles are retired. */
 public class SupportManagerAPI extends HandlerManager
 {
     private SupportVault supportVault;
@@ -44,28 +31,33 @@ public class SupportManagerAPI extends HandlerManager
     private SupportMVdWPlaceholderAPI supportMVdWPlaceholderAPI;
     private SupportWorldGuard supportWorldGuard;
     private SupportEssentials supportEssentials;
-    private SupportCitizens supportCitizens;
-    private SupportHolographicDisplays supportHolographicDisplay;
     private SupportFeatherBoard supportFeatherBoard;
-    private SupportSkillAPI supportSkillAPI;
-    private SupportSkillsPro supportSkillsPro;
-    private SupportHeroes supportHeroes;
     private SupportMythicMobs supportMythicMobs;
-    private SupportMcMMO supportMcMMO;
-    private SupportJobsReborn supportJobsReborn;
-    private SupportMyItems supportMyItems;
     private SupportMythicLib supportMythicLib;
-    private SupportCombatStamina supportCombatStamina;
-    private SupportLifeEssence supportLifeEssence;
-    private SupportBattleLevels supportBattleLevels;
     private SupportLangUtils supportLangUtils;
-    private SupportKingdoms supportKingdoms;
-    private SupportGangs supportGangs;
     private SupportTowny supportTowny;
-    private SupportSimpleClans supportSimpleClans;
     
     public SupportManagerAPI(final AgarthaLib plugin) {
         super(plugin);
+    }
+
+    // Replacement provider APIs deliberately use separate contracts and return null
+    // when unavailable; they must not emulate old Jobs/Heroes level/XP semantics.
+    public final Integer getAuraSkillsLevel(final org.bukkit.OfflinePlayer player, final String skill) {
+        return com.praya.agarthalib.modern.Paper26OptionalProviders.auraSkillLevel(player, skill);
+    }
+    public final Integer getMMOCoreLevel(final org.bukkit.OfflinePlayer player) {
+        return com.praya.agarthalib.modern.Paper26OptionalProviders.mmoCoreLevel(player);
+    }
+    public final String getMMOCoreClassId(final org.bukkit.OfflinePlayer player) {
+        return com.praya.agarthalib.modern.Paper26OptionalProviders.mmoCoreClassId(player);
+    }
+    public final Boolean isLandsClaimed(final Plugin owner, final org.bukkit.Location where) {
+        return com.praya.agarthalib.modern.Paper26OptionalProviders.landsClaimed(owner, where);
+    }
+    public final boolean createTransientDecentHologram(final String id, final org.bukkit.Location where,
+                                                      final java.util.List<String> lines) {
+        return com.praya.agarthalib.modern.Paper26OptionalProviders.createTransientHologram(id, where, lines);
     }
     
     /** Optional provider; never caches a disabled plugin instance. */
@@ -161,37 +153,9 @@ public class SupportManagerAPI extends HandlerManager
         return this.supportEssentials;
     }
     
-    public final SupportCitizens getSupportCitizens() {
-        if (this.supportCitizens == null) {
-            final Plugin source = PluginUtil.getPlugin("Citizens");
-            if (source != null && source.isEnabled()) {
-                this.supportCitizens = new SupportCitizens(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportCitizens.getSource();
-            if (!source.isEnabled()) {
-                this.supportCitizens = null;
-            }
-        }
-        return this.supportCitizens;
-    }
     
-    public final SupportHolographicDisplays getSupportHolographicDisplays() {
-        if (this.supportHolographicDisplay == null) {
-            final Plugin source = PluginUtil.getPlugin("HolographicDisplays");
-            if (source != null && source.isEnabled()) {
-                this.supportHolographicDisplay = new SupportHolographicDisplays(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportHolographicDisplay.getSource();
-            if (!source.isEnabled()) {
-                this.supportHolographicDisplay = null;
-            }
-        }
-        return this.supportHolographicDisplay;
-    }
+    
+    
     
     public final SupportFeatherBoard getSupportFeatherBoard() {
         if (this.supportFeatherBoard == null) {
@@ -209,53 +173,11 @@ public class SupportManagerAPI extends HandlerManager
         return this.supportFeatherBoard;
     }
     
-    public final SupportSkillAPI getSupportSkillAPI() {
-        if (this.supportSkillAPI == null) {
-            final Plugin source = PluginUtil.getPlugin("SkillAPI");
-            if (source != null && source.isEnabled()) {
-                this.supportSkillAPI = new SupportSkillAPI(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportSkillAPI.getSource();
-            if (!source.isEnabled()) {
-                this.supportSkillAPI = null;
-            }
-        }
-        return this.supportSkillAPI;
-    }
     
-    public final SupportSkillsPro getSupportSkillsPro() {
-        if (this.supportSkillsPro == null) {
-            final Plugin source = PluginUtil.getPlugin("Skills");
-            if (source != null && source.isEnabled()) {
-                this.supportSkillsPro = new SupportSkillsPro(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportSkillsPro.getSource();
-            if (!source.isEnabled()) {
-                this.supportSkillsPro = null;
-            }
-        }
-        return this.supportSkillsPro;
-    }
     
-    public final SupportHeroes getSupportHeroes() {
-        if (this.supportHeroes == null) {
-            final Plugin source = PluginUtil.getPlugin("Heroes");
-            if (source != null && source.isEnabled()) {
-                this.supportHeroes = new SupportHeroes(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportHeroes.getSource();
-            if (!source.isEnabled()) {
-                this.supportHeroes = null;
-            }
-        }
-        return this.supportHeroes;
-    }
+    
+    
+    
     
     public final SupportMythicMobs getSupportMythicMobs() {
         if (this.supportMythicMobs == null) {
@@ -273,101 +195,17 @@ public class SupportManagerAPI extends HandlerManager
         return this.supportMythicMobs;
     }
     
-    public final SupportMcMMO getSupportMcMMO() {
-        if (this.supportMcMMO == null) {
-            final Plugin source = PluginUtil.getPlugin("mcMMO");
-            if (source != null && source.isEnabled()) {
-                this.supportMcMMO = new SupportMcMMO(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportMcMMO.getSource();
-            if (!source.isEnabled()) {
-                this.supportMcMMO = null;
-            }
-        }
-        return this.supportMcMMO;
-    }
     
-    public final SupportJobsReborn getSupportJobsReborn() {
-        if (this.supportJobsReborn == null) {
-            final Plugin source = PluginUtil.getPlugin("Jobs");
-            if (source != null && source.isEnabled()) {
-                this.supportJobsReborn = new SupportJobsReborn(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportJobsReborn.getSource();
-            if (!source.isEnabled()) {
-                this.supportJobsReborn = null;
-            }
-        }
-        return this.supportJobsReborn;
-    }
     
-    public final SupportMyItems getSupportMyItems() {
-        if (this.supportMyItems == null) {
-            final Plugin source = PluginUtil.getPlugin("MyItems");
-            if (source != null && source.isEnabled()) {
-                this.supportMyItems = new SupportMyItems(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportMyItems.getSource();
-            if (!source.isEnabled()) {
-                this.supportMyItems = null;
-            }
-        }
-        return this.supportMyItems;
-    }
     
-    public final SupportCombatStamina getSupportCombatStamina() {
-        if (this.supportCombatStamina == null) {
-            final Plugin source = PluginUtil.getPlugin("CombatStamina");
-            if (source != null && source.isEnabled()) {
-                this.supportCombatStamina = new SupportCombatStamina(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportCombatStamina.getSource();
-            if (!source.isEnabled()) {
-                this.supportCombatStamina = null;
-            }
-        }
-        return this.supportCombatStamina;
-    }
     
-    public final SupportLifeEssence getSupportLifeEssence() {
-        if (this.supportLifeEssence == null) {
-            final Plugin source = PluginUtil.getPlugin("LifeEssence");
-            if (source != null && source.isEnabled()) {
-                this.supportLifeEssence = new SupportLifeEssence(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportLifeEssence.getSource();
-            if (!source.isEnabled()) {
-                this.supportLifeEssence = null;
-            }
-        }
-        return this.supportLifeEssence;
-    }
     
-    public final SupportBattleLevels getSupportBattleLevels() {
-        if (this.supportBattleLevels == null) {
-            final Plugin source = PluginUtil.getPlugin("BattleLevels");
-            if (source != null && source.isEnabled()) {
-                this.supportBattleLevels = new SupportBattleLevels(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportBattleLevels.getSource();
-            if (!source.isEnabled()) {
-                this.supportBattleLevels = null;
-            }
-        }
-        return this.supportBattleLevels;
-    }
+    
+    
+    
+    
+    
+    
     
     public final SupportLangUtils getSupportLangUtils() {
         if (this.supportLangUtils == null) {
@@ -385,37 +223,9 @@ public class SupportManagerAPI extends HandlerManager
         return this.supportLangUtils;
     }
     
-    public final SupportKingdoms getSupportKingdoms() {
-        if (this.supportKingdoms == null) {
-            final Plugin source = PluginUtil.getPlugin("Kingdoms");
-            if (source != null && source.isEnabled()) {
-                this.supportKingdoms = new SupportKingdoms(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportKingdoms.getSource();
-            if (!source.isEnabled()) {
-                this.supportKingdoms = null;
-            }
-        }
-        return this.supportKingdoms;
-    }
     
-    public final SupportGangs getSupportGangs() {
-        if (this.supportGangs == null) {
-            final Plugin source = PluginUtil.getPlugin("GangsPlus");
-            if (source != null && source.isEnabled()) {
-                this.supportGangs = new SupportGangs(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportGangs.getSource();
-            if (!source.isEnabled()) {
-                this.supportGangs = null;
-            }
-        }
-        return this.supportGangs;
-    }
+    
+    
     
     public final SupportTowny getSupportTowny() {
         if (this.supportTowny == null) {
@@ -433,21 +243,7 @@ public class SupportManagerAPI extends HandlerManager
         return this.supportTowny;
     }
     
-    public final SupportSimpleClans getSupportSimpleClans() {
-        if (this.supportSimpleClans == null) {
-            final Plugin source = PluginUtil.getPlugin("SimpleClans");
-            if (source != null && source.isEnabled()) {
-                this.supportSimpleClans = new SupportSimpleClans(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportSimpleClans.getSource();
-            if (!source.isEnabled()) {
-                this.supportSimpleClans = null;
-            }
-        }
-        return this.supportSimpleClans;
-    }
+    
     
     
     
@@ -469,16 +265,16 @@ public class SupportManagerAPI extends HandlerManager
     public final SupportGroup getSupportGroup(final SupportGroup.SupportGroupType groupType) {
         switch (groupType) {
             case KINGDOMS: {
-                return this.getSupportKingdoms();
+                return null;
             }
             case GANGS: {
-                return this.getSupportGangs();
+                return null;
             }
             case TOWNY: {
                 return this.getSupportTowny();
             }
             case SIMPLE_CLANS: {
-                return this.getSupportSimpleClans();
+                return null;
             }
             default: {
                 return null;
@@ -521,16 +317,16 @@ public class SupportManagerAPI extends HandlerManager
     public final SupportLevel getSupportLevel(final SupportLevel.SupportLevelType levelType) {
         switch (levelType) {
             case BATTLE_LEVELS: {
-                return this.getSupportBattleLevels();
+                return null;
             }
             case SKILL_API: {
-                return this.getSupportSkillAPI();
+                return null;
             }
             case SKILLS_PRO: {
-                return this.getSupportSkillsPro();
+                return null;
             }
             case HEROES: {
-                return this.getSupportHeroes();
+                return null;
             }
             default: {
                 return null;
@@ -553,13 +349,13 @@ public class SupportManagerAPI extends HandlerManager
     public final SupportClass getSupportClass(final SupportClass.SupportClassType classType) {
         switch (classType) {
             case SKILL_API: {
-                return this.getSupportSkillAPI();
+                return null;
             }
             case SKILLS_PRO: {
-                return this.getSupportSkillsPro();
+                return null;
             }
             case HEROES: {
-                return this.getSupportHeroes();
+                return null;
             }
             default: {
                 return null;
@@ -588,11 +384,11 @@ public class SupportManagerAPI extends HandlerManager
     }
     
     public final boolean isSupportCitizens() {
-        return this.getSupportCitizens() != null;
+        return false;
     }
     
     public final boolean isSupportHolographicDisplay() {
-        return this.getSupportHolographicDisplays() != null;
+        return false;
     }
     
     public final boolean isSupportFeatherBoard() {
@@ -600,15 +396,15 @@ public class SupportManagerAPI extends HandlerManager
     }
     
     public final boolean isSupportSkillAPI() {
-        return this.getSupportSkillAPI() != null;
+        return false;
     }
     
     public final boolean isSupportSkillsPro() {
-        return this.getSupportSkillsPro() != null;
+        return false;
     }
     
     public final boolean isSupportHeroes() {
-        return this.getSupportHeroes() != null;
+        return false;
     }
     
     public final boolean isSupportMythicMobs() {
@@ -616,27 +412,27 @@ public class SupportManagerAPI extends HandlerManager
     }
     
     public final boolean isSupportMcMMO() {
-        return this.getSupportMcMMO() != null;
+        return false;
     }
     
     public final boolean isSupportJobsReborn() {
-        return this.getSupportJobsReborn() != null;
+        return false;
     }
     
     public final boolean isSupportMyItems() {
-        return this.getSupportMyItems() != null;
+        return false;
     }
     
     public final boolean isSupportCombatStamina() {
-        return this.getSupportCombatStamina() != null;
+        return false;
     }
     
     public final boolean isSupportLifeEssence() {
-        return this.getSupportLifeEssence() != null;
+        return false;
     }
     
     public final boolean isSupportBattleLevels() {
-        return this.getSupportBattleLevels() != null;
+        return false;
     }
     
     public final boolean isSupportLangUtils() {
@@ -644,11 +440,11 @@ public class SupportManagerAPI extends HandlerManager
     }
     
     public final boolean isSupportKingdoms() {
-        return this.getSupportKingdoms() != null;
+        return false;
     }
     
     public final boolean isSupportGangs() {
-        return this.getSupportGangs() != null;
+        return false;
     }
     
     public final boolean isSupportTowny() {
@@ -656,7 +452,7 @@ public class SupportManagerAPI extends HandlerManager
     }
     
     public final boolean isSupportSimpleClans() {
-        return this.getSupportSimpleClans() != null;
+        return false;
     }
     
     
@@ -697,12 +493,12 @@ public class SupportManagerAPI extends HandlerManager
     
     @Deprecated
     public final boolean isHookHolographicDisplay() {
-        return this.getSupportHolographicDisplays() != null;
+        return false;
     }
     
     @Deprecated
     public final boolean isHookSkillAPI() {
-        return this.getSupportSkillAPI() != null;
+        return false;
     }
     
     @Deprecated
@@ -712,17 +508,17 @@ public class SupportManagerAPI extends HandlerManager
     
     @Deprecated
     public final boolean isHookMcMMO() {
-        return this.getSupportMcMMO() != null;
+        return false;
     }
     
     @Deprecated
     public final boolean isHookJobsReborn() {
-        return this.getSupportJobsReborn() != null;
+        return false;
     }
     
     @Deprecated
     public final boolean isHookKingdoms() {
-        return this.getSupportKingdoms() != null;
+        return false;
     }
     
     
