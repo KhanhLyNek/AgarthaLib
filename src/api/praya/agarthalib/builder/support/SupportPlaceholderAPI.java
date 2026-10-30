@@ -20,6 +20,11 @@ public class SupportPlaceholderAPI extends Support implements SupportPlaceholder
     
     @Override
     public String setPlaceholders(final OfflinePlayer player, final String text) {
+        // PlaceholderAPI is optional. Never resolve its external class when
+        // the provider is disabled, and preserve source text unchanged.
+        if (text == null || source == null || !source.isEnabled()) {
+            return text;
+        }
         final Player onlinePlayer = (player != null && player.isOnline()) ? player.getPlayer() : null;
         final String placeholder = (text != null) ? PlaceholderAPI.setPlaceholders(onlinePlayer, text) : null;
         return (placeholder != null) ? placeholder : text;
