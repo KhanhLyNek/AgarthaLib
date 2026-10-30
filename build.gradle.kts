@@ -61,7 +61,7 @@ publishing {
 tasks.register<JavaCompile>("compilePaper26ItemData") {
     description = "Type-check the Paper 26.3 PDC service without legacy NMS sources"
     group = "verification"
-    source = files("src/com/praya/agarthalib/modern/Paper26ItemData.java")
+    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java") }
     classpath = configurations["compileClasspath"]
     destinationDirectory.set(layout.buildDirectory.dir("paper26-api-check"))
     javaCompiler.set(javaToolchains.compilerFor {
