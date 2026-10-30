@@ -99,3 +99,11 @@ Paper 26.3 references: https://jd.papermc.io/paper/26.3/org/bukkit/entity/Player
 - No claim is made for removed `PotionType.UNCRAFTABLE` or other historic potion variants without a supported Paper equivalent; it must be handled explicitly when relevant fixtures are available.
 
 **Still blocked:** The full AgarthaLib build requires migration or replacement of additional optional integrations, remaining versioned NMS classes and runtime tests. MyItems cannot yet be installed safely.
+
+## Optional FeatherBoard migration (2026-10-30)
+
+- `SupportFeatherBoard` preserves its original public constructor and all five public scoreboard operations, including the `toggle` overload with a `silent` flag, reset, show and remove functions.
+- The legacy `be.maximvdw.featherboard.api.FeatherBoardAPI` is resolved lazily through the enabled FeatherBoard plugin's class loader and its exact old public method signatures. Its binary JAR is no longer a mandatory compile-time dependency. The class retains the original toggle-if-needed behavior.
+- If `isToggled` cannot be resolved or invoked, the adapter deliberately **does not toggle**: guessing disabled could invert a player's scoreboard. Missing methods and absent/disabled plugins are handled without changing the underlying Bukkit scoreboard. No automatic replacement with Paper scoreboards is attempted.
+- CI compiles the REAL hook with Java 25 and the Paper 26.3 API, and runs a separate test fixture (located exclusively under `ci/`) with a fake FeatherBoard API. Tests cover enabled/disabled, redundant toggles, `silent`, reset, show, remove, null inputs and missing external API. The fixture is never packaged in the plugin.
+- This proves isolated source compatibility and deterministic forwarding, **not** equivalence with every current FeatherBoard release. Validate sidebars, re-enable behavior and priority with a real supported FeatherBoard installation before release.
