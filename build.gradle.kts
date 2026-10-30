@@ -65,7 +65,7 @@ publishing {
 tasks.register<JavaCompile>("compilePaper26ItemData") {
     description = "Type-check the Paper 26.3 item storage and metadata services without legacy NMS"
     group = "verification"
-    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java", "Paper26PotionAliases.java") }
+    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java", "Paper26PotionAliases.java", "Paper26MVdWRegistration.java") }
     classpath = configurations["compileClasspath"]
     destinationDirectory.set(layout.buildDirectory.dir("paper26-api-check"))
     javaCompiler.set(javaToolchains.compilerFor {
@@ -491,4 +491,56 @@ tasks.register<JavaCompile>("compilePaper26TownyBridge") {
     })
     options.encoding = "UTF-8"
     options.release.set(25)
+}
+
+// Compile the REAL legacy custom-placeholder registration class without
+// shipping discontinued MVdW API classes. CI manager stubs come exclusively
+// from the earlier isolated bridge compilation.
+tasks.register<JavaCompile>("compilePaper26MVdWReplacer") {
+    description = "Compile original MVdW wildcard registration with modern optional API bridge"
+    group = "verification"
+    dependsOn("compilePaper26TownyBridge")
+    source = fileTree(".") {
+        include("src/com/praya/agarthalib/placeholder/replacer/ReplacerMVDWPlaceholderAPI.java")
+    }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-mvdw-replacer-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaCompile>("compilePaper26MVdWRegistrationSelfTest") {
+    description = "Compile real MVdW callback registration tests with CI-only fake external classes"
+    group = "verification"
+    dependsOn("compilePaper26ItemData")
+    source = fileTree("ci/paper26-mvdw-registration-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-mvdw-registration-tests"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26MVdWRegistration") {
+    description = "Test preserved MVdW wildcard ID, replacement callback and missing provider"
+    group = "verification"
+    dependsOn("compilePaper26MVdWRegistrationSelfTest", "compilePaper26MVdWReplacer")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-mvdw-registration-tests"),
+        layout.buildDirectory.dir("paper26-api-check")
+    )
+    mainClass.set("com.praya.agarthalib.modern.Paper26MVdWRegistrationSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
 }
