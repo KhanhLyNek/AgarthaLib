@@ -12,6 +12,8 @@ repositories {
     maven("https://maven.enginehub.org/repo/")
     maven("https://repo.extendedclip.com/releases/")
     maven("https://repo.helpch.at/releases/")
+    // TownyAdvanced documents this repository for its public Java API.
+    maven("https://repo.glaremasters.me/repository/towny/")
 }
 
 java {
@@ -29,6 +31,7 @@ dependencies {
     compileOnly("javax.annotation:javax.annotation-api:1.3.2")
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.20")
     compileOnly("me.clip:placeholderapi:2.12.3")
+    compileOnly("com.palmergames.bukkit.towny:towny:0.103.2.0")
 
     // Remaining integrations must be ported or supplied with compatible APIs:
     // Factions variants, Jobs, Heroes, Towny, HolographicDisplays and others.
@@ -466,4 +469,26 @@ tasks.register<JavaExec>("testPaper26LangUtils") {
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
+}
+
+// Test the actual Towny adapter against the plugin's current published Java
+// API without modifying town/claim/group calculations.
+tasks.register<JavaCompile>("compilePaper26TownyBridge") {
+    description = "Compile original Towny group contract against current Towny API"
+    group = "verification"
+    dependsOn("testPaper26LangUtils")
+    source = fileTree(".") {
+        include("src/api/praya/agarthalib/builder/support/SupportTowny.java")
+        include("src/api/praya/agarthalib/builder/support/main/SupportGroup.java")
+    }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-towny-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
 }
