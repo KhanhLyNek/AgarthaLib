@@ -155,3 +155,43 @@ Verified against:
 Source references: https://modrinth.com/plugin/placeholderapi ; https://wiki.placeholderapi.com/users/placeholder-list/minecraft/ ; https://essentialsx.net/ ; https://www.spigotmc.org/resources/vault.34315/ .
 
 **CI correction:** Do not add `net.essentialsx:EssentialsX:2.22.0` to the mandatory compile classpath until the artifact actually resolves in GitHub Actions. EssentialsX continues as an optional installed server plugin, and existing warp-forwarding tests remain in CI.
+
+## 2026-10-30: modern LivingEntity combat-target bridge (proposed PR)
+
+- Added `PacketLivingEntity_Paper26_3`, implementing the original `LivingEntityTools`
+  overloads while using `EntityType.getEntityClass()` and
+  `LivingEntity.class.isAssignableFrom(...)`; no CraftBukkit/NMS imports.
+- `BridgeLivingEntity` routes `V26_3` to this adapter without deleting
+  historical version implementations or changing gameplay ability sources.
+- **Important semantic preservation:** Bukkit armor stands implement
+  `LivingEntity`, but original AgarthaLib deliberately excluded them;
+  the new adapter still excludes `ARMOR_STAND`. Arrow, dropped items and
+  modern text/item holograms are not valid living combat targets.
+- New Java 25 isolated compiler gate compiles the *actual* adapter with the
+  original `LivingEntityTools` interface; an executable regression test checks
+  Paper's registry class metadata, null inputs and combat target exceptions.
+- This is an isolated component migration, **not** a full Paper 26.3 build or
+  verified in-game combat target behavior. Entity selection must be tested on
+  real Paper 26.3 fixtures before production deployment.
+
+### Optional plugin replacements: compatibility policy
+
+The existing direct Java imports for Jobs Reborn, Heroes, FactionsUUID/Massive
+and HolographicDisplays are still **full-build blockers**. Do not silently
+delete these public adapter classes or pretend that an incompatible replacement
+provides the same types or persistent data.
+
+- Jobs Reborn: EcoJobs (economy jobs) or AuraSkills (skill progression).
+  A job salary is not equivalent to skill XP; disable old adapters only after
+  explicit feature mapping.
+- Heroes: evaluate MMOCore with its required runtime components; class names,
+  health scaling and player level are not guaranteed to match old Heroes APIs.
+- FactionsUUID/Massive: evaluate Lands or KingdomsX; claim/role semantics
+  and offline ownership require provider-specific adapters.
+- HolographicDisplays: prefer DecentHolograms, optionally FancyHolograms, via
+  separate provider-specific hologram adapters. Legacy `Hologram` return types
+  cannot be substituted with an unrelated API without breaking consumers.
+
+Every new provider needs an explicitly optional adapter, provider-installed
+runtime checks, read-only migration verification and relevant regression tests;
+no automatic player data conversion, config rewrite or provider JAR bundling.
