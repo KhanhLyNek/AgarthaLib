@@ -1,0 +1,64 @@
+name: Paper 26.3 AgarthaLib CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paper-26.3-agarthalib-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2.1'
+      - name: Java and Gradle versions
+        run: |
+          java -version
+          gradle --version
+      - name: Build with compiler diagnostics
+        shell: bash
+        run: |
+          set -o pipefail
+          gradle clean build --continue --no-daemon --console=plain --stacktrace 2>&1 | tee build-26.3.log
+      - name: Summarize errors
+        if: always()
+        shell: bash
+        run: |
+          echo '## AgarthaLib compiler diagnostics' >> "$GITHUB_STEP_SUMMARY"
+          if [ -f build-26.3.log ]; then
+            echo '~~~text' >> "$GITHUB_STEP_SUMMARY"
+            grep -E '(\.java:[0-9]+: error:|^Execution failed for task|^BUILD (FAILED|SUCCESSFUL))' build-26.3.log | head -n 120 >> "$GITHUB_STEP_SUMMARY" || true
+            echo '~~~' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Gradle did not start; inspect job setup.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agarthalib-build-26.3-log
+          path: build-26.3.log
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Upload test jars (not a verified release)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agarthalib-paper-26.3-test
+          path: build/libs/*.jar
+          if-no-files-found: error
