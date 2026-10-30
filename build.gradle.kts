@@ -281,12 +281,13 @@ tasks.named("compilePaper26PotionUtility") {
 
 // MVdWPlaceholderAPI is an optional legacy plugin. The real adapter and its
 // public SupportPlaceholder contract must compile without the external JAR.
-tasks.register<JavaCompile>("compilePaper26MVdWBridge") {
-    description = "Type-check optional MVdW placeholder hook without its old external API"
+tasks.register<JavaCompile>("compilePaper26PlaceholderBridges") {
+    description = "Compile both original PlaceholderAPI and optional MVdW hooks with current APIs"
     group = "verification"
     dependsOn("compilePaper26PotionUtility")
     source = fileTree(".") {
         include("src/api/praya/agarthalib/builder/support/SupportMVdWPlaceholderAPI.java")
+        include("src/api/praya/agarthalib/builder/support/SupportPlaceholderAPI.java")
         include("src/api/praya/agarthalib/builder/support/main/Support.java")
         include("src/api/praya/agarthalib/builder/support/main/SupportPlaceholder.java")
     }
