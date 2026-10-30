@@ -14,6 +14,9 @@ import core.praya.agarthalib.builder.bridge.ParticleTools;
 import core.praya.agarthalib.enums.branch.ParticleEnum;
 import core.praya.agarthalib.enums.main.VersionNMS;
 import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.Material;
+import core.praya.agarthalib.enums.branch.MaterialEnum;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -133,6 +136,36 @@ public class BridgeParticle extends HandlerBridge
     }
     
     public final void playParticle(final Collection<Player> players, final ParticleEnum particleEnum, final Location location, final int count, final double offsetX, final double offsetY, final double offsetZ, final double extra, final Object data) {
+        if (ServerUtil.getVersionNMS() == VersionNMS.V26_3) {
+            if (players == null || particleEnum == null || location == null || location.getWorld() == null) {
+                return;
+            }
+            final Particle particle = particleEnum.getParticle();
+            if (particle == null) {
+                return;
+            }
+            Object particleData = data;
+            if (particleData instanceof ParticleEnum.DustOptions) {
+                final ParticleEnum.DustOptions dust = (ParticleEnum.DustOptions)particleData;
+                particleData = new Particle.DustOptions(dust.getColor(), dust.getSize());
+            } else if (particleData instanceof MaterialEnum) {
+                final Material material = ((MaterialEnum)particleData).getMaterial();
+                particleData = material != null && material.isBlock() ? material.createBlockData() : null;
+            } else if (particleData instanceof Material) {
+                final Material material = (Material)particleData;
+                particleData = material.isBlock() ? material.createBlockData() : null;
+            }
+            if (particle.getDataType() != Void.class
+                    && (particleData == null || !particle.getDataType().isInstance(particleData))) {
+                return;
+            }
+            for (final Player player : players) {
+                if (player != null && player.isOnline() && player.getWorld().equals(location.getWorld())) {
+                    player.spawnParticle(particle, location, count, offsetX, offsetY, offsetZ, extra, particleData);
+                }
+            }
+            return;
+        }
         final ParticleTools particleTools = this.getParticleTools();
         if (particleTools != null) {
             particleTools.packetPlayParticle(players, particleEnum, location, count, (float)offsetX, (float)offsetY, (float)offsetZ, (float)extra, data);
