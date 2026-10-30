@@ -61,7 +61,7 @@ publishing {
 tasks.register<JavaCompile>("compilePaper26ItemData") {
     description = "Type-check the Paper 26.3 item storage and metadata services without legacy NMS"
     group = "verification"
-    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java") }
+    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java", "Paper26PotionAliases.java") }
     classpath = configurations["compileClasspath"]
     destinationDirectory.set(layout.buildDirectory.dir("paper26-api-check"))
     javaCompiler.set(javaToolchains.compilerFor {
@@ -224,4 +224,56 @@ tasks.register<JavaExec>("testPaper26BlockDamage") {
 
 tasks.named("compilePaper26BlockBridge") {
     dependsOn("testPaper26BlockDamage")
+}
+
+// Compile the original potion API utility and PotionTypeEnum against Paper 26.3,
+// preserving the public signatures and MyItems damage/duration/amplifier logic.
+tasks.register<JavaCompile>("compilePaper26PotionUtility") {
+    description = "Compile real PotionUtil and PotionTypeEnum with modern registry aliases"
+    group = "verification"
+    dependsOn("compilePaper26BlockBridge")
+    source = fileTree(".") {
+        include("src/com/praya/agarthalib/utility/PotionUtil.java")
+        include("src/core/praya/agarthalib/enums/branch/PotionTypeEnum.java")
+    }
+    classpath = configurations["compileClasspath"] +
+        files(layout.buildDirectory.dir("paper26-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-potion-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaCompile>("compilePaper26PotionAliasesSelfTest") {
+    description = "Compile all legacy potion ID and YAML name regression cases"
+    group = "verification"
+    dependsOn("compilePaper26ItemData")
+    source = fileTree("ci/paper26-potion-test") { include("**/*.java") }
+    classpath = files(layout.buildDirectory.dir("paper26-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-potion-tests"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26PotionAliases") {
+    description = "Verify all historical effect ID/name mappings before plugin build"
+    group = "verification"
+    dependsOn("compilePaper26PotionAliasesSelfTest")
+    classpath = files(
+        layout.buildDirectory.dir("paper26-potion-tests"),
+        layout.buildDirectory.dir("paper26-api-check")
+    )
+    mainClass.set("com.praya.agarthalib.modern.Paper26PotionAliasesSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+}
+
+tasks.named("compilePaper26PotionUtility") {
+    dependsOn("testPaper26PotionAliases")
 }
