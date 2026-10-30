@@ -79,3 +79,11 @@ Reference: https://docs.papermc.io/paper/dev/pdc/ (item stack PDC support), http
 - GitHub Actions now independently compiles these new adapters, their original interfaces and the prior codec tests. The full `compileJava` and all gameplay/runtime tests **still must pass** before publishing.
 
 Paper 26.3 references: https://jd.papermc.io/paper/26.3/org/bukkit/entity/Player.html and https://jd.papermc.io/paper/26.3/org/bukkit/inventory/InventoryView.html .
+
+## Modern block-damage overlay adapter (2026-10-30)
+
+- `PacketBlock_Paper26_3` implements the unchanged `PacketBlockAnimation` interface. `BridgeBlock` selects it for Paper 26.3. The old source ID and x/y/z coordinates are passed through.
+- `Paper26BlockDamage` uses `Player.sendBlockDamage(Location, float, int)` to display cracking without changing the real block or firing block-break events. Stage 0–9 maps to 0.1–1.0; stages outside 0–9 map to zero progress. Source IDs isolate multiple overlays.
+- The API accepts a world through `Location`; the legacy packet had no world field. The modern adapter uses each receiving viewer's world, matching the old per-viewer packet scope.
+- The isolated CI task `compilePaper26BlockBridge` checks the actual adapter and the unchanged original interface. `testPaper26BlockDamage` tests all 14 boundary cases, including clearing.
+- **Gameplay caution:** The 10-level screen crack overlay and stage clearing must be compared on a live Paper 26.3 client. Successful source/compile checks do not prove pixel-perfect animation or lifecycle parity. No MyItems skill code was changed.
