@@ -56,6 +56,10 @@ dependencies {
 sourceSets {
     main {
         java.setSrcDirs(listOf("src"))
+        // Build target is Paper 26.3 only. Keep all v1_7..v1_15
+        // source files for audit/history, but never ship incompatible NMS.
+        // All public Bridge* entry points now select modern Paper handlers.
+        java.exclude("**/packet/**/Packet*_1_*.java")
         resources.setSrcDirs(listOf("resources"))
     }
 }
