@@ -59,7 +59,7 @@ public final class Paper26HoverPipelineSelfTest {
 
         Map<?, ?> bad = extra(JsonUtil.getJsonText("Safe||item: AgarthaItem26:INVALID!!"));
         verify(!bad.containsKey("hoverEvent"), "bad versioned marker is ignored");
-        Map<?, ?> click = (Map<?, ?>) extra(JsonUtil.getJsonText("Run||cmd: /myitems list"))
+        Map<?, ?> click = (Map<?, ?>) extra(JsonUtil.getJsonText("Execute||cmd: /myitems list"))
                 .get("clickEvent");
         verify("run_command".equals(click.get("action")), "historic command action preserved");
         verify("/myitems list".equals(click.get("value")), "historic command preserved");
