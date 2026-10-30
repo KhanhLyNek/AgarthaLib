@@ -116,31 +116,23 @@ public enum ParticleEnum
     }
     
     public final Particle getParticle() {
-        final String name = this.toString();
-        Particle[] values;
-        for (int length = (values = Particle.values()).length, i = 0; i < length; ++i) {
-            final Particle particle = values[i];
-            if (particle.toString().equalsIgnoreCase(name)) {
+        // Paper 26.3's particle enum uses current Minecraft registry names.
+        // Preserve the old enum's aliases and fallback rules for MyItems configs.
+        for (final Particle particle : Particle.values()) {
+            if (particle.getKey().getKey().equalsIgnoreCase(this.minecraftKey)
+                    || particle.name().equalsIgnoreCase(this.name())) {
                 return particle;
             }
         }
-        final String replacement = this.getReplacement();
-        if (replacement != null) {
-            final ParticleEnum replacementEnum = getParticleEnum(replacement);
-            if (replacementEnum != null) {
-                final String replacementName = replacementEnum.toString();
-                Particle[] values2;
-                for (int length2 = (values2 = Particle.values()).length, j = 0; j < length2; ++j) {
-                    final Particle particle2 = values2[j];
-                    if (particle2.toString().equalsIgnoreCase(replacementName)) {
-                        return particle2;
-                    }
-                }
+        if (this.replacement != null) {
+            final ParticleEnum replacementEnum = getParticleEnum(this.replacement);
+            if (replacementEnum != null && replacementEnum != this) {
+                return replacementEnum.getParticle();
             }
         }
         return null;
     }
-    
+
     public static final ParticleEnum getParticleEnum(final String particle) {
         if (particle != null) {
             ParticleEnum[] values;
