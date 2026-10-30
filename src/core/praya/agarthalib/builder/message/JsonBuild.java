@@ -192,27 +192,27 @@ public class JsonBuild extends JsonUtil
     public final String read() {
         final HashMap<String, Object> map = new HashMap<String, Object>();
         if (this.hasRawText()) {
-            map.put("text", this.getRawText());
+            map.put("text", colorizeLegacy(this.getRawText()));
         }
         else {
             map.put("text", "");
         }
         if (this.hasColor()) {
-            map.put("color", this.getColor());
+            map.put("color", colorizeLegacy(this.getColor()));
         }
         if (this.hasInsertion()) {
-            map.put("insertion", this.getInsertion());
+            map.put("insertion", colorizeLegacy(this.getInsertion()));
         }
         if (this.isAvailable()) {
             final List<Object> extra = new ArrayList<Object>();
             for (int i = 0; i < this.getSize(); ++i) {
                 final HashMap<String, Object> mapExtra = new HashMap<String, Object>();
                 final String text = this.getText(i);
-                mapExtra.put("text", text);
+                mapExtra.put("text", colorizeLegacy(text));
                 if (this.hasClick(i)) {
                     final HashMap<String, String> mapClick = new HashMap<String, String>();
                     mapClick.put("action", this.getClickAction(i).getText());
-                    mapClick.put("value", this.getClickValue(i));
+                    mapClick.put("value", colorizeLegacy(this.getClickValue(i)));
                     mapExtra.put("clickEvent", mapClick);
                 }
                 if (this.hasHover(i)) {
@@ -232,7 +232,7 @@ public class JsonBuild extends JsonUtil
                         }
                     }
                     else {
-                        mapHover.put("value", value);
+                        mapHover.put("value", colorizeLegacy(value));
                         mapExtra.put("hoverEvent", mapHover);
                     }
                 }
@@ -243,9 +243,15 @@ public class JsonBuild extends JsonUtil
             }
         }
         final JSONObject jsonObject = new JSONObject((Map)map);
-        return TextUtil.colorful(jsonObject.toString());
+        // Colorize legacy message fields before serialization. Do not mutate
+        // the item's raw data components when rendering hover JSON.
+        return jsonObject.toString();
     }
     
+    private static String colorizeLegacy(final String text) {
+        return text == null ? null : TextUtil.colorful(text);
+    }
+
     private final int getIndex() {
         return this.listText.size() - 1;
     }

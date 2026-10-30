@@ -28,7 +28,7 @@ public final class Paper26HoverPipelineSelfTest {
     public static void main(String[] args) throws Exception {
         String itemJson = "{\"text\":\"Đồ & vật\",\"hoverEvent\":{\"action\":\"show_item\","
                 + "\"contents\":{\"id\":\"minecraft:diamond_sword\",\"count\":1,"
-                + "\"components\":{\"minecraft:custom_name\":\"Kiếm: hiếm || đặc biệt\"}}}}";
+                + "\"components\":{\"minecraft:custom_name\":\"Kiếm: &a hiếm || đặc biệt\"}}}}";
         String marker = Paper26HoverItemPayload.encode(itemJson);
         verify(marker != null, "valid modern data components encode");
         verify(!marker.contains(":") || marker.indexOf(':') == "AgarthaItem26".length(),
@@ -44,8 +44,14 @@ public final class Paper26HoverPipelineSelfTest {
         verify("minecraft:diamond_sword".equals(contents.get("id")), "item ID unchanged");
         verify(Long.valueOf(1).equals(contents.get("count")), "item count unchanged");
         Map<?, ?> components = (Map<?, ?>) contents.get("components");
-        verify("Kiếm: hiếm || đặc biệt".equals(components.get("minecraft:custom_name")),
+        verify("Kiếm: &a hiếm || đặc biệt".equals(components.get("minecraft:custom_name")),
                 "colons and double pipes survive JSON roundtrip");
+
+        Map<?, ?> styled = extra(JsonUtil.getJsonText("&aSword||ttp: &cDescription"));
+        verify("§aSword".equals(styled.get("text")), "legacy text color still works");
+        Map<?, ?> styledHover = (Map<?, ?>) styled.get("hoverEvent");
+        verify("§cDescription".equals(styledHover.get("value")),
+                "legacy tooltip color still works");
 
         Map<?, ?> textHover = (Map<?, ?>) extra(JsonUtil.getJsonText("Đọc||ttp: Mô tả"))
                 .get("hoverEvent");
