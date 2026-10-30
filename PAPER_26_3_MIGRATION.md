@@ -23,7 +23,8 @@
 
 ## Remaining hard blockers
 
-- [ ] Introduce a reproducible Java 25 build (Gradle/Maven) and compile against the Paper 26.3 API.
+- [x] Add a Java 25 Gradle build scaffold and a Paper 26.3 dependency (not yet compile-verified).
+- [ ] Finish migrating legacy NMS and optional dependencies, then obtain a successful full Paper 26.3 compilation.
 - [ ] Remove/replace all old `net.minecraft.server.v1_*` and `org.bukkit.craftbukkit.v1_*` packet/NBT imports; numerous historical packet handlers still exist in `src/com/praya/agarthalib/packet`.
 - [ ] Port item NBT handling to supported modern item metadata, PersistentDataContainer, or data components, preserving existing serialized data where feasible.
 - [ ] Audit removed/renamed Material, Sound, EntityType, Attribute, Particle, enchantment APIs across all sources.
