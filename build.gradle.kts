@@ -216,6 +216,9 @@ tasks.register<JavaCompile>("compilePaper26MessageBridge") {
     dependsOn("compilePaper26PlayerBridge")
     source = fileTree(".") {
         include("src/com/praya/agarthalib/packet/message/PacketMessage_Paper26_3.java")
+        // Compile the runtime hover payload in this isolated adapter check too.
+        // The message bridge must not depend on unverified implicit class outputs.
+        include("src/com/praya/agarthalib/modern/Paper26HoverItemPayload.java")
         include("src/core/praya/agarthalib/builder/bridge/MessageActionbar.java")
         include("src/core/praya/agarthalib/builder/bridge/MessageTitle.java")
         include("src/core/praya/agarthalib/builder/bridge/MessageJson.java")
