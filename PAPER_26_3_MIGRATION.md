@@ -206,3 +206,45 @@ implementation the integer id was ignored. The original particle names, YAML
 and modern typed particle path are unchanged. A new source-level CI guard
 prevents this specific routing regression. It is *not* a visual particle
 test; effects requiring typed particle data still need real-game fixtures.
+
+## 2026-10-30: Remove Factions API hooks; optional MythicLib and Paper bridges (stacked)
+
+The obsolete direct FactionsLegacy, FactionsUUID, and FactionsMassive integration
+classes have been deleted, and registration/getter entry points removed from
+`SupportManagerAPI`. The old framework-level `SupportFactions`/group enums
+are retained **only as source compatibility types**, not providers; old
+claim/territory services are not replaced automatically. Review any other
+downstream plugins compiled against the removed adapter classes.
+
+MythicLib is now an optional `softdepend` (no bundled MythicLib jar or mandatory
+build dependency). `SupportMythicLib` and `Paper26MythicLibStats` offer a
+**read-only** API, using the documented `MMOPlayerData.get(UUID)`,
+`getStatMap()`, `getStat(String)` contract via guarded reflection. Missing
+providers, offline players, missing stats, or incompatible APIs return null;
+these must not be interpreted as a numeric zero. NO MyItems damage/health
+formulas, class data, XP, or player balances are modified.
+
+The Paper 26.3 equipment path now selects `PacketEquipment_Paper26_3`, using
+the existing public Bukkit slot access methods with null-equipment guards.
+The inventory path selects `PacketInventory_Paper26_3`. Because
+`InventoryView.setTitle` is deprecated and broken in Paper, attempting to
+rename an already-open inventory now warns once rather than impersonating
+an invalid NMS window, reopening a copied inventory, or replacing holders.
+Use `Paper26InventoryFactory.createChest(...)` to create new titled menus.
+
+`PacketMessage_Paper26_3` now implements the old `MessageJson` entry point
+and forwards the unchanged original `JsonUtil` DSL to Adventure JSON
+serialization for supported click/hover-text messages. Malformed JSON is
+ignored instead of becoming plain text with an altered click action.
+**Hover-item serialization via historical SNBT is not ported**: the API
+returns null rather than falsely serializing modern data components. This
+is a known behavioral gap and requires real item fixtures plus a lossless
+migration design.
+
+Independent Java/Paper 26.3 checks compile the actual new adapter classes,
+execute rich JSON and MythicLib read-only fixtures, and guard route registration.
+The existing full build still fails for other NMS and optional APIs. The
+existing plugin.yml baseline was explicitly updated only for the new
+MythicLib soft-dependency; original skill/item/command YAML is unchanged.
+
+Reference: https://docs.phoenixdevt.fr/mythiclib/api/maven
