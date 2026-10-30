@@ -47,12 +47,16 @@ public class SupportMVdWPlaceholderAPI extends Support implements SupportPlaceho
             }
             final Object resolved = method.invoke(null, player, text);
             return resolved instanceof String ? (String) resolved : text;
-        } catch (final ClassNotFoundException | NoSuchMethodException | IllegalAccessException
-                       | InvocationTargetException | LinkageError ex) {
-            // Keep placeholders unchanged if the optional, outdated plugin is
-            // absent/broken; the original string must never be erased.
+        } catch (final ClassNotFoundException | NoSuchMethodException | LinkageError ex) {
+            // Missing APIs cannot be recovered without the external plugin
+            // reloading, at which point SupportManagerAPI creates a new hook.
             unavailable = true;
             plugin.getLogger().warning("MVdWPlaceholderAPI hook unavailable: " + ex.getClass().getSimpleName());
+            return text;
+        } catch (final IllegalAccessException | InvocationTargetException ex) {
+            // Invocation problems can be player-specific or transient: do not
+            // permanently disable the placeholder hook after a single error.
+            plugin.getLogger().fine("MVdW placeholder invocation failed: " + ex.getClass().getSimpleName());
             return text;
         }
     }
