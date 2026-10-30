@@ -357,3 +357,58 @@ tasks.register<JavaExec>("testPaper26FeatherBoard") {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
 }
+
+// Retain EssentialsX warp discovery and world filtering, while removing the
+// hard compile-time dependency on its version-specific Java classes.
+tasks.register<JavaCompile>("compilePaper26EssentialsBridge") {
+    description = "Compile real Essentials warp adapter without an EssentialsX JAR"
+    group = "verification"
+    dependsOn("testPaper26FeatherBoard")
+    source = fileTree(".") {
+        include("src/api/praya/agarthalib/builder/support/SupportEssentials.java")
+    }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-essentials-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaCompile>("compilePaper26EssentialsSelfTest") {
+    description = "Compile real-adapter Essentials warp and world-filtering tests"
+    group = "verification"
+    dependsOn("compilePaper26EssentialsBridge")
+    source = fileTree("ci/paper26-essentials-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-essentials-api-check"),
+        layout.buildDirectory.dir("paper26-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-essentials-tests"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26EssentialsWarps") {
+    description = "Check optional Essentials warp identity, coordinates, world filtering and invalid entries"
+    group = "verification"
+    dependsOn("compilePaper26EssentialsSelfTest")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-essentials-tests"),
+        layout.buildDirectory.dir("paper26-essentials-api-check"),
+        layout.buildDirectory.dir("paper26-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    mainClass.set("com.praya.agarthalib.modern.Paper26EssentialsWarpSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+}
