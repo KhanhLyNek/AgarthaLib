@@ -117,3 +117,29 @@ Paper 26.3 references: https://jd.papermc.io/paper/26.3/org/bukkit/entity/Player
 - **MVdW custom placeholder registration:** `ReplacerMVDWPlaceholderAPI` still registers the exact original wildcard `placeholder + "_*"`. Its callback still extracts the original suffix and calls the original AgarthaLib `PlaceholderManager.getReplacement(player, suffix)`. New `Paper26MVdWRegistration` dynamically implements the actual external `PlaceholderReplacer` interface only when MVdWPlaceholderAPI is installed and enabled, instead of requiring outdated API classes at compile time. CI compiles the real original replacer against CI-only internal signature stand-ins and verifies 16 cases covering identifier/owner/callback text/player and missing external API.
 - **No silent gameplay change:** Existing MyItems abilities, YAML files, 20 commands, permission names, skill formulas and item serialization have not been edited in this wave. CI source-hash and command/ability guards remain active. Real-plugin integration behavior (especially town identity and locale rendering) requires Paper 26.3 server tests.
 - **Status remains NOT releasable.** The full Java 25 AgarthaLib build still produces numerous errors from additional external integrations and historic versioned NMS/CraftBukkit packet handlers. Isolated compile/test success does not produce a valid AgarthaLib/MyItems JAR.
+
+## Shared modern plugin APIs: PlaceholderAPI / EssentialsX / Vault (2026-10-30)
+
+Verified against:
+- PlaceholderAPI 2.12.3 (Modrinth says Paper/Minecraft 26.3): https://modrinth.com/plugin/placeholderapi and https://wiki.placeholderapi.com/developers/creating-a-placeholderexpansion/
+- PlaceholderAPI expansion list: https://wiki.placeholderapi.com/users/placeholder-list/minecraft/ (e.g. the Player expansion is an independently installed eCloud expansion)
+- EssentialsX 2.22.0 official release: https://github.com/EssentialsX/Essentials/releases/tag/2.22.0 and https://essentialsx.net/
+- Original Vault plugin 1.7.3: https://www.spigotmc.org/resources/vault.34315/ ; VaultAPI 1.7 build contract: https://github.com/MilkBowl/VaultAPI
+- VaultUnlocked 2.20.3 officially says support for 26.3: https://www.spigotmc.org/resources/vaultunlocked.117277/ . Its actual `plugin.yml` declares `name: Vault`, so existing plugin discovery is preserved.
+
+### Implemented
+- Replaced removed `PlaceholderHook` and `registerPlaceholderHook` with supported internal `PlaceholderExpansion`, using the unchanged `agarthalib` identifier, original `hook()` public method, original `onPlaceholderRequest(Player, String)` callback, and `persist() = true` so internal expansion survives PlaceholderAPI reloads.
+- The original `PlaceholderManager.getReplacement(...)` used to return `null` unconditionally. It now delegates to the actual configured YAML via `getPlaceholder(identifier)`. `PlaceholderMemory.getPlaceholder(...)` now correctly retrieves the matched original YAML map key when the requested key uses a different case. The original YAML text, legacy color codes and nested placeholder tokens are returned without normalization or recursive parsing.
+- The original 13-file protected YAML/combat/potion baseline remains unchanged. Java tests verify both the pure case-insensitive resolver (12 assertions) and the real `PlaceholderManager` + `PlaceholderMemory` classes with CI-only supporting fixtures (10 assertions). These tests do NOT replace a real PAPI server test.
+- `SupportEssentials` remains a lazy optional provider, avoiding a hard runtime dependency on an unsupported API artifact. Source review of EssentialsX 2.22.0 confirms the real `Essentials.getWarps()`, `Warps.getList()`, and `Warps.getWarp(String)` signatures still used by this adapter. However the release does not explicitly claim Paper 26.3 compatibility. Test server behavior separately.
+- The original `SupportVault` public `Economy` return type, `OfflinePlayer` account methods and positive/negative deposit/withdraw semantics remain. It now refreshes its `ServicesManager.getRegistration(Economy.class)` reference and clears a stale provider if the economy plugin is disabled or unregistered. This is important for economy plugin reloads.
+- Both repositories compile against public VaultAPI 1.7 with `isTransitive = false`; that avoids accidentally pulling legacy `org.bukkit:bukkit:1.13.1` from VaultAPI's old POM and breaking the Paper 26.3 Gradle resolution. JitPack is scoped only to the MilkBowl GitHub group; EssentialsX 2.22.0 is documented as an optional runtime target rather than an unconditional artifact to bundle.
+- The real modern PAPI and Vault adapters independently compile against Java 25/Paper 26.3. No external plugin implementation or test fixture is shaded into the production artifact.
+
+### Paper 26.3 server smoke tests required
+1. Install **one** Vault-compatible bridge: original Vault if verified working on your server, or VaultUnlocked 2.20.3 for a supported 26.3 candidate. Do **not** install both under plugin name `Vault`. Install an actual economy provider too; Vault is a bridge, not an economy database.
+2. Test with PlaceholderAPI 2.12.3 using `/papi parse me %agarthalib_prefix%` and a mixed-case identifier, then confirm exact YAML text/color handling. The standalone Player expansion is needed for `%player_name%`: `/papi ecloud download Player`, `/papi reload`.
+3. Test original account creation and positive/negative money changes with a real Vault Economy service, including disabling/re-enabling the provider. Never conduct this test on production balances.
+4. Validate the world-specific EssentialsX warps on a safe Paper 26.3 test server with backed-up warp data and a compatible EssentialsX build.
+
+**Release status still blocked:** full compilation still fails for legacy versioned NMS and other optional external APIs. These isolated regression tests do not verify skill runtime, old raw item NBT migration, or deployability.
