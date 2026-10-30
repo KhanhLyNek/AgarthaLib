@@ -61,7 +61,7 @@ publishing {
 tasks.register<JavaCompile>("compilePaper26ItemData") {
     description = "Type-check the Paper 26.3 item storage and metadata services without legacy NMS"
     group = "verification"
-    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java") }
+    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java") }
     classpath = configurations["compileClasspath"]
     destinationDirectory.set(layout.buildDirectory.dir("paper26-api-check"))
     javaCompiler.set(javaToolchains.compilerFor {
@@ -143,6 +143,28 @@ tasks.register<JavaCompile>("compilePaper26PlayerBridge") {
     classpath = configurations["compileClasspath"] +
         files(layout.buildDirectory.dir("paper26-bridge-api-check"))
     destinationDirectory.set(layout.buildDirectory.dir("paper26-player-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+// Compile the real Paper actionbar/title adapter against the old interfaces.
+// JSON click/hover/item components intentionally remain a separate blocker.
+tasks.register<JavaCompile>("compilePaper26MessageBridge") {
+    description = "Type-check Adventure actionbar/title adapter without legacy NMS"
+    group = "verification"
+    dependsOn("compilePaper26PlayerBridge")
+    source = fileTree(".") {
+        include("src/com/praya/agarthalib/packet/message/PacketMessage_Paper26_3.java")
+        include("src/core/praya/agarthalib/builder/bridge/MessageActionbar.java")
+        include("src/core/praya/agarthalib/builder/bridge/MessageTitle.java")
+    }
+    classpath = configurations["compileClasspath"] +
+        files(layout.buildDirectory.dir("paper26-bridge-api-check")) +
+        files(layout.buildDirectory.dir("paper26-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-message-api-check"))
     javaCompiler.set(javaToolchains.compilerFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
