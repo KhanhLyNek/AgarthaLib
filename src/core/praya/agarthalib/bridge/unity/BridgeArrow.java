@@ -4,9 +4,6 @@
 
 package core.praya.agarthalib.bridge.unity;
 
-import com.praya.agarthalib.packet.arrow.PacketArrow_1_7;
-import com.praya.agarthalib.packet.arrow.PacketArrow_1_9;
-import com.praya.agarthalib.packet.arrow.PacketArrow_1_11;
 import com.praya.agarthalib.utility.ServerUtil;
 import core.praya.agarthalib.enums.main.VersionNMS;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -97,18 +94,16 @@ public class BridgeArrow extends HandlerBridge
         
         static {
             final AgarthaLib plugin = (AgarthaLib)JavaPlugin.getPlugin((Class)AgarthaLib.class);
-            HandlerPacket handler;
-            if (ServerUtil.isCompatible(VersionNMS.V1_11_R1)) {
-                handler = new PacketArrow_1_11(plugin);
-            }
-            else if (ServerUtil.isCompatible(VersionNMS.V1_9_R2)) {
-                handler = new PacketArrow_1_9(plugin);
-            }
-            else if (ServerUtil.isCompatible(VersionNMS.V1_7_R4)) {
-                handler = new PacketArrow_1_7(plugin);
-            }
-            else {
-                handler = null;
+            final HandlerPacket handler;
+            switch (ServerUtil.getVersionNMS()) {
+                case V26_3: {
+                    handler = new PacketArrow_Paper26_3(plugin);
+                    break;
+                }
+                default: {
+                    handler = null;
+                    break;
+                }
             }
             instance = new BridgeArrow(plugin, handler);
         }
