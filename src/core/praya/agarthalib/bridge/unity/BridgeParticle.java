@@ -197,6 +197,15 @@ public class BridgeParticle extends HandlerBridge
     
     @Deprecated
     public final void playParticle(final Collection<Player> players, final ParticleEnum particleEnum, final Location location, final int count, final double offsetX, final double offsetY, final double offsetZ, final int id, final float data) {
+        if (ServerUtil.getVersionNMS() == VersionNMS.V26_3) {
+            // The last float was the particle speed/extra in the legacy packet
+            // implementations; the old integer id was ignored by v1_15.
+            // Paper 26.3 has no NMS ParticleTools handler, so delegate to the
+            // existing typed Bukkit spawnParticle path instead of doing nothing.
+            this.playParticle(players, particleEnum, location, count,
+                    offsetX, offsetY, offsetZ, (double) data, null);
+            return;
+        }
         final ParticleTools particleTools = this.getParticleTools();
         if (particleTools != null) {
             particleTools.packetPlayParticle(players, particleEnum, location, count, offsetX, offsetY, offsetZ, id, data);
