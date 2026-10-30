@@ -4,7 +4,9 @@
 
 package com.praya.agarthalib.utility;
 
-import org.bukkit.NamespacedKey;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
+import net.kyori.adventure.key.Key;
 import core.praya.agarthalib.enums.branch.EnchantmentEnum;
 import org.bukkit.enchantments.Enchantment;
 
@@ -20,26 +22,19 @@ public class EnchantmentUtil
     }
     
     public static final Enchantment getEnchantmentByOriginalName(final String enchantment) {
-        if (enchantment != null) {
-            Enchantment[] values;
-            for (int length = (values = Enchantment.values()).length, i = 0; i < length; ++i) {
-                final Enchantment key = values[i];
-                if (key != null) {
-                    if (ServerUtil.isLegacy()) {
-                        if (key.getName().equalsIgnoreCase(enchantment)) {
-                            return key;
-                        }
-                    }
-                    else {
-                        final NamespacedKey namespacedKey = key.getKey();
-                        if (namespacedKey.getKey().equalsIgnoreCase(enchantment)) {
-                            return key;
-                        }
-                    }
-                }
-            }
+        if (enchantment == null || enchantment.isBlank()) {
+            return null;
         }
-        return null;
+        // Paper 26.3 no longer uses the old Enchantment enum/name model.
+        // Only the unqualified vanilla key matched on the earlier modern
+        // path. Preserve that grammar, while resolving through the registry.
+        final String name = enchantment.toLowerCase(java.util.Locale.ROOT);
+        try {
+            return RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT)
+                    .get(RegistryKey.ENCHANTMENT.typedKey(Key.key("minecraft:" + name)));
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
     
     public static final boolean isEnchantmentExists(final String enchantment) {
