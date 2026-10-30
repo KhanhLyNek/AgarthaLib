@@ -8,13 +8,9 @@ import api.praya.agarthalib.builder.support.main.SupportClass;
 import api.praya.agarthalib.builder.support.main.SupportLevel;
 import api.praya.agarthalib.builder.support.main.SupportTerritory;
 import api.praya.agarthalib.builder.support.main.SupportGroup;
-import api.praya.agarthalib.builder.support.main.SupportFactions;
 import org.bukkit.plugin.Plugin;
 import com.praya.agarthalib.utility.PluginUtil;
 import com.praya.agarthalib.AgarthaLib;
-import api.praya.agarthalib.builder.support.SupportFactionsMassive;
-import api.praya.agarthalib.builder.support.SupportFactionsUUID;
-import api.praya.agarthalib.builder.support.SupportFactionsLegacy;
 import api.praya.agarthalib.builder.support.SupportSimpleClans;
 import api.praya.agarthalib.builder.support.SupportTowny;
 import api.praya.agarthalib.builder.support.SupportGangs;
@@ -65,9 +61,6 @@ public class SupportManagerAPI extends HandlerManager
     private SupportGangs supportGangs;
     private SupportTowny supportTowny;
     private SupportSimpleClans supportSimpleClans;
-    private SupportFactionsLegacy supportFactionsLegacy;
-    private SupportFactionsUUID supportFactionsUUID;
-    private SupportFactionsMassive supportFactionsMassive;
     
     public SupportManagerAPI(final AgarthaLib plugin) {
         super(plugin);
@@ -441,82 +434,10 @@ public class SupportManagerAPI extends HandlerManager
         return this.supportSimpleClans;
     }
     
-    public final SupportFactionsLegacy getSupportFactionsLegacy() {
-        if (this.supportFactionsLegacy == null) {
-            final Plugin source = PluginUtil.getPlugin("LegacyFactions");
-            if (source != null && source.isEnabled()) {
-                this.supportFactionsLegacy = new SupportFactionsLegacy(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportFactionsLegacy.getSource();
-            if (!source.isEnabled()) {
-                this.supportFactionsLegacy = null;
-            }
-        }
-        return this.supportFactionsLegacy;
-    }
     
-    public final SupportFactionsUUID getSupportFactionsUUID() {
-        if (this.supportFactionsUUID == null) {
-            final Plugin source = PluginUtil.getPlugin("Factions", "drtshock");
-            if (source != null && source.isEnabled()) {
-                this.supportFactionsUUID = new SupportFactionsUUID(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportFactionsUUID.getSource();
-            if (!source.isEnabled()) {
-                this.supportFactionsUUID = null;
-            }
-        }
-        return this.supportFactionsUUID;
-    }
     
-    public final SupportFactionsMassive getSupportFactionsMassive() {
-        if (this.supportFactionsMassive == null) {
-            final Plugin source = PluginUtil.getPlugin("Factions", "Cayorion");
-            if (source != null && source.isEnabled()) {
-                this.supportFactionsMassive = new SupportFactionsMassive(this.plugin, source);
-            }
-        }
-        else {
-            final Plugin source = this.supportFactionsMassive.getSource();
-            if (!source.isEnabled()) {
-                this.supportFactionsMassive = null;
-            }
-        }
-        return this.supportFactionsMassive;
-    }
     
-    public final SupportFactions getSupportFactions() {
-        SupportFactions.SupportFactionsType[] values;
-        for (int length = (values = SupportFactions.SupportFactionsType.values()).length, i = 0; i < length; ++i) {
-            final SupportFactions.SupportFactionsType factionsType = values[i];
-            final SupportFactions supportFactions = this.getSupportFactions(factionsType);
-            if (supportFactions != null) {
-                return supportFactions;
-            }
-        }
-        return null;
-    }
     
-    public final SupportFactions getSupportFactions(final SupportFactions.SupportFactionsType factionsType) {
-        switch (factionsType) {
-            case FACTIONS_LEGACY: {
-                return this.getSupportFactionsLegacy();
-            }
-            case FACTIONS_MASSIVE: {
-                return this.getSupportFactionsMassive();
-            }
-            case FACTIONS_UUID: {
-                return this.getSupportFactionsUUID();
-            }
-            default: {
-                return null;
-            }
-        }
-    }
     
     public final SupportGroup getSupportGroup() {
         SupportGroup.SupportGroupType[] values;
@@ -532,9 +453,6 @@ public class SupportManagerAPI extends HandlerManager
     
     public final SupportGroup getSupportGroup(final SupportGroup.SupportGroupType groupType) {
         switch (groupType) {
-            case FACTIONS: {
-                return this.getSupportFactions();
-            }
             case KINGDOMS: {
                 return this.getSupportKingdoms();
             }
@@ -567,9 +485,6 @@ public class SupportManagerAPI extends HandlerManager
     
     public final SupportTerritory getSupportTerritory(final SupportTerritory.SupportTerritoryType groupType) {
         switch (groupType) {
-            case FACTIONS: {
-                return this.getSupportFactions();
-            }
             default: {
                 return null;
             }
@@ -729,21 +644,9 @@ public class SupportManagerAPI extends HandlerManager
         return this.getSupportSimpleClans() != null;
     }
     
-    public final boolean isSupportFactionsLegacy() {
-        return this.getSupportFactionsLegacy() != null;
-    }
     
-    public final boolean isSupportFactionsUUID() {
-        return this.getSupportFactionsUUID() != null;
-    }
     
-    public final boolean isSupportFactionsMassive() {
-        return this.getSupportFactionsMassive() != null;
-    }
     
-    public final boolean isSupportFactions() {
-        return this.getSupportFactions() != null;
-    }
     
     public final boolean isSupportGroups() {
         return this.getSupportGroup() != null;
@@ -807,25 +710,9 @@ public class SupportManagerAPI extends HandlerManager
         return this.getSupportKingdoms() != null;
     }
     
-    @Deprecated
-    public final boolean isHookFactionsLegacy() {
-        return this.getSupportFactionsLegacy() != null;
-    }
     
-    @Deprecated
-    public final boolean isHookFactionsUUID() {
-        return this.getSupportFactionsUUID() != null;
-    }
     
-    @Deprecated
-    public final boolean isHookFactionsMassive() {
-        return this.getSupportFactionsMassive() != null;
-    }
     
-    @Deprecated
-    public final boolean isHookFactions() {
-        return this.getSupportFactions() != null;
-    }
     
     @Deprecated
     public final boolean isHookGroups() {
