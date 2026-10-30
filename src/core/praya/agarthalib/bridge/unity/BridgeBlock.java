@@ -129,47 +129,10 @@ public class BridgeBlock extends HandlerBridge
         
         static {
             final AgarthaLib plugin = (AgarthaLib)JavaPlugin.getPlugin((Class)AgarthaLib.class);
-            final VersionNMS version = ServerUtil.getVersionNMS();
-            HandlerPacket handler = null;
-            switch (version) {
+            final HandlerPacket handler;
+            switch (ServerUtil.getVersionNMS()) {
                 case V26_3: {
                     handler = new PacketBlock_Paper26_3(plugin);
-                    break;
-                }
-                case V1_7_R4: {
-                    handler = new PacketBlock_1_7_R4(plugin);
-                    break;
-                }
-                case V1_8_R3: {
-                    handler = new PacketBlock_1_8_R3(plugin);
-                    break;
-                }
-                case V1_9_R2: {
-                    handler = new PacketBlock_1_9_R2(plugin);
-                    break;
-                }
-                case V1_10_R1: {
-                    handler = new PacketBlock_1_10_R1(plugin);
-                    break;
-                }
-                case V1_11_R1: {
-                    handler = new PacketBlock_1_11_R1(plugin);
-                    break;
-                }
-                case V1_12_R1: {
-                    handler = new PacketBlock_1_12_R1(plugin);
-                    break;
-                }
-                case V1_13_R2: {
-                    handler = new PacketBlock_1_13_R2(plugin);
-                    break;
-                }
-                case V1_14_R1: {
-                    handler = new PacketBlock_1_14_R1(plugin);
-                    break;
-                }
-                case V1_15_R1: {
-                    handler = new PacketBlock_1_15_R1(plugin);
                     break;
                 }
                 default: {
