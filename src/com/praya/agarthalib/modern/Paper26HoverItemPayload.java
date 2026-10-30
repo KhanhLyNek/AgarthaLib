@@ -26,10 +26,11 @@ public final class Paper26HoverItemPayload {
         if (componentJson == null || componentJson.isBlank()) return null;
         final byte[] utf8 = componentJson.getBytes(StandardCharsets.UTF_8);
         if (utf8.length == 0 || utf8.length > MAX_JSON_BYTES) return null;
-        // Only accept a valid show_item payload; never pass arbitrary JSON
-        // through the original click/hover event parser.
-        final String candidate = PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(utf8);
-        return contents(candidate) == null ? null : candidate;
+        // Validate the actual JSON before Base64 encoding. Previously encode()
+        // encoded the bytes, immediately decoded them again and parsed JSON,
+        // doubling the allocations for every generated hover item.
+        if (parseContents(componentJson) == null) return null;
+        return PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(utf8);
     }
 
     /** Return JSON-simple compatible nested map for Adventure hoverEvent.contents. */
@@ -40,8 +41,16 @@ public final class Paper26HoverItemPayload {
         try {
             final byte[] utf8 = Base64.getUrlDecoder().decode(encoded);
             if (utf8.length == 0 || utf8.length > MAX_JSON_BYTES) return null;
-            final Object component = new JSONParser().parse(
-                    new String(utf8, StandardCharsets.UTF_8));
+            return parseContents(new String(utf8, StandardCharsets.UTF_8));
+        } catch (IllegalArgumentException ex) {
+            // Malformed or non-base64 tokens cannot reach JSON parsing.
+            return null;
+        }
+    }
+
+    private static Object parseContents(final String json) {
+        try {
+            final Object component = new JSONParser().parse(json);
             if (!(component instanceof Map<?, ?> root)) return null;
             final Object hover = root.containsKey("hoverEvent")
                     ? root.get("hoverEvent") : root.get("hover_event");
