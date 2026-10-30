@@ -67,6 +67,10 @@ public class BridgeInventory extends Handler
             final VersionNMS version = ServerUtil.getVersionNMS();
             HandlerPacket handler = null;
             switch (version) {
+                case V26_3: {
+                    handler = new PacketInventory_Paper26_3(plugin);
+                    break;
+                }
                 case V1_8_R3: {
                     handler = new PacketInventory_1_8_R3(plugin);
                     break;
