@@ -143,3 +143,13 @@ Verified against:
 4. Validate the world-specific EssentialsX warps on a safe Paper 26.3 test server with backed-up warp data and a compatible EssentialsX build.
 
 **Release status still blocked:** full compilation still fails for legacy versioned NMS and other optional external APIs. These isolated regression tests do not verify skill runtime, old raw item NBT migration, or deployability.
+
+## 2026-10-30 official optional service API alignment
+
+- Project build uses the official PlaceholderAPI 2.12.3 `compileOnly` API (Modrinth: https://modrinth.com/plugin/placeholderapi ; development guide: https://wiki.placeholderapi.com/developers/using-placeholderapi/). Minecraft placeholders listed at https://wiki.placeholderapi.com/users/placeholder-list/minecraft/ depend on the corresponding installed expansion where indicated; the wiki is not a source for automatically bundling expansions.
+- EssentialsX 2.22.0 official `net.essentialsx:EssentialsX:2.22.0` compile-only API is taken from `https://repo.essentialsx.net/releases/`; the existing warp adapter retains optional reflective access so EssentialsX does not become mandatory at plugin load. Its published 2.22.0 release describes support through Minecraft 26.1.2, not verified 26.3 runtime. Confirm a compatible EssentialsX build before a Paper 26.3 server launch.
+- Vault uses official MilkBowl `com.github.MilkBowl:VaultAPI:1.7` `compileOnly`, with disabled transitive dependencies. This is only the shared API: a separately installed Vault-compatible service bridge and economy provider must supply the implementation. Never create balances or accounts merely to make a test pass.
+- The original `SupportPlaceholderAPI` now preserves the exact input text when the optional PlaceholderAPI provider is disabled or missing. Dedicated tests check unchanged Minecraft/Vault placeholders and color codes. The enabled path still uses its historic online `Player` argument and PlaceholderAPI parser without altering legacy output formatting.
+- These dependencies are aligned with MyItems but `compileOnly` is **not** installation, automatic expansion registration or proof of runtime support. Full NMS migration and complete builds remain outstanding.
+
+Source references: https://modrinth.com/plugin/placeholderapi ; https://wiki.placeholderapi.com/users/placeholder-list/minecraft/ ; https://essentialsx.net/ ; https://www.spigotmc.org/resources/vault.34315/ .
