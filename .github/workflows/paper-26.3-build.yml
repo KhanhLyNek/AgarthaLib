@@ -32,11 +32,11 @@ jobs:
         run: |
           java -version
           gradle --version
-      - name: Verify item, player, message and block bridges with Java tests
+      - name: Verify modern bridges and original potion utility against Java 25
         shell: bash
         run: |
           set -o pipefail
-          gradle compilePaper26BlockBridge --no-daemon --console=plain 2>&1 | tee paper26-item-api-check.log
+          gradle compilePaper26PotionUtility --no-daemon --console=plain 2>&1 | tee paper26-item-api-check.log
       - name: Build with compiler diagnostics
         if: always()
         shell: bash
