@@ -124,7 +124,7 @@ publishing {
 tasks.register<JavaCompile>("compilePaper26ItemData") {
     description = "Type-check the Paper 26.3 item storage and metadata services without legacy NMS"
     group = "verification"
-    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java", "Paper26PotionAliases.java", "Paper26MVdWRegistration.java", "Paper26PlaceholderValues.java", "Paper26MythicLibStats.java", "Paper26InventoryFactory.java", "Paper26JsonChat.java", "Paper26AuraSkillsProgress.java", "Paper26MMOCoreProgress.java", "Paper26LandsClaims.java", "Paper26DecentHolograms.java", "Paper26OptionalProviders.java", "Paper26ItemSnapshots.java", "Paper26HoverItems.java", "Paper26HoverItemPayload.java", "Paper26ServerTPS.java") }
+    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java", "Paper26PotionAliases.java", "Paper26MVdWRegistration.java", "Paper26PlaceholderValues.java", "Paper26MythicLibStats.java", "Paper26InventoryFactory.java", "Paper26JsonChat.java", "Paper26AuraSkillsProgress.java", "Paper26MMOCoreProgress.java", "Paper26LandsClaims.java", "Paper26DecentHolograms.java", "Paper26OptionalProviders.java", "Paper26ItemSnapshots.java", "Paper26HoverItems.java", "Paper26HoverItemPayload.java", "Paper26LegacyItemTags.java", "Paper26ServerTPS.java") }
     classpath = configurations["compileClasspath"]
     destinationDirectory.set(layout.buildDirectory.dir("paper26-api-check"))
     javaCompiler.set(javaToolchains.compilerFor {
