@@ -1,0 +1,1 @@
+Paper 26.3 provider migration: remove direct Factions hooks; MythicLib is an optional runtime provider.
