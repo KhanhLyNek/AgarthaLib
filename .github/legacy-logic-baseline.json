@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Baseline of legacy gameplay and resource files. Updates require a deliberate review of semantic compatibility before adjusting hashes; no auto regeneration by CI.",
+  "note": "Legacy YAML/combat/metadata are frozen at the original baseline; potion compatibility and potion registry sources are frozen after reviewed Paper 26.3 migration. Updates require semantic review and CI tests, never automatic rebaselining.",
   "files": {
     "resources/Configuration/config.yml": "b204002e57c24db756972435759f284951757b3e",
     "resources/Configuration/placeholder.yml": "fe7d34a7e0e46f91bea9b66ef81c1c29ffa8e6a0",
@@ -10,7 +10,10 @@
     "resources/plugin.yml": "d2df5ef0fc9f1b5491f7f83db34c3c7834e510f2",
     "resources/Resources/command.yml": "7426003fcdae225bb5d3a697bc9890d140cecf7a",
     "resources/update.yml": "8f11629fd6ae33e0ca03ac6f77ba2f506e9d076f",
+    "src/com/praya/agarthalib/modern/Paper26PotionAliases.java": "26ca24a13dfab94ae5e4f54b8ec868d4fbca2643",
     "src/com/praya/agarthalib/utility/CombatUtil.java": "54477f3f5577d42d356adf95dc467644812c3dde",
-    "src/com/praya/agarthalib/utility/MetadataUtil.java": "22ac3507357ae123d251bd630914c8fb861148bc"
+    "src/com/praya/agarthalib/utility/MetadataUtil.java": "22ac3507357ae123d251bd630914c8fb861148bc",
+    "src/com/praya/agarthalib/utility/PotionUtil.java": "62640403f65a074112463fff89e379be094442bd",
+    "src/core/praya/agarthalib/enums/branch/PotionTypeEnum.java": "338a21e4d6d7b5db450496502aa44746ddbe17bb"
   }
 }
