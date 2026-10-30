@@ -32,6 +32,8 @@ jobs:
         run: python3 .github/scripts/check_paper26_bridge_routes.py
       - name: Guard optional MythicLib and removed Factions runtime hooks
         run: python3 .github/scripts/check_paper26_provider_routes.py
+      - name: Enforce Paper 26.3-only packet build and bridge routing
+        run: python3 .github/scripts/check_paper26_nms_cutover.py
       - name: Audit exact remaining NMS and provider source debt
         run: python3 .github/scripts/audit_paper26_remaining.py
       - name: Java and Gradle versions
