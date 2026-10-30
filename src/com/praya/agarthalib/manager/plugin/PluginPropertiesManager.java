@@ -4,8 +4,7 @@
 
 package com.praya.agarthalib.manager.plugin;
 
-import org.bukkit.plugin.PluginLoader;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.Bukkit;
 import com.praya.agarthalib.utility.SystemUtil;
 import java.util.Iterator;
 import core.praya.agarthalib.builder.plugin.PluginTypePropertiesBuild;
@@ -138,10 +137,11 @@ public abstract class PluginPropertiesManager extends HandlerManager
     }
     
     private final void disable(final String message) {
-        final PluginLoader pluginLoader = this.plugin.getPluginLoader();
         if (message != null) {
             SystemUtil.sendMessage(message);
         }
-        pluginLoader.disablePlugin((Plugin)this.plugin);
+        // Paper's PluginManager owns the complete disable lifecycle.
+        // JavaPlugin#getPluginLoader is deprecated for removal.
+        Bukkit.getPluginManager().disablePlugin(this.plugin);
     }
 }
