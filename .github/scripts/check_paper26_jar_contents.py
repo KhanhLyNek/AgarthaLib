@@ -19,6 +19,8 @@ with ZipFile(candidates[0]) as jar:
         "com/praya/agarthalib/packet/equipment/PacketEquipment_Paper26_3.class",
         "com/praya/agarthalib/packet/item/PacketItem_Paper26_3.class",
         "com/praya/agarthalib/modern/Paper26OptionalProviders.class",
+        "org/json/simple/JSONObject.class",
+        "org/json/simple/parser/JSONParser.class",
         "api/praya/agarthalib/manager/plugin/SupportManagerAPI.class",
     ):
         assert required in names, f"Missing Paper 26.3 JAR class: {required}"

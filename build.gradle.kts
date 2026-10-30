@@ -31,7 +31,11 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:26.3.build.230-stable")
 
     // Source-level dependencies found in the first GitHub Actions build log.
-    compileOnly("com.googlecode.json-simple:json-simple:1.1.1")
+    // The historical JsonBuild and new hover payload parser both use this
+    // library at runtime; Paper does not promise to provide it to plugins.
+    implementation("com.googlecode.json-simple:json-simple:1.1.1") {
+        isTransitive = false
+    }
     compileOnly("commons-lang:commons-lang:2.6")
     compileOnly("javax.annotation:javax.annotation-api:1.3.2")
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.20")
@@ -81,6 +85,18 @@ sourceSets {
         java.exclude("**/listener/support/battlelevels/**")
         resources.setSrcDirs(listOf("resources"))
     }
+}
+
+// AgarthaLib is deployed as a plugin jar, not through a Gradle classpath.
+// Embed JSON-simple, otherwise rendering existing messages may fail with
+// NoClassDefFoundError in a standalone server installation.
+tasks.named<Jar>("jar") {
+    from({
+        configurations.runtimeClasspath.get()
+            .filter { it.name.startsWith("json-simple-") }
+            .map { zipTree(it) }
+    })
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -944,6 +960,29 @@ tasks.register<JavaExec>("testPaper26LivingEntityKind") {
     })
 }
 
+// Exercise the exact old DSL->JsonBuild pipeline, including real Paper 26
+// versioned hover items, click commands and legacy value-based text tooltips.
+tasks.register<JavaCompile>("compilePaper26HoverPipelineSelfTest") {
+    description = "Compile actual JsonUtil/JsonBuild regression tests"
+    group = "verification"
+    dependsOn("classes")
+    source = fileTree("ci/paper26-hover-pipeline-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + sourceSets.main.get().output
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-hover-pipeline-tests"))
+    javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+tasks.register<JavaExec>("testPaper26HoverPipeline") {
+    description = "Test old DSL and modern show_item.contents with unchanged click/text behavior"
+    group = "verification"
+    dependsOn("compilePaper26HoverPipelineSelfTest")
+    classpath = configurations["compileClasspath"] + sourceSets.main.get().output +
+            files(layout.buildDirectory.dir("paper26-hover-pipeline-tests"))
+    mainClass.set("com.praya.agarthalib.modern.Paper26HoverPipelineSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+}
+
 // Verify the actual encoded hover payload and strict item-stack counts using
 // the same JSON-simple parser shipped in the historical AgarthaLib sources.
 tasks.register<JavaCompile>("compilePaper26HoverItemPayloadSelfTest") {
@@ -973,7 +1012,7 @@ tasks.register<JavaExec>("testPaper26HoverItemPayload") {
 tasks.register<JavaExec>("testPaper26PapiOptional") {
     description = "Verify disabled/missing PlaceholderAPI retains exact placeholder and formatting"
     group = "verification"
-    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager", "testPaper26LivingEntityKind", "testPaper26JsonChat", "testPaper26MythicLibOptional", "testPaper26ModernProviders", "testPaper26ItemSnapshots", "testPaper26ServerTPS", "testPaper26HoverItemPayload")
+    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager", "testPaper26LivingEntityKind", "testPaper26JsonChat", "testPaper26MythicLibOptional", "testPaper26ModernProviders", "testPaper26ItemSnapshots", "testPaper26ServerTPS", "testPaper26HoverItemPayload", "testPaper26HoverPipeline")
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-papi-optional-tests"),
         layout.buildDirectory.dir("paper26-placeholder-api-check"),

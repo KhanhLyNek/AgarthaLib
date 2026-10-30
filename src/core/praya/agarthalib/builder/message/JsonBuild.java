@@ -12,6 +12,7 @@ import core.praya.agarthalib.enums.main.JsonOption;
 import java.util.HashMap;
 import java.util.List;
 import com.praya.agarthalib.utility.JsonUtil;
+import com.praya.agarthalib.modern.Paper26HoverItemPayload;
 
 public class JsonBuild extends JsonUtil
 {
@@ -215,10 +216,25 @@ public class JsonBuild extends JsonUtil
                     mapExtra.put("clickEvent", mapClick);
                 }
                 if (this.hasHover(i)) {
-                    final HashMap<String, String> mapHover = new HashMap<String, String>();
-                    mapHover.put("action", this.getHoverAction(i).getText());
-                    mapHover.put("value", this.getHoverValue(i));
-                    mapExtra.put("hoverEvent", mapHover);
+                    final JsonOption action = this.getHoverAction(i);
+                    final String value = this.getHoverValue(i);
+                    final HashMap<String, Object> mapHover = new HashMap<String, Object>();
+                    mapHover.put("action", action.getText());
+                    if (action == JsonOption.HOVER_SHOW_ITEM
+                            && Paper26HoverItemPayload.isMarker(value)) {
+                        // Only our versioned, validated marker uses modern
+                        // show_item.contents. Keep historic value-based DSL
+                        // unchanged for other types and old item strings.
+                        final Object contents = Paper26HoverItemPayload.contents(value);
+                        if (contents != null) {
+                            mapHover.put("contents", contents);
+                            mapExtra.put("hoverEvent", mapHover);
+                        }
+                    }
+                    else {
+                        mapHover.put("value", value);
+                        mapExtra.put("hoverEvent", mapHover);
+                    }
                 }
                 extra.add(mapExtra);
             }

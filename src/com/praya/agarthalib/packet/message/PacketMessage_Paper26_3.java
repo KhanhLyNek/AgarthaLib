@@ -4,6 +4,8 @@ import com.praya.agarthalib.AgarthaLib;
 import com.praya.agarthalib.handler.HandlerPacket;
 import com.praya.agarthalib.modern.Paper26AudienceService;
 import com.praya.agarthalib.modern.Paper26JsonChat;
+import com.praya.agarthalib.modern.Paper26HoverItems;
+import com.praya.agarthalib.modern.Paper26HoverItemPayload;
 import com.praya.agarthalib.utility.JsonUtil;
 import core.praya.agarthalib.builder.bridge.MessageActionbar;
 import core.praya.agarthalib.builder.bridge.MessageJson;
@@ -42,9 +44,11 @@ public final class PacketMessage_Paper26_3 extends HandlerPacket
 
     @Override
     public String packetGetJsonItem(final ItemStack item) {
-        // Pre-1.20 SNBT hover-item tags are not interchangeable with modern
-        // data components. No inaccurate conversion is fabricated.
-        return null;
+        // The old JsonUtil.getJsonText DSL expects one colon-safe token. A
+        // versioned URL-safe payload holds Paper's real data components and
+        // JsonBuild converts it to Adventure's show_item.contents at output.
+        // Never pretend that modern components are the pre-1.20 raw SNBT.
+        return Paper26HoverItemPayload.encode(Paper26HoverItems.json("", item));
     }
 
     @Override
