@@ -624,3 +624,67 @@ tasks.register<JavaCompile>("compilePaper26VaultBridge") {
     options.encoding = "UTF-8"
     options.release.set(25)
 }
+
+// Compile both original placeholder classes and handler hierarchy. External
+// providers, config loader and helper signatures are CI-only stubs so no
+// fake implementation ever enters the production source set.
+tasks.register<JavaCompile>("compilePaper26OriginalPlaceholderManager") {
+    description = "Type-check real PlaceholderManager and PlaceholderMemory with preserved Bukkit entrypoints"
+    group = "verification"
+    dependsOn("compilePaper26VaultBridge")
+    source = fileTree(".") {
+        include("src/com/praya/agarthalib/handler/Handler.java")
+        include("src/com/praya/agarthalib/handler/HandlerManager.java")
+        include("src/com/praya/agarthalib/manager/plugin/PlaceholderManager.java")
+        include("src/com/praya/agarthalib/placeholder/PlaceholderMemory.java")
+        include("ci/paper26-placeholder-manager-stubs/**/*.java")
+    }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check"),
+        layout.buildDirectory.dir("paper26-mvdw-replacer-api-check"),
+        layout.buildDirectory.dir("paper26-papi-expansion-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-original-placeholder-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaCompile>("compilePaper26OriginalPlaceholderManagerSelfTest") {
+    description = "Compile real-placeholder-class tests using CI-only config fixture"
+    group = "verification"
+    dependsOn("compilePaper26OriginalPlaceholderManager")
+    source = fileTree("ci/paper26-placeholder-manager-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-original-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check")
+    )
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-original-placeholder-tests"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26OriginalPlaceholderManager") {
+    description = "Verify actual historic PlaceholderManager and PlaceholderMemory resolve YAML through PAPI"
+    group = "verification"
+    dependsOn("compilePaper26OriginalPlaceholderManagerSelfTest")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-original-placeholder-tests"),
+        layout.buildDirectory.dir("paper26-original-placeholder-api-check"),
+        layout.buildDirectory.dir("paper26-api-check"),
+        layout.buildDirectory.dir("paper26-bridge-api-check"),
+        layout.buildDirectory.dir("paper26-papi-expansion-api-check"),
+        layout.buildDirectory.dir("paper26-mvdw-replacer-api-check")
+    )
+    mainClass.set("com.praya.agarthalib.modern.Paper26OriginalPlaceholderManagerSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+}
