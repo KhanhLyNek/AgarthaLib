@@ -61,7 +61,7 @@ publishing {
 tasks.register<JavaCompile>("compilePaper26ItemData") {
     description = "Type-check the Paper 26.3 item storage and metadata services without legacy NMS"
     group = "verification"
-    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java") }
+    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java") }
     classpath = configurations["compileClasspath"]
     destinationDirectory.set(layout.buildDirectory.dir("paper26-api-check"))
     javaCompiler.set(javaToolchains.compilerFor {
@@ -170,4 +170,58 @@ tasks.register<JavaCompile>("compilePaper26MessageBridge") {
     })
     options.encoding = "UTF-8"
     options.release.set(25)
+}
+
+// Verify the real block animation adapter and its unchanged packet interface.
+// CI-only AgarthaLib class stubs were already compiled by the item-bridge task.
+tasks.register<JavaCompile>("compilePaper26BlockBridge") {
+    description = "Type-check the Paper 26.3 block-damage bridge and original interface"
+    group = "verification"
+    dependsOn("compilePaper26MessageBridge")
+    source = fileTree(".") {
+        include("src/com/praya/agarthalib/packet/block/PacketBlock_Paper26_3.java")
+        include("src/com/praya/agarthalib/packet/block/PacketBlockAnimation.java")
+    }
+    classpath = configurations["compileClasspath"] +
+        files(layout.buildDirectory.dir("paper26-api-check")) +
+        files(layout.buildDirectory.dir("paper26-bridge-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-block-api-check"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaCompile>("compilePaper26BlockSelfTest") {
+    description = "Compile the block cracking-stage mapping checks"
+    group = "verification"
+    dependsOn("compilePaper26ItemData")
+    source = fileTree("ci/paper26-block-test") { include("**/*.java") }
+    classpath = configurations["compileClasspath"] +
+        files(layout.buildDirectory.dir("paper26-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-block-tests"))
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26BlockDamage") {
+    description = "Check legacy 0-9 block-crack stage progress boundaries"
+    group = "verification"
+    dependsOn("compilePaper26BlockSelfTest")
+    classpath = configurations["compileClasspath"] + files(
+        layout.buildDirectory.dir("paper26-block-tests"),
+        layout.buildDirectory.dir("paper26-api-check")
+    )
+    mainClass.set("com.praya.agarthalib.modern.Paper26BlockDamageSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    })
+}
+
+tasks.named("compilePaper26BlockBridge") {
+    dependsOn("testPaper26BlockDamage")
 }
