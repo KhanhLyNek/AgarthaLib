@@ -35,8 +35,16 @@ public final class Paper26LegacyItemTags {
         try {
             final byte[] bytes = item.serializeAsBytes();
             if (bytes.length == 0 || bytes.length > MAX_ITEM_BYTES) return null;
+            // Paper's ItemStack.serializeAsBytes() uses GZIP-compressed NBT.
+            // Keep an explicit fallback for standalone uncompressed fixtures,
+            // but never guess a codec from untrusted, arbitrary input.
+            final BinaryTagIO.Compression compression =
+                    bytes.length >= 2 && (bytes[0] & 0xff) == 0x1f
+                            && (bytes[1] & 0xff) == 0x8b
+                            ? BinaryTagIO.Compression.GZIP
+                            : BinaryTagIO.Compression.NONE;
             final CompoundBinaryTag root = BinaryTagIO.reader(MAX_ITEM_BYTES * 2L)
-                    .read(new ByteArrayInputStream(bytes));
+                    .read(new ByteArrayInputStream(bytes), compression);
             return locate(root);
         } catch (IOException | IllegalArgumentException | IllegalStateException ex) {
             return null;
