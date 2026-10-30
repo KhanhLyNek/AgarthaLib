@@ -22,10 +22,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.EnumMap;
 
 public class BridgeSound extends HandlerBridge
 {
     final HandlerPacket handler;
+    private static final Map<SoundEnum, Sound> MODERN_SOUND_CACHE = new EnumMap<>(SoundEnum.class);
     
     protected BridgeSound(final AgarthaLib plugin, final HandlerPacket handler) {
         super(plugin);
@@ -70,12 +73,15 @@ public class BridgeSound extends HandlerBridge
             if (players == null || loc == null || loc.getWorld() == null || sound == null) {
                 return;
             }
-            Sound resolved = null;
-            for (final Sound entry : Registry.SOUND_EVENT) {
-                if (entry.name().equalsIgnoreCase(sound.name())) {
-                    resolved = entry;
-                    break;
+            Sound resolved = MODERN_SOUND_CACHE.get(sound);
+            if (!MODERN_SOUND_CACHE.containsKey(sound)) {
+                for (final Sound entry : Registry.SOUND_EVENT) {
+                    if (entry.name().equalsIgnoreCase(sound.name())) {
+                        resolved = entry;
+                        break;
+                    }
                 }
+                MODERN_SOUND_CACHE.put(sound, resolved);
             }
             if (resolved != null) {
                 for (final Player player : players) {
