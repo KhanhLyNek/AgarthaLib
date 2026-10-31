@@ -26,6 +26,8 @@ with ZipFile(candidates[0]) as jar:
         "com/lymeowz/lib/command/CommandText.class",
         "com/lymeowz/lib/command/CommandDefinitions.class",
         "com/lymeowz/lib/text/HexColors.class",
+        "com/lymeowz/lib/item/StringListCodec.class",
+        "com/praya/agarthalib/modern/Paper26StringListCodec.class",
         "com/praya/agarthalib/modern/Paper26HexColors.class",
         "com/lymeowz/lib/permission/PermissionBridge.class",
         "com/lymeowz/lib/migration/PluginFolderMigration.class",

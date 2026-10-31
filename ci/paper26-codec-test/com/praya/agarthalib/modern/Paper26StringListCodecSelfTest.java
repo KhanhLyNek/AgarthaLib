@@ -11,6 +11,17 @@ public final class Paper26StringListCodecSelfTest {
     private static int assertions;
 
     private static void roundTrip(final List<String> strings) {
+        final byte[] fromLegacy = Paper26StringListCodec.encode(strings);
+        final byte[] fromModern = com.lymeowz.lib.item.StringListCodec.encode(strings);
+        if (!Arrays.equals(fromLegacy, fromModern)) {
+            throw new AssertionError("LyMeowz codec changed persisted item bytes");
+        }
+        assertions++;
+        final List<String> canonical = com.lymeowz.lib.item.StringListCodec.decode(fromLegacy);
+        if (!strings.equals(canonical)) {
+            throw new AssertionError("LyMeowz codec cannot read old item bytes");
+        }
+        assertions++;
         final List<String> actual = Paper26StringListCodec.decode(Paper26StringListCodec.encode(strings));
         if (!strings.equals(actual)) {
             throw new AssertionError("UTF-8 item-data list changed across round trip");
@@ -21,7 +32,13 @@ public final class Paper26StringListCodecSelfTest {
     private static void expectInvalid(final byte[] encoded) {
         try {
             Paper26StringListCodec.decode(encoded);
-            throw new AssertionError("Corrupted list was accepted");
+            throw new AssertionError("Corrupted list was accepted by the legacy codec");
+        } catch (final IllegalStateException expected) {
+            assertions++;
+        }
+        try {
+            com.lymeowz.lib.item.StringListCodec.decode(encoded);
+            throw new AssertionError("Corrupted list was accepted by the new codec");
         } catch (final IllegalStateException expected) {
             assertions++;
         }
@@ -45,6 +62,8 @@ public final class Paper26StringListCodecSelfTest {
             output.writeUTF("a\u0000b");
         }
         if (!Paper26StringListCodec.decode(old.toByteArray())
+                .equals(List.of("old", "Tiếng Việt", "a\u0000b"))
+                || !com.lymeowz.lib.item.StringListCodec.decode(old.toByteArray())
                 .equals(List.of("old", "Tiếng Việt", "a\u0000b"))) {
             throw new AssertionError("Preview-format backward read failed");
         }
@@ -80,6 +99,16 @@ public final class Paper26StringListCodecSelfTest {
 
         if (!Paper26StringListCodec.decode(null).isEmpty()) {
             throw new AssertionError("Null custom list should read as empty");
+        }
+        assertions++;
+        if (!com.lymeowz.lib.item.StringListCodec.decode(null).isEmpty()) {
+            throw new AssertionError("New codec must preserve the null-to-empty behavior");
+        }
+        assertions++;
+        final byte[] encoded = com.lymeowz.lib.item.StringListCodec.encode(List.of("one"));
+        if (encoded.length < 5 || encoded[0] != 0x41 || encoded[1] != 0x47
+                || encoded[2] != 0x4c || encoded[3] != 0x53 || encoded[4] != 0x01) {
+            throw new AssertionError("PDC item magic/version changed during package migration");
         }
         assertions++;
         System.out.println("PASS: " + assertions + " Paper26StringListCodec assertions");

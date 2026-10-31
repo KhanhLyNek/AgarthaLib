@@ -54,8 +54,8 @@ public final class Paper26ItemTextColors {
         if (rawBytes != null && expectedBytes != null &&
                 rawBytes.length <= MAX_BACKUP_BYTES && expectedBytes.length <= MAX_BACKUP_BYTES) {
             try {
-                final List<String> expected = Paper26StringListCodec.decode(expectedBytes);
-                final List<String> original = Paper26StringListCodec.decode(rawBytes);
+                final List<String> expected = com.lymeowz.lib.item.StringListCodec.decode(expectedBytes);
+                final List<String> original = com.lymeowz.lib.item.StringListCodec.decode(rawBytes);
                 if (expected.equals(visible) && original.size() == visible.size()) {
                     return original;
                 }
@@ -99,10 +99,10 @@ public final class Paper26ItemTextColors {
         // rewrite/override unrelated plugin items or all other lore lines.
         if (value != null && value.stream().anyMatch(line -> line != null &&
                 (line.contains(MYITEMS_STATS_MARKER) || line.contains(MYITEMS_VALUE_MARKER)))) {
-            final byte[] raw = Paper26StringListCodec.encode(value);
+            final byte[] raw = com.lymeowz.lib.item.StringListCodec.encode(value);
             final List<String> visible = visibleLore(meta);
             if (visible != null) {
-                final byte[] canonical = Paper26StringListCodec.encode(visible);
+                final byte[] canonical = com.lymeowz.lib.item.StringListCodec.encode(visible);
                 if (raw.length <= MAX_BACKUP_BYTES && canonical.length <= MAX_BACKUP_BYTES) {
                     data.set(RAW_LEGACY_LORE, PersistentDataType.BYTE_ARRAY, raw);
                     data.set(VISIBLE_LEGACY_LORE, PersistentDataType.BYTE_ARRAY, canonical);
