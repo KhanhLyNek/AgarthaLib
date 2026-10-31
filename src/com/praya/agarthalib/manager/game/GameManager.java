@@ -13,7 +13,7 @@ import com.praya.agarthalib.menu.MenuMemory;
 import com.praya.agarthalib.AgarthaLib;
 import com.praya.agarthalib.handler.HandlerManager;
 
-public class GameManager extends HandlerManager
+public class GameManager extends HandlerManager implements com.lymeowz.lib.manager.GameServices
 {
     private final MenuManager menuManager;
     private final BlockBreakManager blockBreakManager;
@@ -54,5 +54,28 @@ public class GameManager extends HandlerManager
     
     public final StatsEntityManager getStatsEntityManager() {
         return this.statsEntityManager;
+    }
+
+    @Override
+    public final java.util.Collection<String> effectTypeIds() {
+        // The legacy API returns a live, mutable keySet. Canonical callers
+        // should not be able to remove a registered effect by clearing it.
+        return java.util.Collections.unmodifiableList(
+                new java.util.ArrayList<>(this.effectTypeManager.getEffectTypeIds()));
+    }
+
+    @Override
+    public final boolean hasEffectType(final String id) {
+        return this.effectTypeManager.isExists(id);
+    }
+
+    @Override
+    public final int trackedEntityStatsCount() {
+        return this.statsEntityManager.getEntityIds().size();
+    }
+
+    @Override
+    public final int trackedProjectileCount() {
+        return this.projectilePropertiesManager.getProjectileIds().size();
     }
 }
