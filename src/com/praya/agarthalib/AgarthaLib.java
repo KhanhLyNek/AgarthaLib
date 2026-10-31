@@ -32,6 +32,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
+import com.praya.agarthalib.modern.Paper26PluginFolderMigration;
 
 public class AgarthaLib extends JavaPlugin implements Agartha
 {
@@ -101,6 +102,12 @@ public class AgarthaLib extends JavaPlugin implements Agartha
         return this.taskManager;
     }
     
+    @Override
+    public void onLoad() {
+        // Plugin metadata was renamed; keep old config/data files accessible.
+        Paper26PluginFolderMigration.copyMissing(this, "AgarthaLib");
+    }
+
     public void onEnable() {
         this.registerConfig();
         this.registerManager();
@@ -129,12 +136,12 @@ public class AgarthaLib extends JavaPlugin implements Agartha
     
     private final void registerCommand() {
         final CommandExecutor commandAgarthaLib = (CommandExecutor)new CommandAgarthaLib(this);
-        this.getCommand("AgarthaLib").setExecutor(commandAgarthaLib);
+        this.getCommand("LyMeowzLib").setExecutor(commandAgarthaLib);
     }
     
     private final void registerTabComplete() {
         final TabCompleter tabCompleterAgarthaLib = (TabCompleter)new TabCompleterAgarthaLib(this);
-        this.getCommand("AgarthaLib").setTabCompleter(tabCompleterAgarthaLib);
+        this.getCommand("LyMeowzLib").setTabCompleter(tabCompleterAgarthaLib);
     }
     
     private final void registerListener() {

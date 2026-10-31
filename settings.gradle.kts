@@ -1,1 +1,1 @@
-rootProject.name = "AgarthaLib"
+rootProject.name = "LyMeowzLib"

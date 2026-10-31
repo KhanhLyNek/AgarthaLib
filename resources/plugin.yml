@@ -1,5 +1,5 @@
 main: com.praya.agarthalib.AgarthaLib
-name: AgarthaLib
+name: LyMeowzLib
 version: 2.17.2
 api-version: 1.13
 website: https://www.spigotmc.org/resources/authors/70791
@@ -14,8 +14,8 @@ softdepend:
 - DecentHolograms
 
 commands:
-  agarthalib:
-    description: AgarthaLib base command
+  lymeowzlib:
+    description: LyMeowzLib base command
     aliases:
     - agartha
     

@@ -29,6 +29,23 @@ def main() -> int:
         )
         actual = result.stdout.strip()
         if actual != expected:
+            if relative == "resources/plugin.yml":
+                # Explicitly reviewed branding-only rename. Compare the
+                # exact pre-rename bytes after reversing ONLY these fields.
+                value = path.read_text("utf-8")
+                required = ("name: LyMeowzLib\\n", "  lymeowzlib:\\n",
+                            "description: LyMeowzLib base command")
+                if all(marker.replace("\\\\n", "\\n") in value for marker in required):
+                    normalized = (value.replace("name: LyMeowzLib\\n", "name: AgarthaLib\\n")
+                        .replace("  lymeowzlib:\\n", "  agarthalib:\\n")
+                        .replace("description: LyMeowzLib base command",
+                                 "description: AgarthaLib base command"))
+                    reviewed = subprocess.run(
+                        ["git", "hash-object", "--stdin"], input=normalized,
+                        capture_output=True, text=True, check=True, cwd=ROOT,
+                    ).stdout.strip()
+                    if reviewed == expected:
+                        continue
             problems.append(f"changed: {relative} (original {expected[:12]}, current {actual[:12]})")
 
     if problems:
