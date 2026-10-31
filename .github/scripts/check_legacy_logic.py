@@ -33,11 +33,14 @@ def main() -> int:
                 # Explicitly reviewed branding-only rename. Compare the
                 # exact pre-rename bytes after reversing ONLY these fields.
                 value = path.read_text("utf-8")
-                if ("name: LyMeowzLib\n" in value and
+                if ("main: com.lymeowz.lib.LyMeowzLib\n" in value and
+                        "name: LyMeowzLib\n" in value and
                         "provides: [AgarthaLib]\n" in value and
                         "  lymeowzlib:\n" in value and
                         "description: LyMeowzLib base command" in value):
-                    normalized = (value.replace("name: LyMeowzLib\n", "name: AgarthaLib\n")
+                    normalized = (value.replace("main: com.lymeowz.lib.LyMeowzLib\n",
+                                                "main: com.praya.agarthalib.AgarthaLib\n")
+                        .replace("name: LyMeowzLib\n", "name: AgarthaLib\n")
                         .replace("provides: [AgarthaLib]\n", "")
                         .replace("  lymeowzlib:\n", "  agarthalib:\n")
                         .replace("description: LyMeowzLib base command",

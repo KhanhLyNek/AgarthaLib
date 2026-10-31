@@ -12,6 +12,7 @@ if len(candidates) != 1:
 with ZipFile(candidates[0]) as jar:
     names = set(jar.namelist())
     manifest = jar.read("plugin.yml").decode("utf-8")
+    assert "main: com.lymeowz.lib.LyMeowzLib\n" in manifest
     assert "name: LyMeowzLib\n" in manifest
     assert "provides: [AgarthaLib]\n" in manifest
     assert "  lymeowzlib.admin:\n" in manifest
@@ -21,6 +22,7 @@ with ZipFile(candidates[0]) as jar:
     for required in (
         "plugin.yml",
         "com/praya/agarthalib/AgarthaLib.class",
+        "com/lymeowz/lib/LyMeowzLib.class",
         "com/lymeowz/lib/permission/PermissionBridge.class",
         "com/lymeowz/lib/migration/PluginFolderMigration.class",
         "com/praya/agarthalib/packet/arrow/PacketArrow_Paper26_3.class",

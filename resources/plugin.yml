@@ -1,4 +1,4 @@
-main: com.praya.agarthalib.AgarthaLib
+main: com.lymeowz.lib.LyMeowzLib
 name: LyMeowzLib
 provides: [AgarthaLib]
 version: 2.17.2
