@@ -12,7 +12,7 @@ import com.praya.agarthalib.placeholder.PlaceholderMemory;
 import com.praya.agarthalib.AgarthaLib;
 import com.praya.agarthalib.handler.HandlerManager;
 
-public class PluginManager extends HandlerManager
+public class PluginManager extends HandlerManager implements com.lymeowz.lib.manager.PluginServices
 {
     private LanguageManager languageManager;
     private CommandManager commandManager;
@@ -47,5 +47,27 @@ public class PluginManager extends HandlerManager
     
     public final MetricsManager getMetricsManager() {
         return this.metricsManager;
+    }
+
+    @Override
+    public final com.lymeowz.lib.command.CommandRegistry commands() {
+        return this.commandManager;
+    }
+
+    @Override
+    public final java.util.Collection<String> languageIds() {
+        return java.util.Collections.unmodifiableList(
+                new java.util.ArrayList<>(this.languageManager.getLanguageIds()));
+    }
+
+    @Override
+    public final java.util.List<String> languageLines(final String locale, final String key) {
+        return java.util.Collections.unmodifiableList(
+                new java.util.ArrayList<>(this.languageManager.getListText(locale, key)));
+    }
+
+    @Override
+    public final String placeholder(final String identifier) {
+        return this.placeholderManager.getPlaceholder(identifier);
     }
 }

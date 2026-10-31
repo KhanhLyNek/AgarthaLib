@@ -29,6 +29,8 @@ with ZipFile(candidates[0]) as jar:
         "com/lymeowz/lib/command/CommandLookup.class",
         "com/lymeowz/lib/manager/GameServices.class",
         "com/lymeowz/lib/manager/GameAccess.class",
+        "com/lymeowz/lib/manager/PluginServices.class",
+        "com/lymeowz/lib/manager/PluginAccess.class",
         "com/lymeowz/lib/text/HexColors.class",
         "com/lymeowz/lib/item/StringListCodec.class",
         "com/praya/agarthalib/modern/Paper26StringListCodec.class",
