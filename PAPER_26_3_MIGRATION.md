@@ -364,3 +364,10 @@ Original YAML/item/ability source values were not modified by this cutover.
 Outstanding: startup smoke test, Paper runtime inventory item snapshot parity,
 raw custom legacy NBT migration, historic hover_item SNBT conversion,
 functional Jobs/EcoJobs and Heroes/MMOCore equivalence mapping.
+
+## Canonical legacy item builder snapshot views (pending CI)
+
+- Original `core.praya.agarthalib.builder.item.ItemList` and `ItemSingle` remain the same mutable builders and keep all existing Java descriptors, storage behavior and cloning semantics.
+- Both builders now implement `com.lymeowz.lib.item.ItemView`, whose `currentSnapshot()` and `itemSnapshots()` return fresh clones of Bukkit `ItemStack` instances.
+- List snapshots are immutable collections, preserving original ordering and null entries. The clone-only API does not write to inventory, disk, YAML or NBT/PDC; existing builder methods still return their original live references.
+- `testPaper26LegacyItemViews` checks that old callers retain their references while canonical callers cannot mutate their stored stacks through snapshots. This is a boundary improvement, **not** a storage format migration.
