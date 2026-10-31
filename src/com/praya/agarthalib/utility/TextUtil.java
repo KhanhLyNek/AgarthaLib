@@ -106,7 +106,7 @@ public class TextUtil
     
     public static final String colorful(final String text) {
         return ChatColor.translateAlternateColorCodes('&',
-                com.praya.agarthalib.modern.Paper26HexColors.translate(text));
+                com.lymeowz.lib.text.HexColors.translate(text));
     }
     
     public static final String hookPlaceholderAPI(final Player player, String text) {

@@ -9,6 +9,16 @@ public final class Paper26HexColorsSelfTest {
     }
     public static void main(String[] args) {
         final String rgb = "§x§f§f§0§0§a§a";
+        for (String candidate : new String[] {
+                "&#FF00Aa", "<#fF00aA>", "{#ff00aa}", "#FF00AA",
+                "&x&F&F&0&0&A&A", "&aLegacy", "§x§0§0§f§f§0§0",
+                "#1234567", "invalid", "", "A &#FEEDBBSword"}) {
+            check(java.util.Objects.equals(Paper26HexColors.translate(candidate),
+                    com.lymeowz.lib.text.HexColors.translate(candidate)),
+                    "old/new HEX namespaces agree: " + candidate);
+        }
+        check(com.lymeowz.lib.text.HexColors.translate(null) == null,
+                "new HEX namespace preserves null");
         check(rgb.equals(Paper26HexColors.translate("&#FF00Aa")), "ampersand HEX");
         check(rgb.equals(Paper26HexColors.translate("<#fF00aA>")), "angle HEX");
         check(rgb.equals(Paper26HexColors.translate("{#ff00aa}")), "brace HEX");
