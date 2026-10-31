@@ -124,7 +124,7 @@ publishing {
 tasks.register<JavaCompile>("compilePaper26ItemData") {
     description = "Type-check the Paper 26.3 item storage and metadata services without legacy NMS"
     group = "verification"
-    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java", "Paper26PotionAliases.java", "Paper26MVdWRegistration.java", "Paper26PlaceholderValues.java", "Paper26MythicLibStats.java", "Paper26InventoryFactory.java", "Paper26JsonChat.java", "Paper26AuraSkillsProgress.java", "Paper26MMOCoreProgress.java", "Paper26LandsClaims.java", "Paper26DecentHolograms.java", "Paper26OptionalProviders.java", "Paper26ItemSnapshots.java", "Paper26HoverItems.java", "Paper26HoverItemPayload.java", "Paper26LegacyItemTags.java", "Paper26ItemModels.java", "Paper26ServerTPS.java") }
+    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java", "Paper26PotionAliases.java", "Paper26MVdWRegistration.java", "Paper26PlaceholderValues.java", "Paper26MythicLibStats.java", "Paper26InventoryFactory.java", "Paper26JsonChat.java", "Paper26AuraSkillsProgress.java", "Paper26MMOCoreProgress.java", "Paper26LandsClaims.java", "Paper26DecentHolograms.java", "Paper26OptionalProviders.java", "Paper26ItemSnapshots.java", "Paper26HoverItems.java", "Paper26HoverItemPayload.java", "Paper26LegacyItemTags.java", "Paper26HexColors.java", "Paper26ItemModels.java", "Paper26ServerTPS.java") }
     classpath = configurations["compileClasspath"]
     destinationDirectory.set(layout.buildDirectory.dir("paper26-api-check"))
     javaCompiler.set(javaToolchains.compilerFor {
@@ -1052,4 +1052,28 @@ tasks.register<JavaExec>("testPaper26PapiOptional") {
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
+}
+
+// Pure-JVM HEX parser fixture; protects legacy & formatting, RGB syntax
+// variants and invalid/incomplete input without an actual Paper server.
+tasks.register<JavaCompile>("compilePaper26HexColorsTest") {
+    group = "verification"
+    dependsOn("compilePaper26ItemData")
+    source = fileTree("ci/paper26-hex-color-test") { include("**/*.java") }
+    classpath = files(layout.buildDirectory.dir("paper26-api-check"))
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-hex-color-tests"))
+    javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+tasks.register<JavaExec>("testPaper26HexColors") {
+    group = "verification"
+    dependsOn("compilePaper26HexColorsTest")
+    classpath = files(layout.buildDirectory.dir("paper26-api-check"),
+                      layout.buildDirectory.dir("paper26-hex-color-tests"))
+    mainClass.set("com.praya.agarthalib.modern.Paper26HexColorsSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+}
+tasks.named("testPaper26PapiOptional") {
+    dependsOn("testPaper26HexColors")
 }
