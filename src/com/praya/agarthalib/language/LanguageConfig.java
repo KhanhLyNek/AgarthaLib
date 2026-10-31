@@ -7,6 +7,7 @@ package com.praya.agarthalib.language;
 import com.praya.agarthalib.manager.plugin.PlaceholderManager;
 import core.praya.agarthalib.builder.message.MessageBuild;
 import com.praya.agarthalib.placeholder.PlaceholderMemory;
+import com.lymeowz.lib.command.CommandText;
 import org.bukkit.configuration.file.FileConfiguration;
 import java.util.Iterator;
 import java.io.File;
@@ -14,7 +15,6 @@ import java.util.regex.Pattern;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.praya.agarthalib.utility.FileUtil;
 import com.praya.agarthalib.AgarthaLib;
-import com.praya.agarthalib.modern.Paper26CommandText;
 import java.util.ArrayList;
 import core.praya.agarthalib.builder.main.LanguageBuild;
 import java.util.HashMap;
@@ -92,7 +92,7 @@ public class LanguageConfig extends HandlerConfig
                 final List<String> list = new ArrayList<String>();
                 list.add(text);
                 final List<String> listPlaceholder = placeholderManager.localPlaceholder(list);
-                final MessageBuild messages = new MessageBuild(Paper26CommandText.rewrite(listPlaceholder));
+                final MessageBuild messages = new MessageBuild(CommandText.rewrite(listPlaceholder));
                 mapLanguage.put(key, messages);
             }
             else {
@@ -101,7 +101,7 @@ public class LanguageConfig extends HandlerConfig
                 }
                 final List<String> list2 = (List<String>)config.getStringList(path);
                 final List<String> listPlaceholder2 = placeholderManager.localPlaceholder(list2);
-                final MessageBuild messages2 = new MessageBuild(Paper26CommandText.rewrite(listPlaceholder2));
+                final MessageBuild messages2 = new MessageBuild(CommandText.rewrite(listPlaceholder2));
                 mapLanguage.put(key, messages2);
             }
         }

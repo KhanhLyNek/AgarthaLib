@@ -23,6 +23,8 @@ with ZipFile(candidates[0]) as jar:
         "plugin.yml",
         "com/praya/agarthalib/AgarthaLib.class",
         "com/lymeowz/lib/LyMeowzLib.class",
+        "com/lymeowz/lib/command/CommandText.class",
+        "com/lymeowz/lib/command/CommandDefinitions.class",
         "com/lymeowz/lib/permission/PermissionBridge.class",
         "com/lymeowz/lib/migration/PluginFolderMigration.class",
         "com/praya/agarthalib/packet/arrow/PacketArrow_Paper26_3.class",
