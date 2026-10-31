@@ -308,6 +308,35 @@ tasks.register<JavaExec>("testPaper26ItemSnapshots") {
     javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
 }
 
+// Verify the canonical read-only views of the original ItemList and ItemSingle.
+// Source is compiled in an isolated CI task; no fixture ships in the plugin jar.
+tasks.register<JavaCompile>("compilePaper26LegacyItemViewSelfTest") {
+    description = "Compile legacy Bukkit ItemList/ItemSingle canonical snapshot API test"
+    group = "verification"
+    source = fileTree(".") {
+        include("src/core/praya/agarthalib/builder/item/Item.java")
+        include("src/core/praya/agarthalib/builder/item/ItemList.java")
+        include("src/core/praya/agarthalib/builder/item/ItemSingle.java")
+        include("src/com/lymeowz/lib/item/ItemView.java")
+        include("ci/paper26-item-view-test/**/*.java")
+    }
+    classpath = configurations["compileClasspath"]
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-item-view-tests"))
+    javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26LegacyItemViews") {
+    description = "Verify read-only detached item stack snapshots without touching inventory"
+    group = "verification"
+    dependsOn("compilePaper26LegacyItemViewSelfTest")
+    classpath = configurations["compileClasspath"] +
+            files(layout.buildDirectory.dir("paper26-item-view-tests"))
+    mainClass.set("com.lymeowz.lib.item.ItemViewSelfTest")
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+}
+
 // Verify modern inventory and equipment adapters against preserved public contracts.
 tasks.register<JavaCompile>("compilePaper26InventoryEquipmentBridges") {
     description = "Compile Paper 26.3 inventory and equipment bridge sources"
@@ -1044,7 +1073,7 @@ tasks.register<JavaExec>("testPaper26HoverItemPayload") {
 tasks.register<JavaExec>("testPaper26PapiOptional") {
     description = "Verify disabled/missing PlaceholderAPI retains exact placeholder and formatting"
     group = "verification"
-    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager", "testPaper26LivingEntityKind", "testPaper26JsonChat", "testPaper26MythicLibOptional", "testPaper26ModernProviders", "testPaper26ItemSnapshots", "testPaper26ServerTPS", "testPaper26HoverItemPayload", "testPaper26HoverPipeline", "testPaper26LegacyNbt")
+    dependsOn("compilePaper26PapiOptionalSelfTest", "testPaper26OriginalPlaceholderManager", "testPaper26LivingEntityKind", "testPaper26JsonChat", "testPaper26MythicLibOptional", "testPaper26ModernProviders", "testPaper26ItemSnapshots", "testPaper26LegacyItemViews", "testPaper26ServerTPS", "testPaper26HoverItemPayload", "testPaper26HoverPipeline", "testPaper26LegacyNbt")
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-papi-optional-tests"),
         layout.buildDirectory.dir("paper26-placeholder-api-check"),
