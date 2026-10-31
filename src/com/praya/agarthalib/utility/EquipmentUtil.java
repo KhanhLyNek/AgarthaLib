@@ -204,13 +204,28 @@ public class EquipmentUtil
     public static final void colorful(final ItemStack item) {
         if (item != null) {
             final ItemMeta meta = item.getItemMeta();
-            final String name = meta.getDisplayName();
-            final List<String> lores = TextUtil.colorful(getLores(item));
+            if (meta == null) return;
+            // Avoid reconstructing every already-styled Adventure component
+            // through Paper's deprecated String getters on YAML reload:
+            // that path silently downsampled existing HEX and discarded style.
+            boolean changed = false;
+            final String name = com.praya.agarthalib.modern.Paper26ItemTextColors.displayName(meta);
             if (name != null) {
-                meta.setDisplayName(TextUtil.colorful(name));
+                final String coloredName = TextUtil.colorful(name);
+                if (!name.equals(coloredName)) {
+                    com.praya.agarthalib.modern.Paper26ItemTextColors.displayName(meta, coloredName);
+                    changed = true;
+                }
             }
-            meta.setLore((List)lores);
-            item.setItemMeta(meta);
+            final List<String> original = com.praya.agarthalib.modern.Paper26ItemTextColors.lore(meta);
+            if (original != null) {
+                final List<String> coloredLores = TextUtil.colorful(new java.util.ArrayList<>(original));
+                if (!original.equals(coloredLores)) {
+                    com.praya.agarthalib.modern.Paper26ItemTextColors.lore(meta, coloredLores);
+                    changed = true;
+                }
+            }
+            if (changed) item.setItemMeta(meta);
         }
     }
     
@@ -269,7 +284,7 @@ public class EquipmentUtil
         final ItemMeta itemMeta = item.getItemMeta();
         final MaterialEnum materialEnum = MaterialEnum.getMaterialEnum(item);
         if (itemMeta != null && itemMeta.hasDisplayName()) {
-            final String displayName = itemMeta.getDisplayName();
+            final String displayName = com.praya.agarthalib.modern.Paper26ItemTextColors.displayName(itemMeta);
             final String nameLegacy = materialEnum.getNameLegacy();
             if (ServerUtil.isLegacy() && nameLegacy != null) {
                 final String formatLegacy = TextUtil.toTitleCase(nameLegacy.replace("_", " "));
@@ -387,7 +402,7 @@ public class EquipmentUtil
             if (itemMeta != null) {
                 name = (hookPlaceholder ? TextUtil.hookPlaceholderAPI(null, name) : name);
                 name = TextUtil.colorful(name);
-                itemMeta.setDisplayName(name);
+                com.praya.agarthalib.modern.Paper26ItemTextColors.displayName(itemMeta, name);
                 item.setItemMeta(itemMeta);
             }
         }
@@ -407,7 +422,7 @@ public class EquipmentUtil
         if (item != null) {
             final ItemMeta itemMeta = item.getItemMeta();
             if (itemMeta != null) {
-                final List<String> lores = (List<String>)itemMeta.getLore();
+                final List<String> lores = com.praya.agarthalib.modern.Paper26ItemTextColors.lore(itemMeta);
                 if (lores != null) {
                     return lores;
                 }
@@ -446,7 +461,7 @@ public class EquipmentUtil
                 final ItemLoresChangeEvent itemLoresChangeEvent = new ItemLoresChangeEvent(item, lores);
                 ServerEventUtil.callEvent(itemLoresChangeEvent);
                 if (!itemLoresChangeEvent.isCancelled()) {
-                    meta.setLore((List)lores);
+                    com.praya.agarthalib.modern.Paper26ItemTextColors.lore(meta, lores);
                     item.setItemMeta(meta);
                 }
             }
