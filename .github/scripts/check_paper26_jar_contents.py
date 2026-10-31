@@ -13,6 +13,7 @@ with ZipFile(candidates[0]) as jar:
     names = set(jar.namelist())
     manifest = jar.read("plugin.yml").decode("utf-8")
     assert "name: LyMeowzLib\n" in manifest
+    assert "provides: [AgarthaLib]\n" in manifest
     assert "  lymeowzlib:\n" in manifest
     assert "  agarthalib:\n" not in manifest
     for required in (

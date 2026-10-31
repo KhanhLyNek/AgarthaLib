@@ -34,9 +34,11 @@ def main() -> int:
                 # exact pre-rename bytes after reversing ONLY these fields.
                 value = path.read_text("utf-8")
                 if ("name: LyMeowzLib\n" in value and
+                        "provides: [AgarthaLib]\n" in value and
                         "  lymeowzlib:\n" in value and
                         "description: LyMeowzLib base command" in value):
                     normalized = (value.replace("name: LyMeowzLib\n", "name: AgarthaLib\n")
+                        .replace("provides: [AgarthaLib]\n", "")
                         .replace("  lymeowzlib:\n", "  agarthalib:\n")
                         .replace("description: LyMeowzLib base command",
                                  "description: AgarthaLib base command"))

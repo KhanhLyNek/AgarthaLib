@@ -1,5 +1,6 @@
 main: com.praya.agarthalib.AgarthaLib
 name: LyMeowzLib
+provides: [AgarthaLib]
 version: 2.17.2
 api-version: 1.13
 website: https://www.spigotmc.org/resources/authors/70791
