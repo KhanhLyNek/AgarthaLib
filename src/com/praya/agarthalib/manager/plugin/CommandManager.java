@@ -14,7 +14,7 @@ import java.util.Collection;
 import com.praya.agarthalib.AgarthaLib;
 import com.praya.agarthalib.handler.HandlerManager;
 
-public abstract class CommandManager extends HandlerManager
+public abstract class CommandManager extends HandlerManager implements com.lymeowz.lib.command.CommandRegistry
 {
     protected CommandManager(final AgarthaLib plugin) {
         super(plugin);
@@ -55,18 +55,7 @@ public abstract class CommandManager extends HandlerManager
     }
     
     public final boolean checkCommand(final String arg, final String id) {
-        final CommandBuild commandBuild = this.getCommandBuild(id);
-        if (commandBuild != null) {
-            final String main = commandBuild.getMain();
-            if (main.equalsIgnoreCase(arg)) {
-                return true;
-            }
-            for (final String aliases : commandBuild.getAliases()) {
-                if (aliases.equalsIgnoreCase(arg)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return com.lymeowz.lib.command.CommandLookup.matches(getCommandBuild(id), arg);
     }
+
 }

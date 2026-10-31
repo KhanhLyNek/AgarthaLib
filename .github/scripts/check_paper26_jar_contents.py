@@ -25,6 +25,8 @@ with ZipFile(candidates[0]) as jar:
         "com/lymeowz/lib/LyMeowzLib.class",
         "com/lymeowz/lib/command/CommandText.class",
         "com/lymeowz/lib/command/CommandDefinitions.class",
+        "com/lymeowz/lib/command/CommandRegistry.class",
+        "com/lymeowz/lib/command/CommandLookup.class",
         "com/lymeowz/lib/text/HexColors.class",
         "com/lymeowz/lib/item/StringListCodec.class",
         "com/praya/agarthalib/modern/Paper26StringListCodec.class",
