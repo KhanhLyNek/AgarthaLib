@@ -12,9 +12,9 @@ if len(candidates) != 1:
 with ZipFile(candidates[0]) as jar:
     names = set(jar.namelist())
     manifest = jar.read("plugin.yml").decode("utf-8")
-    assert "name: LyMeowzLib\\n".replace("\\\\n", "\\n") in manifest
-    assert "  lymeowzlib:\\n".replace("\\\\n", "\\n") in manifest
-    assert "  agarthalib:\\n".replace("\\\\n", "\\n") not in manifest
+    assert "name: LyMeowzLib\n" in manifest
+    assert "  lymeowzlib:\n" in manifest
+    assert "  agarthalib:\n" not in manifest
     for required in (
         "plugin.yml",
         "com/praya/agarthalib/AgarthaLib.class",
