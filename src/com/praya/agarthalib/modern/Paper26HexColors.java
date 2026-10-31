@@ -17,7 +17,7 @@ public final class Paper26HexColors {
             "(?i)&#([0-9a-f]{6})(?![0-9a-f])"
             + "|<#([0-9a-f]{6})>"
             + "|\\{#([0-9a-f]{6})\\}"
-            + "|(?<![a-z0-9_/#])#([0-9a-f]{6})(?![0-9a-f])");
+            + "|(?<![a-z0-9_/#<&{])#([0-9a-f]{6})(?![0-9a-f])");
     private static final Pattern AMP_X = Pattern.compile(
             "(?i)&x(?:&[0-9a-f]){6}");
 
