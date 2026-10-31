@@ -14,11 +14,15 @@ with ZipFile(candidates[0]) as jar:
     manifest = jar.read("plugin.yml").decode("utf-8")
     assert "name: LyMeowzLib\n" in manifest
     assert "provides: [AgarthaLib]\n" in manifest
+    assert "  lymeowzlib.admin:\n" in manifest
+    assert "  lymeowzlib.command.reload:\n" in manifest
     assert "  lymeowzlib:\n" in manifest
     assert "  agarthalib:\n" not in manifest
     for required in (
         "plugin.yml",
         "com/praya/agarthalib/AgarthaLib.class",
+        "com/lymeowz/lib/permission/PermissionBridge.class",
+        "com/lymeowz/lib/migration/PluginFolderMigration.class",
         "com/praya/agarthalib/packet/arrow/PacketArrow_Paper26_3.class",
         "com/praya/agarthalib/packet/material/PacketMaterial_Paper26_3.class",
         "com/praya/agarthalib/packet/equipment/PacketEquipment_Paper26_3.class",

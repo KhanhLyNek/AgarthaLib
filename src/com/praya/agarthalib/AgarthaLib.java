@@ -32,7 +32,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
-import com.praya.agarthalib.modern.Paper26PluginFolderMigration;
+import com.lymeowz.lib.migration.PluginFolderMigration;
 
 public class AgarthaLib extends JavaPlugin implements Agartha
 {
@@ -105,7 +105,7 @@ public class AgarthaLib extends JavaPlugin implements Agartha
     @Override
     public void onLoad() {
         // Plugin metadata was renamed; keep old config/data files accessible.
-        Paper26PluginFolderMigration.copyMissing(this, "AgarthaLib");
+        PluginFolderMigration.copyMissing(this, "AgarthaLib");
     }
 
     public void onEnable() {

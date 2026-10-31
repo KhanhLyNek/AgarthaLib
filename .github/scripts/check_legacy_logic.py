@@ -41,7 +41,8 @@ def main() -> int:
                         .replace("provides: [AgarthaLib]\n", "")
                         .replace("  lymeowzlib:\n", "  agarthalib:\n")
                         .replace("description: LyMeowzLib base command",
-                                 "description: AgarthaLib base command"))
+                                 "description: AgarthaLib base command")
+                        .replace("\n\n  # New canonical permission namespace. Legacy permissions above remain live.\n  lymeowzlib.admin:\n    description: Administrative access to LyMeowzLib\n    default: op\n    children:\n      lymeowzlib.command.reload: true\n\n  lymeowzlib.command.reload:\n    description: Reload LyMeowzLib configuration\n    default: false", ""))
                     reviewed = subprocess.run(
                         ["git", "hash-object", "--stdin"], input=normalized,
                         capture_output=True, text=True, check=True, cwd=ROOT,

@@ -25,3 +25,14 @@ permissions:
     description: Gives access to everything!
     children:
       agarthalib.command.reload: true
+
+  # New canonical permission namespace. Legacy permissions above remain live.
+  lymeowzlib.admin:
+    description: Administrative access to LyMeowzLib
+    default: op
+    children:
+      lymeowzlib.command.reload: true
+
+  lymeowzlib.command.reload:
+    description: Reload LyMeowzLib configuration
+    default: false

@@ -5,7 +5,7 @@
 package com.praya.agarthalib.manager.plugin;
 
 import java.util.Iterator;
-import com.praya.agarthalib.utility.SenderUtil;
+import com.lymeowz.lib.permission.PermissionBridge;
 import org.bukkit.command.CommandSender;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,7 @@ public abstract class CommandManager extends HandlerManager
     
     public final String getPermission(final String id) {
         final CommandBuild commandBuild = this.getCommandBuild(id);
-        return (commandBuild != null) ? commandBuild.getPermission() : null;
+        return (commandBuild != null) ? PermissionBridge.canonical(commandBuild.getPermission()) : null;
     }
     
     public final List<String> getAliases(final String id) {
@@ -49,7 +49,7 @@ public abstract class CommandManager extends HandlerManager
         final CommandBuild commandBuild = this.getCommandBuild(id);
         if (commandBuild != null) {
             final String permission = commandBuild.getPermission();
-            return SenderUtil.hasPermission(sender, permission);
+            return PermissionBridge.allowed(sender, permission);
         }
         return false;
     }
