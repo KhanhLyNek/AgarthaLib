@@ -41,6 +41,22 @@ public final class ItemViewSelfTest {
                 "cleared legacy list exposes safe empty snapshots");
         check(all.size() == 2, "previous snapshot retains its original size");
 
+        // Null entries are legal legacy list members; removing a requested
+        // null item must not throw or silently discard older null slots.
+        final ItemList nullEntries = new ItemList((ItemStack) null, (ItemStack) null);
+        nullEntries.removeItemStack(null);
+        check(nullEntries.getItemList().size() == 2,
+                "null removal preserves legacy list entries without an NPE");
+
+        // The legacy getter exposes a mutable list. Shrinking it after next()
+        // must not make the older getItemStack() method throw on a stale index.
+        final ItemList changingList = new ItemList((ItemStack) null, (ItemStack) null);
+        changingList.next();
+        changingList.getItemList().remove(1);
+        check(changingList.getItemStack() == null
+                        && changingList.currentSnapshot() == null,
+                "stale item list cursor is safely treated as no current item");
+
         final ItemSingle single = new ItemSingle(null);
         final ItemView singleView = single;
         check(singleView.currentSnapshot() == null && singleView.itemSnapshots().isEmpty(),
