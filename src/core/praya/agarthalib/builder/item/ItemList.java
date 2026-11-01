@@ -35,7 +35,7 @@ public class ItemList implements Item, Cloneable, com.lymeowz.lib.item.ItemView
     
     @Override
     public final ItemStack getItemStack() {
-        return this.itemList.isEmpty() ? null : this.itemList.get(this.index);
+        return this.index < 0 || this.index >= this.itemList.size() ? null : this.itemList.get(this.index);
     }
     
     @Override
@@ -53,7 +53,7 @@ public class ItemList implements Item, Cloneable, com.lymeowz.lib.item.ItemView
     public void removeItemStack(final ItemStack item) {
         final List<ItemStack> itemList = new ArrayList<ItemStack>(this.getItemList());
         for (final ItemStack itemStack : itemList) {
-            if (itemStack.equals((Object)item)) {
+            if (itemStack != null && itemStack.equals((Object)item)) {
                 this.itemList.remove(itemStack);
             }
         }
