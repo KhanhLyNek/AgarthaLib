@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import org.bukkit.inventory.ItemStack;
 import java.util.List;
 
-public class ItemList implements Item, Cloneable
+public class ItemList implements Item, Cloneable, com.lymeowz.lib.item.ItemView
 {
     private final List<ItemStack> itemList;
     private int index;
@@ -85,6 +85,24 @@ public class ItemList implements Item, Cloneable
         return item;
     }
     
+    @Override
+    public final ItemStack currentSnapshot() {
+        if (this.index < 0 || this.index >= this.itemList.size()) {
+            return null;
+        }
+        final ItemStack current = this.itemList.get(this.index);
+        return current == null ? null : current.clone();
+    }
+
+    @Override
+    public final java.util.List<ItemStack> itemSnapshots() {
+        final java.util.List<ItemStack> result = new java.util.ArrayList<>(this.itemList.size());
+        for (final ItemStack item : this.itemList) {
+            result.add(item == null ? null : item.clone());
+        }
+        return java.util.Collections.unmodifiableList(result);
+    }
+
     public ItemList clone() {
         return new ItemList(this.itemList);
     }
