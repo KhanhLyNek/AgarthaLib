@@ -1,0 +1,70 @@
+package com.lymeowz.lib.packet.message;
+
+import com.lymeowz.lib.AgarthaLib;
+import com.lymeowz.lib.handler.HandlerPacket;
+import com.lymeowz.lib.modern.Paper26AudienceService;
+import com.lymeowz.lib.modern.Paper26JsonChat;
+import com.lymeowz.lib.modern.Paper26HoverItems;
+import com.lymeowz.lib.modern.Paper26HoverItemPayload;
+import com.lymeowz.lib.utility.JsonUtil;
+import com.lymeowz.lib.core.builder.bridge.MessageActionbar;
+import com.lymeowz.lib.core.builder.bridge.MessageJson;
+import com.lymeowz.lib.core.builder.bridge.MessageTitle;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.Collection;
+
+/**
+ * Paper 26.3 replacement for the old action bar/title/subtitle packet paths.
+ * Supports text/click/hover chat through Adventure. The historical item-hover
+ * SNBT format cannot be generated safely from modern data components yet.
+ */
+public final class PacketMessage_Paper26_3 extends HandlerPacket
+        implements MessageActionbar, MessageTitle, MessageJson {
+
+    public PacketMessage_Paper26_3(final AgarthaLib plugin) {
+        super(plugin);
+    }
+
+    /**
+     * Reuse the *original* JsonUtil rich-text DSL converter instead of
+     * renaming commands or silently interpreting markup as plain chat.
+     */
+    @Override
+    public void packetSendJson(final Collection<Player> players, final String message) {
+        if (message == null) return;
+        try {
+            Paper26JsonChat.send(players, JsonUtil.getJsonText(message));
+        } catch (RuntimeException ex) {
+            // Malformed legacy DSL must not crash the scheduler or send a
+            // lossy fallback with accidentally executable click actions.
+        }
+    }
+
+    @Override
+    public String packetGetJsonItem(final ItemStack item) {
+        // The old JsonUtil.getJsonText DSL expects one colon-safe token. A
+        // versioned URL-safe payload holds Paper's real data components and
+        // JsonBuild converts it to Adventure's show_item.contents at output.
+        // Never pretend that modern components are the pre-1.20 raw SNBT.
+        return Paper26HoverItemPayload.encode(Paper26HoverItems.json("", item));
+    }
+
+    @Override
+    public void packetSendActionbar(final Collection<Player> players, final String message) {
+        Paper26AudienceService.actionBar(players, message);
+    }
+
+    @Override
+    public void packetSendTitle(final Collection<Player> players, final String message,
+                                final int fadeIn, final int stay, final int fadeOut) {
+        Paper26AudienceService.title(players, message, fadeIn, stay, fadeOut);
+    }
+
+    @Override
+    public void packetSendSubtitle(final Collection<Player> players, final String message,
+                                   final int fadeIn, final int stay, final int fadeOut) {
+        Paper26AudienceService.subtitle(players, message, fadeIn, stay, fadeOut);
+    }
+}

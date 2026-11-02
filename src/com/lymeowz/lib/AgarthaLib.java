@@ -1,0 +1,217 @@
+// 
+// Decompiled by Procyon v0.5.36
+// 
+
+package com.lymeowz.lib;
+
+import com.lymeowz.lib.command.executor.CommandAgarthaLib;
+import com.lymeowz.lib.listener.core.*;
+import com.lymeowz.lib.listener.custom.ListenerMenuClick;
+import com.lymeowz.lib.listener.custom.ListenerMenuCreate;
+import com.lymeowz.lib.listener.custom.ListenerPlayerHealthChange;
+import com.lymeowz.lib.listener.custom.ListenerPlayerHealthMaxChange;
+import com.lymeowz.lib.listener.main.*;
+import com.lymeowz.lib.manager.core.CoreManager;
+import com.lymeowz.lib.manager.game.GameManager;
+import com.lymeowz.lib.manager.player.PlayerManager;
+import com.lymeowz.lib.manager.plugin.PluginManager;
+import com.lymeowz.lib.manager.server.ServerManager;
+import com.lymeowz.lib.manager.task.TaskManager;
+import com.lymeowz.lib.tabcompleter.TabCompleterAgarthaLib;
+import com.lymeowz.lib.utility.PlayerUtil;
+import com.lymeowz.lib.utility.PluginUtil;
+import com.lymeowz.lib.utility.ServerEventUtil;
+import com.lymeowz.lib.utility.ServerUtil;
+import com.lymeowz.lib.core.bridge.unity.Bridge;
+import com.lymeowz.lib.core.enums.main.VersionNMS;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.List;
+import com.lymeowz.lib.migration.PluginFolderMigration;
+
+public class AgarthaLib extends JavaPlugin implements Agartha
+{
+    private final String type = "Free";
+    private final String placeholder = "agarthalib";
+    private AgarthaLibConfig mainConfig;
+    private CoreManager coreManager;
+    private ServerManager serverManager;
+    private PluginManager pluginManager;
+    private PlayerManager playerManager;
+    private GameManager gameManager;
+    private TaskManager taskManager;
+    
+    public String getPluginName() {
+        return this.getName();
+    }
+    
+    public String getPluginType() {
+        return "Free";
+    }
+    
+    public String getPluginVersion() {
+        return this.getDescription().getVersion();
+    }
+    
+    public String getPluginPlaceholder() {
+        return "agarthalib";
+    }
+    
+    public String getPluginWebsite() {
+        return this.getPluginManager().getPluginPropertiesManager().getPluginWebsite();
+    }
+    
+    public String getPluginLatest() {
+        return this.getPluginManager().getPluginPropertiesManager().getPluginVersion(this.getPluginType());
+    }
+    
+    public List<String> getPluginDevelopers() {
+        return this.getPluginManager().getPluginPropertiesManager().getPluginDevelopers();
+    }
+    
+    public final AgarthaLibConfig getMainConfig() {
+        return this.mainConfig;
+    }
+    
+    public final CoreManager getCoreManager() {
+        return this.coreManager;
+    }
+    
+    public final ServerManager getServerManager() {
+        return this.serverManager;
+    }
+    
+    public final PluginManager getPluginManager() {
+        return this.pluginManager;
+    }
+    
+    public final PlayerManager getPlayerManager() {
+        return this.playerManager;
+    }
+    
+    public final GameManager getGameManager() {
+        return this.gameManager;
+    }
+    
+    public final TaskManager getTaskManager() {
+        return this.taskManager;
+    }
+    
+    @Override
+    public void onLoad() {
+        // Plugin metadata was renamed; keep old config/data files accessible.
+        PluginFolderMigration.copyMissing(this, "AgarthaLib");
+    }
+
+    public void onEnable() {
+        this.registerConfig();
+        this.registerManager();
+        this.registerCommand();
+        this.registerTabComplete();
+        this.registerListener();
+        this.registerPlaceholder();
+    }
+    
+    private final void registerConfig() {
+        this.mainConfig = new AgarthaLibConfig(this);
+    }
+    
+    private final void registerManager() {
+        this.coreManager = new CoreManager(this);
+        this.serverManager = new AgarthaServerMemory(this);
+        this.pluginManager = new PluginManager(this);
+        this.playerManager = new PlayerManager(this);
+        this.gameManager = new GameManager(this);
+        this.taskManager = new TaskManager(this);
+    }
+    
+    private final void registerPlaceholder() {
+        this.getPluginManager().getPlaceholderManager().registerAll();
+    }
+    
+    private final void registerCommand() {
+        final CommandExecutor commandAgarthaLib = (CommandExecutor)new CommandAgarthaLib(this);
+        this.getCommand("LyMeowzLib").setExecutor(commandAgarthaLib);
+    }
+    
+    private final void registerTabComplete() {
+        final TabCompleter tabCompleterAgarthaLib = (TabCompleter)new TabCompleterAgarthaLib(this);
+        this.getCommand("LyMeowzLib").setTabCompleter(tabCompleterAgarthaLib);
+    }
+    
+    private final void registerListener() {
+        final Listener listenerCoreBossBarPlayerKick = (Listener)new ListenerCoreBossBarPlayerKick(this);
+        final Listener listenerCoreBossBarPlayerQuit = (Listener)new ListenerCoreBossBarPlayerQuit(this);
+        final Listener listenerCoreMenuClick = (Listener)new ListenerCoreMenuClick(this);
+        final Listener listenerCoreMenuClose = (Listener)new ListenerCoreMenuClose(this);
+        final Listener listenerCoreMenuOpen = (Listener)new ListenerCoreMenuOpen(this);
+        final Listener listenerMenuClick = (Listener)new ListenerMenuClick(this);
+        final Listener listenerMenuCreate = (Listener)new ListenerMenuCreate(this);
+        final Listener listenerEntityDamage = (Listener)new ListenerEntityDamage(this);
+        final Listener listenerEntityDeath = (Listener)new ListenerEntityDeath(this);
+        final Listener listenerEntityShootBow = (Listener)new ListenerEntityShootBow(this);
+        final Listener listenerInventoryDrag = (Listener)new ListenerInventoryDrag(this);
+        final Listener listenerPlayerJoin = (Listener)new ListenerPlayerJoin(this);
+        final Listener listenerPlayerQuit = (Listener)new ListenerPlayerQuit(this);
+        final Listener listenerProjectileHit = (Listener)new ListenerProjectileHit(this);
+        final Listener listenerProjectileLaunch = (Listener)new ListenerProjectileLaunch(this);
+        final Listener listenerWorldLoad = (Listener)new ListenerWorldLoad(this);
+        final Listener listenerWorldUnload = (Listener)new ListenerWorldUnload(this);
+        final Listener listenerPlayerHealthChange = (Listener)new ListenerPlayerHealthChange(this);
+        final Listener listenerPlayerHealthMaxChange = (Listener)new ListenerPlayerHealthMaxChange(this);
+        ServerEventUtil.registerEvent((Plugin)this, listenerCoreBossBarPlayerKick);
+        ServerEventUtil.registerEvent((Plugin)this, listenerCoreBossBarPlayerQuit);
+        ServerEventUtil.registerEvent((Plugin)this, listenerCoreMenuClick);
+        ServerEventUtil.registerEvent((Plugin)this, listenerCoreMenuClose);
+        ServerEventUtil.registerEvent((Plugin)this, listenerCoreMenuOpen);
+        ServerEventUtil.registerEvent((Plugin)this, listenerMenuClick);
+        ServerEventUtil.registerEvent((Plugin)this, listenerMenuCreate);
+        ServerEventUtil.registerEvent((Plugin)this, listenerEntityDamage);
+        ServerEventUtil.registerEvent((Plugin)this, listenerEntityDeath);
+        ServerEventUtil.registerEvent((Plugin)this, listenerEntityShootBow);
+        ServerEventUtil.registerEvent((Plugin)this, listenerInventoryDrag);
+        ServerEventUtil.registerEvent((Plugin)this, listenerPlayerJoin);
+        ServerEventUtil.registerEvent((Plugin)this, listenerPlayerQuit);
+        ServerEventUtil.registerEvent((Plugin)this, listenerProjectileHit);
+        ServerEventUtil.registerEvent((Plugin)this, listenerProjectileLaunch);
+        ServerEventUtil.registerEvent((Plugin)this, listenerWorldLoad);
+        ServerEventUtil.registerEvent((Plugin)this, listenerWorldUnload);
+        ServerEventUtil.registerEvent((Plugin)this, listenerPlayerHealthChange);
+        ServerEventUtil.registerEvent((Plugin)this, listenerPlayerHealthMaxChange);
+        if (ServerUtil.isLegacy()) {
+            final Listener listenerPlayerMove = (Listener)new ListenerPlayerMove(this);
+            ServerEventUtil.registerEvent((Plugin)this, listenerPlayerMove);
+        }
+        if (ServerUtil.isCompatible(VersionNMS.V1_9_R2)) {
+            final Listener listenerPlayerPickupArrow = (Listener)new ListenerPlayerPickupArrow(this);
+            ServerEventUtil.registerEvent((Plugin)this, listenerPlayerPickupArrow);
+        }
+        else {
+            final Listener listenerCoreBossBarPlayerRespawn = (Listener)new ListenerCoreBossBarPlayerRespawn(this);
+            final Listener listenerCoreBossBarPlayerTeleport = (Listener)new ListenerCoreBossBarPlayerTeleport(this);
+            ServerEventUtil.registerEvent((Plugin)this, listenerCoreBossBarPlayerRespawn);
+            ServerEventUtil.registerEvent((Plugin)this, listenerCoreBossBarPlayerTeleport);
+        }
+        // Removed: 1.7-1.15 provider events cannot be subscribed to through
+        // obsolete third-party API classes on Paper 26.3.
+        // Do not silently map their XP/health callbacks onto MMOCore/AuraSkills.
+        for (final String obsolete : new String[] {"SkillAPI", "BattleLevels", "Heroes"}) {
+            if (PluginUtil.isPluginInstalled(obsolete)) {
+                this.getLogger().warning("Legacy provider " + obsolete
+                        + " detected. Its old event bridge is disabled on Paper 26.3;"
+                        + " use the new separate provider API contracts.");
+            }
+        }
+    }
+    
+    public void onDisable() {
+        for (final Player player : PlayerUtil.getOnlinePlayers()) {
+            Bridge.getBridgeMessage().removeAllBossBar(player);
+        }
+    }
+}

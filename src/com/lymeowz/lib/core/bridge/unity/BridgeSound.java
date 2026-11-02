@@ -1,0 +1,106 @@
+// 
+// Decompiled by Procyon v0.5.36
+// 
+
+package com.lymeowz.lib.core.bridge.unity;
+
+import com.lymeowz.lib.AgarthaLib;
+import com.lymeowz.lib.handler.HandlerBridge;
+import com.lymeowz.lib.handler.HandlerPacket;
+import com.lymeowz.lib.modern.Paper26SoundRegistry;
+import com.lymeowz.lib.utility.PlayerUtil;
+import com.lymeowz.lib.utility.ServerUtil;
+import com.lymeowz.lib.core.builder.bridge.SoundTools;
+import com.lymeowz.lib.core.enums.branch.SoundEnum;
+import com.lymeowz.lib.core.enums.main.VersionNMS;
+import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Collection;
+
+public class BridgeSound extends HandlerBridge
+{
+    final HandlerPacket handler;
+    
+    protected BridgeSound(final AgarthaLib plugin, final HandlerPacket handler) {
+        super(plugin);
+        this.handler = handler;
+    }
+    
+    protected static final BridgeSound getInstance() {
+        return BridgeSoundHelper.instance;
+    }
+    
+    public final HandlerPacket getHandler() {
+        return this.handler;
+    }
+    
+    public final boolean isSet() {
+        return this.getHandler() != null;
+    }
+    
+    public final SoundTools getSoundTools() {
+        return (this.isSet() && this.getHandler() instanceof SoundTools) ? ((SoundTools)this.getHandler()) : null;
+    }
+    
+    public final boolean isImplementSoundTools() {
+        return this.getSoundTools() != null;
+    }
+    
+    public final void playSound(final Player player, final Location loc, final String soundName, final float volume, final float pitch) {
+        if (soundName != null) {
+            final SoundEnum sound = SoundEnum.getSoundEnum(soundName);
+            this.playSound(player, loc, sound, volume, pitch);
+        }
+    }
+    
+    public final void playSound(final Player player, final Location loc, final SoundEnum sound, final float volume, final float pitch) {
+        if (player != null) {
+            this.playSound(PlayerUtil.toCollection(player), loc, sound, volume, pitch);
+        }
+    }
+    
+    public final void playSound(final Collection<Player> players, final Location loc, final SoundEnum sound, final float volume, final float pitch) {
+        if (ServerUtil.getVersionNMS() == VersionNMS.V26_3) {
+            if (players == null || loc == null || loc.getWorld() == null || sound == null) {
+                return;
+            }
+            final Sound resolved = Paper26SoundRegistry.resolve(sound.name());
+            if (resolved != null) {
+                for (final Player player : players) {
+                    if (player != null && player.isOnline() && player.getWorld().equals(loc.getWorld())) {
+                        player.playSound(loc, resolved, volume, pitch);
+                    }
+                }
+            }
+            return;
+        }
+        final SoundTools soundTools = this.getSoundTools();
+        if (soundTools != null) {
+            soundTools.playSoundEffect(players, loc, sound, volume, pitch);
+        }
+    }
+    
+    private static class BridgeSoundHelper
+    {
+        private static final BridgeSound instance;
+        
+        static {
+            final AgarthaLib plugin = (AgarthaLib)JavaPlugin.getPlugin((Class)AgarthaLib.class);
+            final HandlerPacket handler;
+            switch (ServerUtil.getVersionNMS()) {
+                case V26_3: {
+                    handler = null;
+                    break;
+                }
+                default: {
+                    handler = null;
+                    break;
+                }
+            }
+            instance = new BridgeSound(plugin, handler);
+        }
+    }
+}
