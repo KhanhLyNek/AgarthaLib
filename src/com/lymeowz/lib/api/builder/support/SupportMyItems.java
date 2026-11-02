@@ -4,16 +4,16 @@
 
 package com.lymeowz.lib.api.builder.support;
 
-import api.praya.myitems.manager.player.PlayerManagerAPI;
-import api.praya.myitems.main.MyItemsAPI;
-import api.praya.myitems.manager.game.GameManagerAPI;
-import api.praya.myitems.builder.lorestats.LoreStatsOption;
-import api.praya.myitems.manager.game.LoreStatsManagerAPI;
-import api.praya.myitems.builder.lorestats.LoreStatsEnum;
+import com.lymeowz.item.api.manager.player.PlayerManagerAPI;
+import com.lymeowz.item.api.main.MyItemsAPI;
+import com.lymeowz.item.api.manager.game.GameManagerAPI;
+import com.lymeowz.item.api.builder.lorestats.LoreStatsOption;
+import com.lymeowz.item.api.manager.game.LoreStatsManagerAPI;
+import com.lymeowz.item.api.builder.lorestats.LoreStatsEnum;
 import org.bukkit.inventory.ItemStack;
-import api.praya.myitems.builder.item.ItemStatsArmor;
-import api.praya.myitems.manager.player.PlayerItemStatsManagerAPI;
-import api.praya.myitems.builder.item.ItemStatsWeapon;
+import com.lymeowz.item.api.builder.item.ItemStatsArmor;
+import com.lymeowz.item.api.manager.player.PlayerItemStatsManagerAPI;
+import com.lymeowz.item.api.builder.item.ItemStatsWeapon;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import com.lymeowz.lib.AgarthaLib;
