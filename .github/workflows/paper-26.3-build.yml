@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      - name: Enforce complete LyMeowz Java namespaces
+        run: python3 ci/check_full_namespace.py
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v6
         with:
