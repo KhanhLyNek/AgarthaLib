@@ -98,7 +98,20 @@ def main() -> None:
             bad.append(str(file.relative_to(ROOT)))
     if bad:
         raise SystemExit("Old Java packages remain: " + ", ".join(bad[:20]))
-    print(f"OK: migrated {len(moved)} Java paths and {len(changes)} source/config references")
+    # A broad gitignore pattern such as "lib" can silently discard all moved
+    # sources. Stage and validate the entire tracked Java inventory first.
+    subprocess.run(["git", "add", "-A"], cwd=ROOT, check=True)
+    tracked = git("ls-files").splitlines()
+    tracked_java = [name for name in tracked if name.endswith(".java")]
+    expected_java = [p for p in ROOT.rglob("*.java")
+                     if not any(x in SKIP for x in p.relative_to(ROOT).parts)]
+    if len(tracked_java) != len(expected_java) or len(tracked_java) < 560:
+        raise SystemExit(f"Missing staged Java files: tracked={len(tracked_java)}, "
+                         f"filesystem={len(expected_java)}")
+    if any("/praya/" in p for p in tracked_java):
+        raise SystemExit("Legacy Java paths remain in Git index")
+    print(f"OK: migrated {len(moved)} Java paths, "
+          f"{len(tracked_java)} tracked Java files and {len(changes)} references")
 
 if __name__ == "__main__":
     main()
