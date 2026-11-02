@@ -9,6 +9,7 @@ import java.util.Collection;
  */
 public interface GameServices {
     com.lymeowz.lib.effect.EffectRegistry effects();
+    com.lymeowz.lib.projectile.ProjectileRegistry projectiles();
     Collection<String> effectTypeIds();
     boolean hasEffectType(String id);
     int trackedEntityStatsCount();

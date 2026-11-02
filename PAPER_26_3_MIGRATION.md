@@ -380,3 +380,13 @@ snapshot; `EffectRegistry.find(id)` uses original case-insensitive lookup.
 The original `EffectType` implements read-only `EffectDefinition` (ID and
 owner plugin name). No effect is registered, removed, or rebalanced by this API,
 and legacy `EffectType` Java method descriptors remain intact.
+
+### Canonical projectile metadata API (November 2026)
+
+`GameAccess.of(LyMeowzLib).projectiles()` now projects the same live
+`ProjectilePropertiesManager` into `ProjectileRegistry`. Its `ids()` are
+immutable detached snapshots, and `find(Projectile)` uses the original
+non-generating lookup. Each existing `ProjectileProperties` implements
+`ProjectileDefinition` with the original UUID and cloned main/deputy
+ItemStack snapshots. Existing mutable legacy getters/setters and projectile
+registry lifecycle remain unchanged. No projectile is spawned by this API.

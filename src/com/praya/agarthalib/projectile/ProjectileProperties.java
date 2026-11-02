@@ -8,7 +8,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.ItemStack;
 import java.util.UUID;
 
-public class ProjectileProperties
+public class ProjectileProperties implements com.lymeowz.lib.projectile.ProjectileDefinition
 {
     private final UUID projectileId;
     private ItemStack itemMain;
@@ -44,6 +44,21 @@ public class ProjectileProperties
         return this.itemDeputy;
     }
     
+    @Override
+    public final UUID id() {
+        return getProjectileId();
+    }
+
+    @Override
+    public final ItemStack mainItemSnapshot() {
+        return this.itemMain == null ? null : this.itemMain.clone();
+    }
+
+    @Override
+    public final ItemStack deputyItemSnapshot() {
+        return this.itemDeputy == null ? null : this.itemDeputy.clone();
+    }
+
     public final boolean hasItemMain() {
         return this.getItemMain() != null;
     }

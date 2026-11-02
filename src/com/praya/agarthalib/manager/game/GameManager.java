@@ -57,6 +57,11 @@ public class GameManager extends HandlerManager implements com.lymeowz.lib.manag
     }
 
     @Override
+    public final com.lymeowz.lib.projectile.ProjectileRegistry projectiles() {
+        return this.projectilePropertiesManager;
+    }
+
+    @Override
     public final com.lymeowz.lib.effect.EffectRegistry effects() {
         return this.effectTypeManager;
     }
