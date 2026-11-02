@@ -1,7 +1,7 @@
 package com.lymeowz.lib.item;
 
-import core.praya.agarthalib.builder.item.ItemList;
-import core.praya.agarthalib.builder.item.ItemSingle;
+import com.lymeowz.lib.core.builder.item.ItemList;
+import com.lymeowz.lib.core.builder.item.ItemSingle;
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
 

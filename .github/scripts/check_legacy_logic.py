@@ -39,7 +39,7 @@ def main() -> int:
                         "  lymeowzlib:\n" in value and
                         "description: LyMeowzLib base command" in value):
                     normalized = (value.replace("main: com.lymeowz.lib.LyMeowzLib\n",
-                                                "main: com.praya.agarthalib.AgarthaLib\n")
+                                                "main: com.lymeowz.lib.AgarthaLib\n")
                         .replace("name: LyMeowzLib\n", "name: AgarthaLib\n")
                         .replace("provides: [AgarthaLib]\n", "")
                         .replace("  lymeowzlib:\n", "  agarthalib:\n")

@@ -29,6 +29,6 @@ out.write_text(json.dumps(hits, indent=2, ensure_ascii=False)+"\n", "utf-8")
 print("PAPER26_LEGACY_API_CALLERS " + json.dumps({
     key: {"file_count": len(val),
           "outside_provider": [v for v in val
-                  if not v.startswith("src/api/praya/agarthalib/builder/support/")
+                  if not v.startswith("src/com/lymeowz/lib/api/builder/support/")
                   and not v.endswith("SupportManagerAPI.java")]}
     for key,val in hits.items()}, ensure_ascii=False))

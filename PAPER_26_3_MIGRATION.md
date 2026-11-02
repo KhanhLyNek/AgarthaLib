@@ -25,7 +25,7 @@
 
 - [x] Add a Java 25 Gradle build scaffold and a Paper 26.3 dependency (not yet compile-verified).
 - [ ] Finish migrating legacy NMS and optional dependencies, then obtain a successful full Paper 26.3 compilation.
-- [ ] Remove/replace all old `net.minecraft.server.v1_*` and `org.bukkit.craftbukkit.v1_*` packet/NBT imports; numerous historical packet handlers still exist in `src/com/praya/agarthalib/packet`.
+- [ ] Remove/replace all old `net.minecraft.server.v1_*` and `org.bukkit.craftbukkit.v1_*` packet/NBT imports; numerous historical packet handlers still exist in `src/com/lymeowz/lib/packet`.
 - [x] Add `Paper26ItemData` for new plugin-owned PDC tags and `Paper26ItemMeta` for Bukkit attribute, unbreakable and book operations. `PacketItem_Paper26_3` is selected by `BridgeTagsNBT` when running 26.3.
 - [x] Add an independent `compilePaper26ItemData` Java 25 CI task. The PDC and item metadata services have successfully compiled against Paper 26.3 in Actions.
 - [ ] Implement and test **read/migration of old raw item NBT** into PDC (requires historic serialized-item test fixtures). The new PDC service does **not** read old custom tags automatically. Do not deploy this bridge against production legacy items without a migration plan.
@@ -367,7 +367,7 @@ functional Jobs/EcoJobs and Heroes/MMOCore equivalence mapping.
 
 ## Canonical legacy item builder snapshot views (pending CI)
 
-- Original `core.praya.agarthalib.builder.item.ItemList` and `ItemSingle` remain the same mutable builders and keep all existing Java descriptors, storage behavior and cloning semantics.
+- Original `com.lymeowz.lib.core.builder.item.ItemList` and `ItemSingle` remain the same mutable builders and keep all existing Java descriptors, storage behavior and cloning semantics.
 - Both builders now implement `com.lymeowz.lib.item.ItemView`, whose `currentSnapshot()` and `itemSnapshots()` return fresh clones of Bukkit `ItemStack` instances.
 - List snapshots are immutable collections, preserving original ordering and null entries. The clone-only API does not write to inventory, disk, YAML or NBT/PDC; existing builder methods still return their original live references.
 - `testPaper26LegacyItemViews` covers null/empty state, detached list structure, and immutable collection behavior under the standalone Paper API classpath. Non-null ItemStack clone/NBT parity **still needs a live Paper runtime test** because the modern Material registry cannot initialize in isolated JVM tests. This is a boundary improvement, **not** a storage format migration.

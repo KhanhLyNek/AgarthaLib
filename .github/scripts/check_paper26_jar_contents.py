@@ -21,7 +21,7 @@ with ZipFile(candidates[0]) as jar:
     assert "  agarthalib:\n" not in manifest
     for required in (
         "plugin.yml",
-        "com/praya/agarthalib/AgarthaLib.class",
+        "com/lymeowz/lib/AgarthaLib.class",
         "com/lymeowz/lib/LyMeowzLib.class",
         "com/lymeowz/lib/command/CommandText.class",
         "com/lymeowz/lib/command/CommandDefinitions.class",
@@ -33,20 +33,20 @@ with ZipFile(candidates[0]) as jar:
         "com/lymeowz/lib/manager/PluginAccess.class",
         "com/lymeowz/lib/text/HexColors.class",
         "com/lymeowz/lib/item/StringListCodec.class",
-        "com/praya/agarthalib/modern/Paper26StringListCodec.class",
-        "com/praya/agarthalib/modern/Paper26HexColors.class",
+        "com/lymeowz/lib/modern/Paper26StringListCodec.class",
+        "com/lymeowz/lib/modern/Paper26HexColors.class",
         "com/lymeowz/lib/permission/PermissionBridge.class",
         "com/lymeowz/lib/migration/PluginFolderMigration.class",
-        "com/praya/agarthalib/packet/arrow/PacketArrow_Paper26_3.class",
-        "com/praya/agarthalib/packet/material/PacketMaterial_Paper26_3.class",
-        "com/praya/agarthalib/packet/equipment/PacketEquipment_Paper26_3.class",
-        "com/praya/agarthalib/packet/item/PacketItem_Paper26_3.class",
-        "com/praya/agarthalib/modern/Paper26OptionalProviders.class",
+        "com/lymeowz/lib/packet/arrow/PacketArrow_Paper26_3.class",
+        "com/lymeowz/lib/packet/material/PacketMaterial_Paper26_3.class",
+        "com/lymeowz/lib/packet/equipment/PacketEquipment_Paper26_3.class",
+        "com/lymeowz/lib/packet/item/PacketItem_Paper26_3.class",
+        "com/lymeowz/lib/modern/Paper26OptionalProviders.class",
         "org/json/simple/JSONObject.class",
         "org/json/simple/parser/JSONParser.class",
         "net/kyori/adventure/nbt/BinaryTagIO.class",
-        "com/praya/agarthalib/modern/Paper26LegacyItemTags.class",
-        "api/praya/agarthalib/manager/plugin/SupportManagerAPI.class",
+        "com/lymeowz/lib/modern/Paper26LegacyItemTags.class",
+        "com/lymeowz/lib/api/manager/plugin/SupportManagerAPI.class",
     ):
         assert required in names, f"Missing Paper 26.3 JAR class: {required}"
     retired = (
@@ -54,13 +54,13 @@ with ZipFile(candidates[0]) as jar:
         "LifeEssence", "Kingdoms", "McMMO", "BattleLevels", "Citizens",
         "MyItems", "SkillAPI", "Gangs", "SimpleClans")
     forbidden = [n for n in names if
-        (n.startswith("com/praya/agarthalib/packet/") and
+        (n.startswith("com/lymeowz/lib/packet/") and
          n.rsplit("/", 1)[-1].startswith("Packet") and
          "_1_" in n.rsplit("/", 1)[-1]) or
-        n in {f"api/praya/agarthalib/builder/support/Support{item}.class" for item in retired} or
-        n.startswith(("com/praya/agarthalib/listener/support/heroes/",
-                      "com/praya/agarthalib/listener/support/skillapi/",
-                      "com/praya/agarthalib/listener/support/battlelevels/"))]
+        n in {f"com/lymeowz/lib/api/builder/support/Support{item}.class" for item in retired} or
+        n.startswith(("com/lymeowz/lib/listener/support/heroes/",
+                      "com/lymeowz/lib/listener/support/skillapi/",
+                      "com/lymeowz/lib/listener/support/battlelevels/"))]
     assert not forbidden, f"Legacy optional/NMS classes leaked into runtime JAR: {forbidden[:30]}"
     print(f"PASS: inspected {candidates[0].name}, {len(names)} entries, "
           "9 modern bridges and no archived versioned packet/retired provider classes")

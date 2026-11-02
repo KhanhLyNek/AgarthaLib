@@ -1,8 +1,8 @@
 package com.lymeowz.lib.command;
 
-import com.praya.agarthalib.AgarthaLib;
-import com.praya.agarthalib.utility.FileUtil;
-import core.praya.agarthalib.builder.command.CommandBuild;
+import com.lymeowz.lib.AgarthaLib;
+import com.lymeowz.lib.utility.FileUtil;
+import com.lymeowz.lib.core.builder.command.CommandBuild;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.ConfigurationSection;
 import java.util.HashMap;

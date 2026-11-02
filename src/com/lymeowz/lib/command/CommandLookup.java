@@ -1,6 +1,6 @@
 package com.lymeowz.lib.command;
 
-import core.praya.agarthalib.builder.command.CommandBuild;
+import com.lymeowz.lib.core.builder.command.CommandBuild;
 
 /** Legacy command-main and alias matching, moved without rewriting any IDs. */
 public final class CommandLookup {

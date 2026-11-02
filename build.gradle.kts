@@ -3,7 +3,7 @@ plugins {
     `maven-publish`
 }
 
-group = "com.praya"
+group = "com.lymeowz"
 version = "2.17.2-paper26.3-SNAPSHOT"
 
 repositories {
@@ -124,7 +124,7 @@ publishing {
 tasks.register<JavaCompile>("compilePaper26ItemData") {
     description = "Type-check the Paper 26.3 item storage and metadata services without legacy NMS"
     group = "verification"
-    source = fileTree("src/com/praya/agarthalib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java", "Paper26PotionAliases.java", "Paper26MVdWRegistration.java", "Paper26PlaceholderValues.java", "Paper26MythicLibStats.java", "Paper26InventoryFactory.java", "Paper26JsonChat.java", "Paper26AuraSkillsProgress.java", "Paper26MMOCoreProgress.java", "Paper26LandsClaims.java", "Paper26DecentHolograms.java", "Paper26OptionalProviders.java", "Paper26ItemSnapshots.java", "Paper26HoverItems.java", "Paper26HoverItemPayload.java", "Paper26LegacyItemTags.java", "Paper26HexColors.java", "Paper26ItemTextColors.java", "Paper26ItemModels.java", "Paper26ServerTPS.java") }
+    source = fileTree("src/com/lymeowz/lib/modern") { include("Paper26ItemData.java", "Paper26ItemMeta.java", "Paper26StringListCodec.java", "Paper26SoundRegistry.java", "Paper26AudienceService.java", "Paper26BlockDamage.java", "Paper26PotionAliases.java", "Paper26MVdWRegistration.java", "Paper26PlaceholderValues.java", "Paper26MythicLibStats.java", "Paper26InventoryFactory.java", "Paper26JsonChat.java", "Paper26AuraSkillsProgress.java", "Paper26MMOCoreProgress.java", "Paper26LandsClaims.java", "Paper26DecentHolograms.java", "Paper26OptionalProviders.java", "Paper26ItemSnapshots.java", "Paper26HoverItems.java", "Paper26HoverItemPayload.java", "Paper26LegacyItemTags.java", "Paper26HexColors.java", "Paper26ItemTextColors.java", "Paper26ItemModels.java", "Paper26ServerTPS.java") }
     source(fileTree("src/com/lymeowz/lib/item") { include("StringListCodec.java") })
     source(fileTree("src/com/lymeowz/lib/text") { include("HexColors.java") })
     classpath = configurations["compileClasspath"]
@@ -144,10 +144,10 @@ tasks.register<JavaCompile>("compilePaper26ItemBridge") {
     group = "verification"
     dependsOn("compilePaper26ItemData")
     source = fileTree(".") {
-        include("src/com/praya/agarthalib/packet/item/PacketItem_Paper26_3.java")
-        include("src/core/praya/agarthalib/builder/bridge/TagsNBTItem.java")
-        include("src/core/praya/agarthalib/builder/bridge/TagsNBTBooks.java")
-        include("src/core/praya/agarthalib/builder/bridge/TagsNBTCustom.java")
+        include("src/com/lymeowz/lib/packet/item/PacketItem_Paper26_3.java")
+        include("src/com/lymeowz/lib/core/builder/bridge/TagsNBTItem.java")
+        include("src/com/lymeowz/lib/core/builder/bridge/TagsNBTBooks.java")
+        include("src/com/lymeowz/lib/core/builder/bridge/TagsNBTCustom.java")
         include("ci/paper26-bridge-stubs/**/*.java")
     }
     classpath = configurations["compileClasspath"] + files(layout.buildDirectory.dir("paper26-api-check"))
@@ -182,7 +182,7 @@ tasks.register<JavaExec>("testPaper26StringListCodec") {
         layout.buildDirectory.dir("paper26-codec-tests"),
         layout.buildDirectory.dir("paper26-api-check")
     )
-    mainClass.set("com.praya.agarthalib.modern.Paper26StringListCodecSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26StringListCodecSelfTest")
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
@@ -199,11 +199,11 @@ tasks.register<JavaCompile>("compilePaper26PlayerBridge") {
     group = "verification"
     dependsOn("compilePaper26ItemBridge")
     source = fileTree(".") {
-        include("src/com/praya/agarthalib/packet/player/PacketPlayer_Paper26_3.java")
-        include("src/com/praya/agarthalib/packet/player/PacketPlayerProperties.java")
-        include("src/com/praya/agarthalib/packet/player/PacketPlayerVisibility.java")
-        include("src/com/praya/agarthalib/packet/player/PacketPlayerAbsorption.java")
-        include("src/com/praya/agarthalib/packet/player/PacketPlayerCombat.java")
+        include("src/com/lymeowz/lib/packet/player/PacketPlayer_Paper26_3.java")
+        include("src/com/lymeowz/lib/packet/player/PacketPlayerProperties.java")
+        include("src/com/lymeowz/lib/packet/player/PacketPlayerVisibility.java")
+        include("src/com/lymeowz/lib/packet/player/PacketPlayerAbsorption.java")
+        include("src/com/lymeowz/lib/packet/player/PacketPlayerCombat.java")
     }
     classpath = configurations["compileClasspath"] +
         files(layout.buildDirectory.dir("paper26-bridge-api-check"))
@@ -222,14 +222,14 @@ tasks.register<JavaCompile>("compilePaper26MessageBridge") {
     group = "verification"
     dependsOn("compilePaper26PlayerBridge")
     source = fileTree(".") {
-        include("src/com/praya/agarthalib/packet/message/PacketMessage_Paper26_3.java")
+        include("src/com/lymeowz/lib/packet/message/PacketMessage_Paper26_3.java")
         // Compile the runtime hover payload in this isolated adapter check too.
         // The message bridge must not depend on unverified implicit class outputs.
-        include("src/com/praya/agarthalib/modern/Paper26HoverItemPayload.java")
-        include("src/core/praya/agarthalib/builder/bridge/MessageActionbar.java")
-        include("src/core/praya/agarthalib/builder/bridge/MessageTitle.java")
-        include("src/core/praya/agarthalib/builder/bridge/MessageJson.java")
-        include("ci/paper26-json-stubs/com/praya/agarthalib/utility/JsonUtil.java")
+        include("src/com/lymeowz/lib/modern/Paper26HoverItemPayload.java")
+        include("src/com/lymeowz/lib/core/builder/bridge/MessageActionbar.java")
+        include("src/com/lymeowz/lib/core/builder/bridge/MessageTitle.java")
+        include("src/com/lymeowz/lib/core/builder/bridge/MessageJson.java")
+        include("ci/paper26-json-stubs/com/lymeowz/lib/utility/JsonUtil.java")
     }
     classpath = configurations["compileClasspath"] +
         files(layout.buildDirectory.dir("paper26-bridge-api-check")) +
@@ -260,7 +260,7 @@ tasks.register<JavaExec>("testPaper26ServerTPS") {
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-tps-tests"),
         layout.buildDirectory.dir("paper26-api-check"))
-    mainClass.set("com.praya.agarthalib.modern.Paper26ServerTPSSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26ServerTPSSelfTest")
     javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
 }
 
@@ -283,7 +283,7 @@ tasks.register<JavaExec>("testPaper26ModernProviders") {
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-modern-provider-tests"),
         layout.buildDirectory.dir("paper26-api-check"))
-    mainClass.set("com.praya.agarthalib.modern.Paper26ModernProvidersSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26ModernProvidersSelfTest")
     javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
 }
 tasks.register<JavaCompile>("compilePaper26ItemSnapshotSelfTest") {
@@ -304,7 +304,7 @@ tasks.register<JavaExec>("testPaper26ItemSnapshots") {
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-item-snapshot-tests"),
         layout.buildDirectory.dir("paper26-api-check"))
-    mainClass.set("com.praya.agarthalib.modern.Paper26ItemSnapshotsSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26ItemSnapshotsSelfTest")
     javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
 }
 
@@ -314,9 +314,9 @@ tasks.register<JavaCompile>("compilePaper26LegacyItemViewSelfTest") {
     description = "Compile legacy Bukkit ItemList/ItemSingle canonical snapshot API test"
     group = "verification"
     source = fileTree(".") {
-        include("src/core/praya/agarthalib/builder/item/Item.java")
-        include("src/core/praya/agarthalib/builder/item/ItemList.java")
-        include("src/core/praya/agarthalib/builder/item/ItemSingle.java")
+        include("src/com/lymeowz/lib/core/builder/item/Item.java")
+        include("src/com/lymeowz/lib/core/builder/item/ItemList.java")
+        include("src/com/lymeowz/lib/core/builder/item/ItemSingle.java")
         include("src/com/lymeowz/lib/item/ItemView.java")
         include("ci/paper26-item-view-test/**/*.java")
     }
@@ -343,10 +343,10 @@ tasks.register<JavaCompile>("compilePaper26InventoryEquipmentBridges") {
     group = "verification"
     dependsOn("compilePaper26ItemBridge")
     source = fileTree(".") {
-        include("src/com/praya/agarthalib/packet/inventory/PacketInventory_Paper26_3.java")
-        include("src/com/praya/agarthalib/packet/equipment/PacketEquipment_Paper26_3.java")
-        include("src/core/praya/agarthalib/builder/bridge/WindowTools.java")
-        include("src/core/praya/agarthalib/builder/bridge/EquipmentTools.java")
+        include("src/com/lymeowz/lib/packet/inventory/PacketInventory_Paper26_3.java")
+        include("src/com/lymeowz/lib/packet/equipment/PacketEquipment_Paper26_3.java")
+        include("src/com/lymeowz/lib/core/builder/bridge/WindowTools.java")
+        include("src/com/lymeowz/lib/core/builder/bridge/EquipmentTools.java")
     }
     classpath = configurations["compileClasspath"] + files(layout.buildDirectory.dir("paper26-bridge-api-check"))
     destinationDirectory.set(layout.buildDirectory.dir("paper26-inventory-equipment-api-check"))
@@ -362,11 +362,11 @@ tasks.register<JavaCompile>("compilePaper26ArrowMaterial") {
     group = "verification"
     dependsOn("compilePaper26ItemBridge")
     source = fileTree(".") {
-        include("src/com/praya/agarthalib/packet/arrow/PacketArrow_Paper26_3.java")
-        include("src/com/praya/agarthalib/packet/arrow/PacketArrowNormal.java")
-        include("src/com/praya/agarthalib/packet/arrow/PacketArrowModification.java")
-        include("src/com/praya/agarthalib/packet/material/PacketMaterial_Paper26_3.java")
-        include("src/core/praya/agarthalib/builder/bridge/MaterialTools.java")
+        include("src/com/lymeowz/lib/packet/arrow/PacketArrow_Paper26_3.java")
+        include("src/com/lymeowz/lib/packet/arrow/PacketArrowNormal.java")
+        include("src/com/lymeowz/lib/packet/arrow/PacketArrowModification.java")
+        include("src/com/lymeowz/lib/packet/material/PacketMaterial_Paper26_3.java")
+        include("src/com/lymeowz/lib/core/builder/bridge/MaterialTools.java")
     }
     classpath = configurations["compileClasspath"] +
         files(layout.buildDirectory.dir("paper26-bridge-api-check"))
@@ -397,7 +397,7 @@ tasks.register<JavaExec>("testPaper26JsonChat") {
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-json-tests"),
         layout.buildDirectory.dir("paper26-api-check"))
-    mainClass.set("com.praya.agarthalib.modern.Paper26JsonChatSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26JsonChatSelfTest")
     javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
 }
 
@@ -420,7 +420,7 @@ tasks.register<JavaExec>("testPaper26MythicLibOptional") {
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-mythiclib-tests"),
         layout.buildDirectory.dir("paper26-api-check"))
-    mainClass.set("com.praya.agarthalib.modern.Paper26MythicLibStatsSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26MythicLibStatsSelfTest")
     javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
 }
 
@@ -433,8 +433,8 @@ tasks.register<JavaCompile>("compilePaper26BlockBridge") {
     group = "verification"
     dependsOn("compilePaper26MessageBridge")
     source = fileTree(".") {
-        include("src/com/praya/agarthalib/packet/block/PacketBlock_Paper26_3.java")
-        include("src/com/praya/agarthalib/packet/block/PacketBlockAnimation.java")
+        include("src/com/lymeowz/lib/packet/block/PacketBlock_Paper26_3.java")
+        include("src/com/lymeowz/lib/packet/block/PacketBlockAnimation.java")
     }
     classpath = configurations["compileClasspath"] +
         files(layout.buildDirectory.dir("paper26-api-check")) +
@@ -470,7 +470,7 @@ tasks.register<JavaExec>("testPaper26BlockDamage") {
         layout.buildDirectory.dir("paper26-block-tests"),
         layout.buildDirectory.dir("paper26-api-check")
     )
-    mainClass.set("com.praya.agarthalib.modern.Paper26BlockDamageSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26BlockDamageSelfTest")
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
@@ -487,8 +487,8 @@ tasks.register<JavaCompile>("compilePaper26PotionUtility") {
     group = "verification"
     dependsOn("compilePaper26BlockBridge")
     source = fileTree(".") {
-        include("src/com/praya/agarthalib/utility/PotionUtil.java")
-        include("src/core/praya/agarthalib/enums/branch/PotionTypeEnum.java")
+        include("src/com/lymeowz/lib/utility/PotionUtil.java")
+        include("src/com/lymeowz/lib/core/enums/branch/PotionTypeEnum.java")
     }
     classpath = configurations["compileClasspath"] +
         files(layout.buildDirectory.dir("paper26-api-check"))
@@ -522,7 +522,7 @@ tasks.register<JavaExec>("testPaper26PotionAliases") {
         layout.buildDirectory.dir("paper26-potion-tests"),
         layout.buildDirectory.dir("paper26-api-check")
     )
-    mainClass.set("com.praya.agarthalib.modern.Paper26PotionAliasesSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26PotionAliasesSelfTest")
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
@@ -539,10 +539,10 @@ tasks.register<JavaCompile>("compilePaper26PlaceholderBridges") {
     group = "verification"
     dependsOn("compilePaper26PotionUtility")
     source = fileTree(".") {
-        include("src/api/praya/agarthalib/builder/support/SupportMVdWPlaceholderAPI.java")
-        include("src/api/praya/agarthalib/builder/support/SupportPlaceholderAPI.java")
-        include("src/api/praya/agarthalib/builder/support/main/Support.java")
-        include("src/api/praya/agarthalib/builder/support/main/SupportPlaceholder.java")
+        include("src/com/lymeowz/lib/api/builder/support/SupportMVdWPlaceholderAPI.java")
+        include("src/com/lymeowz/lib/api/builder/support/SupportPlaceholderAPI.java")
+        include("src/com/lymeowz/lib/api/builder/support/main/Support.java")
+        include("src/com/lymeowz/lib/api/builder/support/main/SupportPlaceholder.java")
     }
     classpath = configurations["compileClasspath"] +
         files(layout.buildDirectory.dir("paper26-bridge-api-check"))
@@ -561,7 +561,7 @@ tasks.register<JavaCompile>("compilePaper26FeatherBoardBridge") {
     group = "verification"
     dependsOn("compilePaper26PlaceholderBridges")
     source = fileTree(".") {
-        include("src/api/praya/agarthalib/builder/support/SupportFeatherBoard.java")
+        include("src/com/lymeowz/lib/api/builder/support/SupportFeatherBoard.java")
     }
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-placeholder-api-check"),
@@ -605,7 +605,7 @@ tasks.register<JavaExec>("testPaper26FeatherBoard") {
         layout.buildDirectory.dir("paper26-placeholder-api-check"),
         layout.buildDirectory.dir("paper26-bridge-api-check")
     )
-    mainClass.set("com.praya.agarthalib.modern.Paper26FeatherBoardSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26FeatherBoardSelfTest")
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
@@ -618,7 +618,7 @@ tasks.register<JavaCompile>("compilePaper26EssentialsBridge") {
     group = "verification"
     dependsOn("testPaper26FeatherBoard")
     source = fileTree(".") {
-        include("src/api/praya/agarthalib/builder/support/SupportEssentials.java")
+        include("src/com/lymeowz/lib/api/builder/support/SupportEssentials.java")
     }
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-placeholder-api-check"),
@@ -660,7 +660,7 @@ tasks.register<JavaExec>("testPaper26EssentialsWarps") {
         layout.buildDirectory.dir("paper26-placeholder-api-check"),
         layout.buildDirectory.dir("paper26-bridge-api-check")
     )
-    mainClass.set("com.praya.agarthalib.modern.Paper26EssentialsWarpSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26EssentialsWarpSelfTest")
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
@@ -673,7 +673,7 @@ tasks.register<JavaCompile>("compilePaper26LangUtilsBridge") {
     group = "verification"
     dependsOn("testPaper26EssentialsWarps")
     source = fileTree(".") {
-        include("src/api/praya/agarthalib/builder/support/SupportLangUtils.java")
+        include("src/com/lymeowz/lib/api/builder/support/SupportLangUtils.java")
     }
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-placeholder-api-check"),
@@ -715,7 +715,7 @@ tasks.register<JavaExec>("testPaper26LangUtils") {
         layout.buildDirectory.dir("paper26-placeholder-api-check"),
         layout.buildDirectory.dir("paper26-bridge-api-check")
     )
-    mainClass.set("com.praya.agarthalib.modern.Paper26LangUtilsSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26LangUtilsSelfTest")
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
@@ -728,8 +728,8 @@ tasks.register<JavaCompile>("compilePaper26TownyBridge") {
     group = "verification"
     dependsOn("testPaper26LangUtils")
     source = fileTree(".") {
-        include("src/api/praya/agarthalib/builder/support/SupportTowny.java")
-        include("src/api/praya/agarthalib/builder/support/main/SupportGroup.java")
+        include("src/com/lymeowz/lib/api/builder/support/SupportTowny.java")
+        include("src/com/lymeowz/lib/api/builder/support/main/SupportGroup.java")
     }
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-placeholder-api-check"),
@@ -751,7 +751,7 @@ tasks.register<JavaCompile>("compilePaper26MVdWReplacer") {
     group = "verification"
     dependsOn("compilePaper26TownyBridge")
     source = fileTree(".") {
-        include("src/com/praya/agarthalib/placeholder/replacer/ReplacerMVDWPlaceholderAPI.java")
+        include("src/com/lymeowz/lib/placeholder/replacer/ReplacerMVDWPlaceholderAPI.java")
     }
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-api-check"),
@@ -789,7 +789,7 @@ tasks.register<JavaExec>("testPaper26MVdWRegistration") {
         layout.buildDirectory.dir("paper26-mvdw-registration-tests"),
         layout.buildDirectory.dir("paper26-api-check")
     )
-    mainClass.set("com.praya.agarthalib.modern.Paper26MVdWRegistrationSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26MVdWRegistrationSelfTest")
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
@@ -803,7 +803,7 @@ tasks.register<JavaCompile>("compilePaper26PapiExpansion") {
     group = "verification"
     dependsOn("testPaper26MVdWRegistration")
     source = fileTree(".") {
-        include("src/com/praya/agarthalib/placeholder/replacer/ReplacerPlaceholderAPI.java")
+        include("src/com/lymeowz/lib/placeholder/replacer/ReplacerPlaceholderAPI.java")
     }
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-bridge-api-check")
@@ -838,7 +838,7 @@ tasks.register<JavaExec>("testPaper26PlaceholderValues") {
         layout.buildDirectory.dir("paper26-placeholder-values-tests"),
         layout.buildDirectory.dir("paper26-api-check")
     )
-    mainClass.set("com.praya.agarthalib.modern.Paper26PlaceholderValuesSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26PlaceholderValuesSelfTest")
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
@@ -851,7 +851,7 @@ tasks.register<JavaCompile>("compilePaper26VaultBridge") {
     group = "verification"
     dependsOn("testPaper26PlaceholderValues")
     source = fileTree(".") {
-        include("src/api/praya/agarthalib/builder/support/SupportVault.java")
+        include("src/com/lymeowz/lib/api/builder/support/SupportVault.java")
     }
     classpath = configurations["compileClasspath"] + files(
         layout.buildDirectory.dir("paper26-placeholder-api-check"),
@@ -873,10 +873,10 @@ tasks.register<JavaCompile>("compilePaper26OriginalPlaceholderManager") {
     group = "verification"
     dependsOn("compilePaper26VaultBridge")
     source = fileTree(".") {
-        include("src/com/praya/agarthalib/handler/Handler.java")
-        include("src/com/praya/agarthalib/handler/HandlerManager.java")
-        include("src/com/praya/agarthalib/manager/plugin/PlaceholderManager.java")
-        include("src/com/praya/agarthalib/placeholder/PlaceholderMemory.java")
+        include("src/com/lymeowz/lib/handler/Handler.java")
+        include("src/com/lymeowz/lib/handler/HandlerManager.java")
+        include("src/com/lymeowz/lib/manager/plugin/PlaceholderManager.java")
+        include("src/com/lymeowz/lib/placeholder/PlaceholderMemory.java")
         include("ci/paper26-placeholder-manager-stubs/**/*.java")
     }
     classpath = configurations["compileClasspath"] + files(
@@ -923,7 +923,7 @@ tasks.register<JavaExec>("testPaper26OriginalPlaceholderManager") {
         layout.buildDirectory.dir("paper26-papi-expansion-api-check"),
         layout.buildDirectory.dir("paper26-mvdw-replacer-api-check")
     )
-    mainClass.set("com.praya.agarthalib.modern.Paper26OriginalPlaceholderManagerSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26OriginalPlaceholderManagerSelfTest")
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
@@ -955,9 +955,9 @@ tasks.register<JavaCompile>("compilePaper26LivingEntityBridge") {
     group = "verification"
     dependsOn("compilePaper26ItemBridge")
     source = fileTree(".") {
-        include("src/com/praya/agarthalib/modern/Paper26LivingEntityKind.java")
-        include("src/com/praya/agarthalib/packet/livingentity/PacketLivingEntity_Paper26_3.java")
-        include("src/core/praya/agarthalib/builder/bridge/LivingEntityTools.java")
+        include("src/com/lymeowz/lib/modern/Paper26LivingEntityKind.java")
+        include("src/com/lymeowz/lib/packet/livingentity/PacketLivingEntity_Paper26_3.java")
+        include("src/com/lymeowz/lib/core/builder/bridge/LivingEntityTools.java")
     }
     classpath = configurations["compileClasspath"] +
         files(layout.buildDirectory.dir("paper26-bridge-api-check"))
@@ -993,7 +993,7 @@ tasks.register<JavaExec>("testPaper26LivingEntityKind") {
         layout.buildDirectory.dir("paper26-livingentity-tests"),
         layout.buildDirectory.dir("paper26-livingentity-api-check")
     )
-    mainClass.set("com.praya.agarthalib.modern.Paper26LivingEntityKindSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26LivingEntityKindSelfTest")
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
@@ -1030,7 +1030,7 @@ tasks.register<JavaExec>("testPaper26LegacyNbt") {
     dependsOn("compilePaper26LegacyNbtSelfTest")
     classpath = configurations["compileClasspath"] + sourceSets.main.get().output +
             files(layout.buildDirectory.dir("paper26-legacy-nbt-tests"))
-    mainClass.set("com.praya.agarthalib.modern.Paper26LegacyItemTagsSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26LegacyItemTagsSelfTest")
     javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
 }
 
@@ -1040,7 +1040,7 @@ tasks.register<JavaExec>("testPaper26HoverPipeline") {
     dependsOn("compilePaper26HoverPipelineSelfTest")
     classpath = configurations["compileClasspath"] + sourceSets.main.get().output +
             files(layout.buildDirectory.dir("paper26-hover-pipeline-tests"))
-    mainClass.set("com.praya.agarthalib.modern.Paper26HoverPipelineSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26HoverPipelineSelfTest")
     javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
 }
 
@@ -1050,7 +1050,7 @@ tasks.register<JavaCompile>("compilePaper26HoverItemPayloadSelfTest") {
     description = "Compile real versioned hover item payload against JSON-simple"
     group = "verification"
     source = fileTree(".") {
-        include("src/com/praya/agarthalib/modern/Paper26HoverItemPayload.java")
+        include("src/com/lymeowz/lib/modern/Paper26HoverItemPayload.java")
         include("ci/paper26-hover-item-test/**/*.java")
     }
     classpath = configurations["compileClasspath"]
@@ -1066,7 +1066,7 @@ tasks.register<JavaExec>("testPaper26HoverItemPayload") {
     dependsOn("compilePaper26HoverItemPayloadSelfTest")
     classpath = configurations["compileClasspath"] +
             files(layout.buildDirectory.dir("paper26-hover-item-tests"))
-    mainClass.set("com.praya.agarthalib.modern.Paper26HoverItemPayloadSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26HoverItemPayloadSelfTest")
     javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
 }
 
@@ -1079,7 +1079,7 @@ tasks.register<JavaExec>("testPaper26PapiOptional") {
         layout.buildDirectory.dir("paper26-placeholder-api-check"),
         layout.buildDirectory.dir("paper26-bridge-api-check")
     )
-    mainClass.set("com.praya.agarthalib.modern.Paper26PapiOptionalSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26PapiOptionalSelfTest")
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(25))
     })
@@ -1102,7 +1102,7 @@ tasks.register<JavaExec>("testPaper26HexColors") {
     dependsOn("compilePaper26HexColorsTest")
     classpath = files(layout.buildDirectory.dir("paper26-api-check"),
                       layout.buildDirectory.dir("paper26-hex-color-tests"))
-    mainClass.set("com.praya.agarthalib.modern.Paper26HexColorsSelfTest")
+    mainClass.set("com.lymeowz.lib.modern.Paper26HexColorsSelfTest")
     javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
 }
 tasks.named("testPaper26PapiOptional") {

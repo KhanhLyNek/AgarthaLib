@@ -13,9 +13,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PREFIXES = (
-    ("core.praya.agarthalib", "com.lymeowz.lib.core"),
-    ("api.praya.agarthalib", "com.lymeowz.lib.api"),
-    ("com.praya.agarthalib", "com.lymeowz.lib"),
+    ("com.lymeowz.lib.core", "com.lymeowz.lib.core"),
+    ("com.lymeowz.lib.api", "com.lymeowz.lib.api"),
+    ("com.lymeowz.lib", "com.lymeowz.lib"),
 )
 REPLACEMENTS = [(a, b) for a, b in PREFIXES]
 REPLACEMENTS += [(a.replace(".", "/"), b.replace(".", "/")) for a, b in PREFIXES]

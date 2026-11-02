@@ -7,13 +7,13 @@
     "resources/Language/lang_en.yml": "f4a7caaf07269b0e7bd4a107c1e30dccb6b8f61c",
     "resources/Language/lang_id.yml": "ae7414b584dee0333ccd1a8c433e343fff35f4cc",
     "resources/Language/lang_ru.yml": "bed56e0844cae44b5a5e7df90c0acd6ac4fcf61a",
-    "resources/plugin.yml": "cb26128054244386d6a3b683793892dfdcf7d898",
+    "resources/plugin.yml": "c3d313b3afdf55410420781c624747e98fde5942",
     "resources/Resources/command.yml": "7426003fcdae225bb5d3a697bc9890d140cecf7a",
     "resources/update.yml": "8f11629fd6ae33e0ca03ac6f77ba2f506e9d076f",
-    "src/com/praya/agarthalib/modern/Paper26PotionAliases.java": "26ca24a13dfab94ae5e4f54b8ec868d4fbca2643",
-    "src/com/praya/agarthalib/utility/CombatUtil.java": "54477f3f5577d42d356adf95dc467644812c3dde",
-    "src/com/praya/agarthalib/utility/MetadataUtil.java": "22ac3507357ae123d251bd630914c8fb861148bc",
-    "src/com/praya/agarthalib/utility/PotionUtil.java": "62640403f65a074112463fff89e379be094442bd",
-    "src/core/praya/agarthalib/enums/branch/PotionTypeEnum.java": "338a21e4d6d7b5db450496502aa44746ddbe17bb"
+    "src/com/lymeowz/lib/modern/Paper26PotionAliases.java": "a941fd69a1f28fe6198b7c11f6b296206781eb79",
+    "src/com/lymeowz/lib/utility/CombatUtil.java": "c27929475678761f3b55aaa82eeb131489ed06a2",
+    "src/com/lymeowz/lib/utility/MetadataUtil.java": "b9315c4c31483cf92f651dd6046aba81eb7fdf9e",
+    "src/com/lymeowz/lib/utility/PotionUtil.java": "8f8692c4abcf2384adc297edceb01f0d686c2e60",
+    "src/com/lymeowz/lib/core/enums/branch/PotionTypeEnum.java": "996f3e57d2e1f68a319c69dc3d7025c42621deac"
   }
 }

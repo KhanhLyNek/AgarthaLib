@@ -34,7 +34,7 @@ adapters = [
     "Paper26AuraSkillsProgress", "Paper26MMOCoreProgress",
     "Paper26LandsClaims", "Paper26DecentHolograms",
 ]
-existing = [name for name in adapters if (SRC / "com/praya/agarthalib/modern" / (name+".java")).is_file()]
+existing = [name for name in adapters if (SRC / "com/lymeowz/lib/modern" / (name+".java")).is_file()]
 # A *source* implemented flag only; never assert runtime completion from this.
 remaining = {
     "legacy_versioned_packet_files_to_retire_or_isolate": len(versioned),

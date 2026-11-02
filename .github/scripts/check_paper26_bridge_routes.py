@@ -7,10 +7,10 @@ packet class. It does not replace in-game targeting or visual tests.
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
-bridge_entity = (root / "src/core/praya/agarthalib/bridge/unity/BridgeLivingEntity.java").read_text(encoding="utf-8")
-bridge_particle = (root / "src/core/praya/agarthalib/bridge/unity/BridgeParticle.java").read_text(encoding="utf-8")
-entity_handler = (root / "src/com/praya/agarthalib/packet/livingentity/PacketLivingEntity_Paper26_3.java").read_text(encoding="utf-8")
-entity_classifier = (root / "src/com/praya/agarthalib/modern/Paper26LivingEntityKind.java").read_text(encoding="utf-8")
+bridge_entity = (root / "src/com/lymeowz/lib/core/bridge/unity/BridgeLivingEntity.java").read_text(encoding="utf-8")
+bridge_particle = (root / "src/com/lymeowz/lib/core/bridge/unity/BridgeParticle.java").read_text(encoding="utf-8")
+entity_handler = (root / "src/com/lymeowz/lib/packet/livingentity/PacketLivingEntity_Paper26_3.java").read_text(encoding="utf-8")
+entity_classifier = (root / "src/com/lymeowz/lib/modern/Paper26LivingEntityKind.java").read_text(encoding="utf-8")
 
 assert "case V26_3:" in bridge_entity
 assert "handler = new PacketLivingEntity_Paper26_3(plugin);" in bridge_entity

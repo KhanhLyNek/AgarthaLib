@@ -9,12 +9,12 @@ import re
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
-packets = sorted((root / "src/com/praya/agarthalib/packet").rglob("Packet*_1_*.java"))
+packets = sorted((root / "src/com/lymeowz/lib/packet").rglob("Packet*_1_*.java"))
 gradle = (root / "build.gradle.kts").read_text("utf-8")
 assert 'java.exclude("**/packet/**/Packet*_1_*.java")' in gradle
 assert len(packets) == 82, f"Unexpected historic packet count: {len(packets)}"
 
-bridges = root / "src/core/praya/agarthalib/bridge/unity"
+bridges = root / "src/com/lymeowz/lib/core/bridge/unity"
 implemented = {
     "BridgeArrow": "PacketArrow_Paper26_3",
     "BridgeBlock": "PacketBlock_Paper26_3",
@@ -34,16 +34,16 @@ for name in ("BridgeArrow", "BridgeBlock", "BridgeEquipment", "BridgeInventory",
     assert not re.search(r"\b(?:new|import)\s+Packet\w*_1_\d+", s), f"Old packet reference in {name}"
     if name in implemented:
         assert "new " + implemented[name] + "(plugin)" in s, f"Missing {name} adapter"
-        adapter = list((root / "src/com/praya/agarthalib/packet").rglob(
+        adapter = list((root / "src/com/lymeowz/lib/packet").rglob(
             implemented[name] + ".java"))
         assert len(adapter) == 1, f"Missing or ambiguous adapter for {name}"
     else:
         assert "handler = null;" in s
 
-equipment = (root / "src/com/praya/agarthalib/packet/equipment/PacketEquipment_Paper26_3.java").read_text("utf-8")
+equipment = (root / "src/com/lymeowz/lib/packet/equipment/PacketEquipment_Paper26_3.java").read_text("utf-8")
 assert "implements EquipmentTools" in equipment
 assert "PacketEquipment_1_9" not in equipment
-arrow = (root / "src/com/praya/agarthalib/packet/arrow/PacketArrow_Paper26_3.java").read_text("utf-8")
+arrow = (root / "src/com/lymeowz/lib/packet/arrow/PacketArrow_Paper26_3.java").read_text("utf-8")
 assert "HIDE_ADDITIONAL_TOOLTIP" in arrow and "PotionMeta" in arrow
 # No provider implementation whose public Java signature links an absent
 # dependency may accidentally re-enter the Paper runtime artifact.
@@ -51,7 +51,7 @@ retired = ("JobsReborn", "HolographicDisplays", "Heroes", "SkillsPro",
            "CombatStamina", "LifeEssence", "Kingdoms", "McMMO",
            "BattleLevels", "Citizens", "MyItems", "SkillAPI",
            "Gangs", "SimpleClans")
-manager = (root / "src/api/praya/agarthalib/manager/plugin/SupportManagerAPI.java").read_text("utf-8")
+manager = (root / "src/com/lymeowz/lib/api/manager/plugin/SupportManagerAPI.java").read_text("utf-8")
 for name in retired:
     assert f'java.exclude("**/builder/support/Support{name}.java")' in gradle, name
     assert "Support" + name + " getSupport" + name + "(" not in manager, name
@@ -59,7 +59,7 @@ for name in retired:
     assert "isSupport" + flag_name + "()" in manager, name
 for folder in ("heroes", "skillapi", "battlelevels"):
     assert f'java.exclude("**/listener/support/{folder}/**")' in gradle
-boot = (root / "src/com/praya/agarthalib/AgarthaLib.java").read_text("utf-8")
+boot = (root / "src/com/lymeowz/lib/AgarthaLib.java").read_text("utf-8")
 for old_listener in ("new ListenerHeroes", "new ListenerSkillAPI",
                      "new ListenerBattleLevels"):
     assert old_listener not in boot, "Old listener boot route reintroduced"
