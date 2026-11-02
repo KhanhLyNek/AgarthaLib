@@ -9,7 +9,7 @@ import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public abstract class EffectType
+public abstract class EffectType implements com.lymeowz.lib.effect.EffectDefinition
 {
     private final Plugin plugin;
     private final String id;
@@ -32,6 +32,16 @@ public abstract class EffectType
     
     public final String getId() {
         return this.id;
+    }
+
+    @Override
+    public final String id() {
+        return this.id;
+    }
+
+    @Override
+    public final String pluginName() {
+        return this.plugin.getName();
     }
     
     public final boolean isRegistered() {

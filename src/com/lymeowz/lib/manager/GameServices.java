@@ -8,6 +8,7 @@ import java.util.Collection;
  * no duplicate manager is created.
  */
 public interface GameServices {
+    com.lymeowz.lib.effect.EffectRegistry effects();
     Collection<String> effectTypeIds();
     boolean hasEffectType(String id);
     int trackedEntityStatsCount();

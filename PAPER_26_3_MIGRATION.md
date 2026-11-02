@@ -371,3 +371,12 @@ functional Jobs/EcoJobs and Heroes/MMOCore equivalence mapping.
 - Both builders now implement `com.lymeowz.lib.item.ItemView`, whose `currentSnapshot()` and `itemSnapshots()` return fresh clones of Bukkit `ItemStack` instances.
 - List snapshots are immutable collections, preserving original ordering and null entries. The clone-only API does not write to inventory, disk, YAML or NBT/PDC; existing builder methods still return their original live references.
 - `testPaper26LegacyItemViews` covers null/empty state, detached list structure, and immutable collection behavior under the standalone Paper API classpath. Non-null ItemStack clone/NBT parity **still needs a live Paper runtime test** because the modern Material registry cannot initialize in isolated JVM tests. This is a boundary improvement, **not** a storage format migration.
+
+### Canonical custom effect API (November 2026)
+
+`GameAccess.of(LyMeowzLib).effects()` returns the same original
+`EffectTypeManager` instance. `EffectRegistry.ids()` returns an immutable
+snapshot; `EffectRegistry.find(id)` uses original case-insensitive lookup.
+The original `EffectType` implements read-only `EffectDefinition` (ID and
+owner plugin name). No effect is registered, removed, or rebalanced by this API,
+and legacy `EffectType` Java method descriptors remain intact.

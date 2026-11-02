@@ -57,6 +57,11 @@ public class GameManager extends HandlerManager implements com.lymeowz.lib.manag
     }
 
     @Override
+    public final com.lymeowz.lib.effect.EffectRegistry effects() {
+        return this.effectTypeManager;
+    }
+
+    @Override
     public final java.util.Collection<String> effectTypeIds() {
         // The legacy API returns a live, mutable keySet. Canonical callers
         // should not be able to remove a registered effect by clearing it.
