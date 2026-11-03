@@ -33,8 +33,30 @@ public final class Paper26ItemTextColors {
     private static final NamespacedKey VISIBLE_LEGACY_LORE =
             Objects.requireNonNull(NamespacedKey.fromString("agarthalib:legacy_lore_visible"));
     private static final int MAX_BACKUP_BYTES = 131072;
-    private static final String MYITEMS_STATS_MARKER = "§0§1§r";
-    private static final String MYITEMS_VALUE_MARKER = "§0§2§r";
+    // All 24 historical hidden lore identifiers in LyMeowzItem/MainConfig,
+    // not only its two lore-stat markers. Adventure can erase these visually
+    // inert colors while preserving the visible text, leaving weapon skills,
+    // click/command powers, socket gems, requirements and sets unreadable.
+    // Store the original raw lines in PDC only when one of these exact
+    // internal sentinels is present, then use the existing visible-lore
+    // fingerprint to reject stale backups when another plugin edits lore.
+    private static final String[] MYITEMS_HIDDEN_MARKERS = {
+            "§0§1§r", "§0§2§r", "§0§3§r", "§0§4§r",
+            "§0§5§r", "§0§6§r", "§0§7§r", "§0§8§r", "§0§9§r",
+            "§1§0§r", "§1§1§r", "§1§2§r", "§1§3§r",
+            "§1§4§r", "§1§5§r", "§1§6§r",
+            "§2§1§r", "§2§2§r", "§2§3§r",
+            "§2§4§r", "§2§5§r",
+            "§3§0§r", "§3§1§r", "§3§2§r"
+    };
+
+    private static boolean hasMyItemsHiddenMarker(final String line) {
+        if (line == null) return false;
+        for (final String marker : MYITEMS_HIDDEN_MARKERS) {
+            if (line.contains(marker)) return true;
+        }
+        return false;
+    }
 
     private Paper26ItemTextColors() {}
 
@@ -45,9 +67,10 @@ public final class Paper26ItemTextColors {
 
     public static List<String> lore(final ItemMeta meta) {
         final List<String> visible = visibleLore(meta);
-        // Legacy hidden formatting markers (§0§1§r, etc.) are display-state
-        // no-ops. Paper's Component roundtrip may normalize them away. Keep
-        // the original marked lore only while visible content still matches.
+        // Legacy hidden formatting markers (§0§1§r, §0§4§r, §0§5§r, etc.)
+        // are display-state no-ops. Paper's Component roundtrip may normalize
+        // them away. Keep original marked lore only while visible content
+        // still matches, so stale PDC cannot restore externally edited lines.
         final PersistentDataContainer data = meta.getPersistentDataContainer();
         final byte[] rawBytes = data.get(RAW_LEGACY_LORE, PersistentDataType.BYTE_ARRAY);
         final byte[] expectedBytes = data.get(VISIBLE_LEGACY_LORE, PersistentDataType.BYTE_ARRAY);
@@ -95,10 +118,9 @@ public final class Paper26ItemTextColors {
         final PersistentDataContainer data = meta.getPersistentDataContainer();
         data.remove(RAW_LEGACY_LORE);
         data.remove(VISIBLE_LEGACY_LORE);
-        // Store sidecars only for the old internal lore marker format. Do not
-        // rewrite/override unrelated plugin items or all other lore lines.
-        if (value != null && value.stream().anyMatch(line -> line != null &&
-                (line.contains(MYITEMS_STATS_MARKER) || line.contains(MYITEMS_VALUE_MARKER)))) {
+        // Preserve all original MyItems hidden identifiers, not just stats.
+        // The backup is tied to visible lore, so unrelated edits invalidate it.
+        if (value != null && value.stream().anyMatch(Paper26ItemTextColors::hasMyItemsHiddenMarker)) {
             final byte[] raw = com.lymeowz.lib.item.StringListCodec.encode(value);
             final List<String> visible = visibleLore(meta);
             if (visible != null) {
