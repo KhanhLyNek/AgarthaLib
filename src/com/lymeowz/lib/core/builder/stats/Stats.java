@@ -86,7 +86,9 @@ public class Stats
     public final double getTotalValueByPlugin(final String plugin) {
         if (plugin != null) {
             final StatsPlugin statsPlugin = this.getStatsPlugin(plugin);
-            return statsPlugin.getTotalValue();
+            // An unrelated plugin has not registered any contribution.
+            // Return the type's neutral/default value instead of throwing.
+            return (statsPlugin != null) ? statsPlugin.getTotalValue() : this.getType().getValue();
         }
         return this.getType().getValue();
     }
