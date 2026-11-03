@@ -1,0 +1,43 @@
+name: One-time audited merged-branch cleanup
+on:
+  push:
+    branches: [master]
+    paths:
+      - .github/workflows/one-time-merged-branch-cleanup-20261103.yml
+permissions:
+  contents: write
+jobs:
+  delete-merged-branches:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Verify exact branch heads are ancestors of master before deleting
+        shell: bash
+        run: |
+          set -euo pipefail
+          while read -r branch expected; do
+            [[ -z "$branch" ]] && continue
+            actual="$(git ls-remote --heads origin "refs/heads/${branch}" | awk '{print $1}')"
+            if [[ -z "$actual" ]]; then
+              echo "ALREADY DELETED: $branch"
+              continue
+            fi
+            if [[ "$actual" != "$expected" ]]; then
+              echo "::error::REF CHANGED: $branch ($actual != $expected)"
+              exit 1
+            fi
+            if ! git merge-base --is-ancestor "$actual" HEAD; then
+              echo "::error::NOT FULLY MERGED INTO MASTER: $branch"
+              exit 1
+            fi
+            echo "DELETING VERIFIED MERGED BRANCH: $branch"
+            git push origin --delete "refs/heads/${branch}"
+            echo "DELETED: $branch"
+          done <<'REVIEWED_BRANCHES'
+          fix/stats-plugin-defaults-regression-20261103 31698b3e72a2920087743da5cbe41366a87d27fc
+          migration/legacy-item-views-20261101 256c6dded2c8e5c1cbb552d7168c85556495e17f
+          REVIEWED_BRANCHES
