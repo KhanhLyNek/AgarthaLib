@@ -1108,3 +1108,37 @@ tasks.register<JavaExec>("testPaper26HexColors") {
 tasks.named("testPaper26PapiOptional") {
     dependsOn("testPaper26HexColors")
 }
+
+
+// CI-only isolated Stats API test. None of these fixtures are published in
+// LyMeowzLib's production JAR; only the existing protected gameplay code runs.
+tasks.register<JavaCompile>("compilePaper26StatsEntitySelfTest") {
+    description = "Compile original Stats API with isolated no-server regression assertions"
+    group = "verification"
+    source = fileTree(".") {
+        include("src/com/lymeowz/lib/core/builder/stats/Stats.java")
+        include("src/com/lymeowz/lib/core/builder/stats/StatsPlugin.java")
+        include("src/com/lymeowz/lib/core/builder/stats/StatsProperties.java")
+        include("src/com/lymeowz/lib/core/builder/stats/StatsType.java")
+        include("ci/paper26-stats-entity-test/**/*.java")
+    }
+    classpath = configurations["compileClasspath"]
+    destinationDirectory.set(layout.buildDirectory.dir("paper26-stats-entity-tests"))
+    javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+tasks.register<JavaExec>("testPaper26StatsEntity") {
+    description = "Ensure registered and unregistered plugin contributions preserve Stats addition/multiplication"
+    group = "verification"
+    dependsOn("compilePaper26StatsEntitySelfTest")
+    classpath = configurations["compileClasspath"] +
+            files(layout.buildDirectory.dir("paper26-stats-entity-tests"))
+    mainClass.set("com.lymeowz.lib.core.builder.stats.Paper26StatsEntitySelfTest")
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+}
+
+tasks.named("testPaper26PapiOptional") {
+    dependsOn("testPaper26StatsEntity")
+}
