@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Original YAML and legacy gameplay are frozen except explicitly reviewed targeted fixes. CombatUtil: the 2026-11-03 instant-damage finally cleanup prevents a stale marker after a protection plugin cancels a synchronous hit; tested in the real Paper 26.3 live combat fixture. Potion sources remain at the reviewed Paper 26.3 baseline. Never bulk refresh hashes.",
+  "note": "Legacy YAML/gameplay source hashes are frozen except explicitly reviewed surgical fixes. CombatUtil: 2026-11-03 instant-damage finally cleanup and bounded nearby-living-entity lookup (same spherical semantics; avoids a full-world scan for each skill tick). Real Paper 26.3 regressions verify cancellation and spatial target selection. Never bulk refresh hashes.",
   "files": {
     "resources/Configuration/config.yml": "b204002e57c24db756972435759f284951757b3e",
     "resources/Configuration/placeholder.yml": "fe7d34a7e0e46f91bea9b66ef81c1c29ffa8e6a0",
@@ -11,7 +11,7 @@
     "resources/Resources/command.yml": "7426003fcdae225bb5d3a697bc9890d140cecf7a",
     "resources/update.yml": "8f11629fd6ae33e0ca03ac6f77ba2f506e9d076f",
     "src/com/lymeowz/lib/modern/Paper26PotionAliases.java": "a941fd69a1f28fe6198b7c11f6b296206781eb79",
-    "src/com/lymeowz/lib/utility/CombatUtil.java": "98ab50930e811a362d209c6a98b871d5e55324f8",
+    "src/com/lymeowz/lib/utility/CombatUtil.java": "e42e6a512b8f2a1fb4f2d3d00a8754e538d59b40",
     "src/com/lymeowz/lib/utility/MetadataUtil.java": "b9315c4c31483cf92f651dd6046aba81eb7fdf9e",
     "src/com/lymeowz/lib/utility/PotionUtil.java": "8f8692c4abcf2384adc297edceb01f0d686c2e60",
     "src/com/lymeowz/lib/core/enums/branch/PotionTypeEnum.java": "996f3e57d2e1f68a319c69dc3d7025c42621deac"
