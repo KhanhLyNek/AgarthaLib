@@ -32,29 +32,12 @@ public class CombatUtil
     
     public static final Collection<LivingEntity> getNearbyUnits(final Location location, final double range) {
         final Collection<LivingEntity> list = new ArrayList<LivingEntity>();
-        if (location == null || Double.isNaN(range) || range < 0.0) {
-            return list;
-        }
-        final World world = location.getWorld();
-        if (world == null) {
-            return list;
-        }
-
-        // Weapon skills can call this several times per cast. Scanning every
-        // mob in the entire world (the historical implementation) scales with
-        // total server population and can stall the main thread. Query only
-        // the nearby loaded entities, then keep the original spherical range
-        // and living-entity bridge filters. Infinity retains the old all-world
-        // semantics for callers that explicitly request it.
-        final Collection<? extends Entity> candidates = Double.isInfinite(range)
-                ? world.getLivingEntities()
-                : world.getNearbyEntities(location, range, range, range);
-        final double radiusSquared = range * range;
-        for (final Entity candidate : candidates) {
-            if (candidate instanceof LivingEntity
-                    && Bridge.getBridgeLivingEntity().isLivingEntity(candidate)
-                    && location.distanceSquared(candidate.getLocation()) <= radiusSquared) {
-                list.add((LivingEntity)candidate);
+        if (location != null) {
+            final World world = location.getWorld();
+            for (final LivingEntity livingEntity : world.getLivingEntities()) {
+                if (Bridge.getBridgeLivingEntity().isLivingEntity((Entity)livingEntity) && livingEntity.getWorld().equals(world) && location.distance(livingEntity.getLocation()) <= range) {
+                    list.add(livingEntity);
+                }
             }
         }
         return list;
