@@ -71,7 +71,14 @@ public class CombatUtil
     public static final void instantDamage(final LivingEntity attacker, final LivingEntity victims, final double damage) {
         if (attacker != null && victims != null) {
             victims.setMetadata("Instant_Damage", MetadataUtil.createMetadata(true));
-            victims.damage(damage, (Entity)attacker);
+            try {
+                victims.damage(damage, (Entity)attacker);
+            } finally {
+                // Damage events are synchronous. Their listener normally consumes
+                // this marker, but a protection plugin may cancel the event
+                // before that listener sees it. Never suppress the next hit.
+                MetadataUtil.removeMetadata((Entity)victims, "Instant_Damage");
+            }
         }
     }
     
